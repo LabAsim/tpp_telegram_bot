@@ -1,21 +1,17 @@
-import time
-
-import requests
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton  # for reply keyboard (sends message)
-from saved_tokens import token_apify, token_telegram_bot, token_telegram_bot_test
+"""Main module"""
 import logging
-from source.bot.bot import BotConstructor
+from aiogram import executor
+from config import DEBUG
+# Import all the bot methods
+from source.bot.bot_functions import dp
+from source.helper.helper import parse_arguments
 
 
-def app(event):
-    #
-    bot = BotConstructor(telegram_token=token_telegram_bot_test, apify_token=token_apify)
-    logging.basicConfig(level=logging.DEBUG)
-    # this is the last line
-    executor.start_polling(bot.dp, timeout=20)
+def app(event, debug=False):
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+    executor.start_polling(dp, timeout=20)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    app(event=None)
+    app(event=None, debug=DEBUG)

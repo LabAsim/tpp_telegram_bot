@@ -5,3 +5,5 @@ dir_path = os.path.dirname(os.path.realpath(__file__))  # As a one-file executab
 
 if getattr(sys, 'frozen', False):
     dir_path = os.path.dirname(os.path.realpath(dir_path))
+
+PROXY_URL_PYTHONANYWHERE = "http://proxy.server:3128"

@@ -1,4 +1,4 @@
-from urllib.parse import urljoin
+
 
 import requests
 from apify import Actor
@@ -24,7 +24,6 @@ class NewsDataclass:
     debug: bool = True
 
     def __post_init__(self):
-        # Convert date to UNIX timestamp
         try:
             self.main_content = self.strip_ansi_characters(self.main_content)
             self.summary = self.strip_ansi_characters(self.summary)

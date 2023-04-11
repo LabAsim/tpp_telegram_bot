@@ -1,3 +1,4 @@
+'''
 @self.dp.message_handler(commands=['search'])
         async def respond_deprecated(message: types.Message):
             """Searches based on the user's input and replies with the search results
@@ -48,3 +49,4 @@ async def _req(self):
     final_url = "https://telegram_bot-1-e9314129.deta.app/"
     response = requests.get(url=final_url)
     print(response.text)
+'''

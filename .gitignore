@@ -1,0 +1,10 @@
+.space
+.idea
+Spacefile
+saved_tokens.py
+example*
+settings.json
+venv
+**/__pycache__
+config.py
+**/.pytest_cache
