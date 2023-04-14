@@ -1,5 +1,5 @@
 """
-A function to trace errors from traceback
+A module containing helper functions
 """
 import argparse
 import os.path

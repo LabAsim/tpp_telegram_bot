@@ -4,18 +4,7 @@ import logging
 from aiogram import types, md
 from source.bot.apify_actor import call_apify_actor, synthesize_url, convert_category_str_to_url
 from source.bot.bot_dispatcher import dp, _bot
-
-
-@dp.message_handler(commands=['start'])
-async def welcome(message: types.Message):
-    """
-    :param message: The input command
-    """
-    # sends welcome message after start
-
-    await message.answer(md.escape_md('👋 Hello! Please select your language.'
-                                      '\n👋 Γεια! Διάλεξε τι γλώσσα επιλογής σου'),
-                         reply_markup=_bot.lang_kb)
+from source.bot.commands_text import Text
 
 
 @dp.message_handler(lambda message: message.text in ("English 👍", "Greek 🤝"))
@@ -33,85 +22,32 @@ async def save_language(message: types.Message) -> None:
     _bot.save_all_settings()
     markup = types.ReplyKeyboardRemove()
     if _bot.settings[f"{user_id}"]["lang"] == "English":
-        await message.answer("Language preference is saved 👍", reply_markup=markup)
+        await message.answer(Text.save_lang_text_eng, reply_markup=markup)
     else:
-        await message.answer("Η επιλογή γλώσσας αποθηκεύτηκε 👍", reply_markup=markup)
+        await message.answer(Text.save_lang_text_greek, reply_markup=markup)
     await show_help(message=message)
 
 
-@dp.message_handler(commands=['lang', "language"])
+@dp.message_handler(commands=['lang', "language", 'start'])
 async def choose_language(message: types.message):
     """Choose and saves the language preference of the user"""
     print(message)
-    await message.answer(md.escape_md('👋 Hello! Please select your language.'
-                                      '\n👋 Γεια! Διάλεξε τι γλώσσα επιλογής σου'),
+    await message.answer(Text.choose_lang_text,
                          reply_markup=_bot.lang_kb)
 
 
 @dp.message_handler(commands=['help'])
 async def show_help(message: types.Message):
-    """
-        Shows the help
-        """
+    """Shows the help message"""
     user_id = message["from"]["id"]
     if _bot.settings[f"{user_id}"]["lang"] == "English":
-        answer = md.text(md.bold('\n👇 -- The command list -- 👇\n'),
-                         '\n• /search or /s ',
-                         md.escape_md('\n\n\t\t\tArticle search based on a keyword'),
-                         '\n\n\t\t\tExample:\t/search ΒΙΟΜΕ',
-                         '\n',
-                         '\n• /category or /c  ',
-                         md.escape_md('\n\n\t\t\tSearch the latest news of the category'),
-                         md.escape_md('\n\n\t\t\tExample:\t/category Newsroom'),
-                         md.escape_md('\n\t\t\tExample:\t/category news'),
-                         md.escape_md('\n\n\t\t\tValid categories:'),
-                         md.escape_md('\n\t\t\t\t\t\tNews[room]'),
-                         md.escape_md('\n\t\t\t\t\t\tPol[itics]'),
-                         md.escape_md('\n\t\t\t\t\t\tEco[nomy]'),
-                         md.escape_md('\n\t\t\t\t\t\tInter[national]'),
-                         md.escape_md('\n\t\t\t\t\t\tRepo[rtage]'),
-                         md.escape_md('\n\t\t\t\t\t\tAna[lysis]'),
-                         md.escape_md('\n\t\t\t\t\t\tCul[ture]'),
-                         md.escape_md('\n\t\t\t\t\t\tAna[skopisi]'),
-                         md.escape_md('\n\t\t\t\t\t\t[tpp.]radio'),
-                         md.escape_md('\n\t\t\t\t\t\t[tpp.]tv'),
-                         md.escape_md('\n'),
-                         '\n• /language or /lang',
-                         md.escape_md('\n\n\t\t\tChoose your preferred language'),
-                         md.escape_md('\n\n• /help : Prints this help text'),
-                         '\n'
-                         )
+        answer = Text.help_text_eng
     else:
-        answer = md.text(md.bold('\n👇 -- Η λίστα με όλες τις εντολές -- 👇\n'),
-                         '\n• /search ή /s ',
-                         md.escape_md('\n\n\t\t\tΑναζήτηση άρθρων βάσει λέξης κλειδί.'),
-                         '\n\n\t\t\tΠαράδειγμα:\t/search ΒΙΟΜΕ',
-                         '\n',
-                         '\n• /category ή /c  ',
-                         md.escape_md('\n\n\t\t\tΑναζήτηση τελευταίων άρθρων συγκεκριμένης κατηγορίας.'),
-                         md.escape_md('\n\n\t\t\tΠαράδειγμα:\t/category Newsroom'),
-                         md.escape_md('\n\n\t\t\tΚατηγορίες:'),
-                         md.escape_md('\n\t\t\t\t\t\tNews[room]'),
-                         md.escape_md('\n\t\t\t\t\t\tPol[itics]'),
-                         md.escape_md('\n\t\t\t\t\t\tEco[nomy]'),
-                         md.escape_md('\n\t\t\t\t\t\tInter[national]'),
-                         md.escape_md('\n\t\t\t\t\t\tRepo[rtage]'),
-                         md.escape_md('\n\t\t\t\t\t\tAna[lysis]'),
-                         md.escape_md('\n\t\t\t\t\t\tCul[ture]'),
-                         md.escape_md('\n\t\t\t\t\t\tAna[skopisi]'),
-                         md.escape_md('\n\t\t\t\t\t\t[tpp.]radio'),
-                         md.escape_md('\n\t\t\t\t\t\t[tpp.]tv'),
-                         md.escape_md('\n'),
-                         '\n• /language ή /lang',
-                         md.escape_md('\n\n\t\t\tΔιάλεξε τη γλώσσα της επιλογής σου'),
-                         md.escape_md('\n\n• /help : Τυπώνει αυτό το βοηθητικό κείμενο'),
-                         '\n'
-                         )
+        answer = Text.help_text_greek
     await message.answer(answer)
 
 
-@dp.message_handler(commands=['search', 's', 'σ'])
-async def respond(message: types.Message):
+async def search(message: types.Message):
     """Searches based on the user's input and replies with the search results"""
     logging.info(f"{message.from_user.first_name}: {message.text}")
     # Reset the counter
@@ -134,12 +70,19 @@ async def respond(message: types.Message):
             md.bold((md.text(title))),
             md.text(md.escape_md(url)),
             md.text(md.escape_md(last_line)), sep="\n")
-    # print(f"{answer}")
+
     markup = types.ReplyKeyboardRemove()
-    # Reply to user
+
     await message.reply(answer, reply_markup=markup, disable_web_page_preview=True,
                         parse_mode=types.ParseMode.MARKDOWN_V2)
-    # Wait the for user's input
+
+
+@dp.message_handler(commands=['search', 's', 'σ'])
+async def search_handler(message: types.Message):
+    """Searches based on the user's input, replies with the search results and waits the user to interact"""
+
+    await search(message=message)
+
     await to_search_next_page(message=message)
 
 
@@ -155,10 +98,10 @@ async def to_search_next_page(message: types.Message) -> None:
 
     if _bot.settings[f"{user_id}"]["lang"] == "English":
         markup.add("Yes 🆗", "No 👎")
-        await message.reply("Do you want to search the next page?", reply_markup=markup)
+        await message.reply(Text.to_search_next_page_eng, reply_markup=markup)
     else:
         markup.add("Ναι 🆗", "Όχι 👎")
-        await message.reply("Θέλετε να συνεχίσετε την αναζήτηση στην επόμενη σελίδα;", reply_markup=markup)
+        await message.reply(Text.to_search_next_page_greek, reply_markup=markup)
 
 
 @dp.message_handler(lambda message: "Yes 🆗" == message.text)
@@ -171,11 +114,10 @@ async def search_next_page(message: types.Message) -> None:
     if _bot.search_keyword == "" and _bot.page_number == 1:
         markup = types.ReplyKeyboardRemove()
         if _bot.settings[f"{user_id}"]["lang"] == "English":
-            await message.answer(text=md.escape_md("Nothing to search."
-                                                   "\nRepeat the search command /search <keyword>"),
+            await message.answer(text=Text.search_next_page_empty_keyword_page_no_1_eng,
                                  reply_markup=markup)
         else:
-            await message.answer(text=md.escape_md("\nΕπαναλάβετε την αναζήτηση με την εντολή /search <λέξη κλειδί>"),
+            await message.answer(text=Text.search_next_page_empty_keyword_page_no_1_greek,
                                  reply_markup=markup)
         return None
     url = synthesize_url(keyword=_bot.search_keyword, page_number=_bot.page_number)

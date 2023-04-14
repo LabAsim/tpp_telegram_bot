@@ -2,7 +2,7 @@
 from aiogram import Bot, Dispatcher, executor, types
 
 from config import DEBUG
-from saved_tokens import token_apify, token_telegram_bot, token_telegram_bot_test
+from saved_tokens import TOKEN_APIFY, TOKEN_TELEGRAM_BOT, TOKEN_TELEGRAM_BOT_TEST
 from source.bot.botvalues import BotConstructor
 from source.helper.misc import PROXY_URL_PYTHONANYWHERE
 
@@ -26,13 +26,13 @@ def choose_token() -> str:
     #args = parse_arguments()
     #debug = args.debug
     if DEBUG:
-        return token_telegram_bot_test
+        return TOKEN_TELEGRAM_BOT_TEST
     else:
-        return token_telegram_bot
+        return TOKEN_TELEGRAM_BOT
 
 
 bot = botify(token=choose_token(), proxy_url=PROXY_URL_PYTHONANYWHERE, debug=True)
 
 dp = Dispatcher(bot)
 
-_bot = BotConstructor(telegram_token=choose_token(), apify_token=token_apify, dispatcher=dp)
+_bot = BotConstructor(telegram_token=choose_token(), apify_token=TOKEN_APIFY, dispatcher=dp)

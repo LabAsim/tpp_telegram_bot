@@ -3,7 +3,7 @@ import logging
 
 from apify_client import ApifyClient
 from typing import Union
-from saved_tokens import token_apify
+from saved_tokens import TOKEN_APIFY
 
 
 def convert_category_str_to_url(category_str: str) -> str:
@@ -84,5 +84,5 @@ def call_apify_actor(actor: str, url: str, token: str) -> dict:
 
 if __name__ == '__main__':
     url = synthesize_url(keyword="ΒΙΟΜΕ")
-    results = call_apify_actor(url=url, token=token_apify, actor="athletic_scraper/my-actor")
+    results = call_apify_actor(url=url, token=TOKEN_APIFY, actor="athletic_scraper/my-actor")
     print(results)

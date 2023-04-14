@@ -113,14 +113,12 @@ class CategoryScraper:
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             if self.category in ('Anaskopisi', 'anaskopisi'):
-                print(f"CategoryScraper>scrape_the_soup>{self.category}")
                 for div in self.soup.find_all('div', class_='m-item grid-item col-md-6'):
                     try:
                         executor.submit(self.iterate_div_for_anaskopisi, div)
                     except Exception as err:
                         print(err)
             else:
-                print(f"CategoryScraper>scrape_the_soup>{self.category}")
                 for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                     try:
                         executor.submit(self.iterate_div, div)
@@ -151,7 +149,6 @@ class CategoryScraper:
                 temp_list.append(title)
                 temp_list.append(link)
                 news = NewsDataclass(url=link, title=title)
-                print(news)
                 self.news_list.append(news)
 
     def iterate_div_for_anaskopisi(self, div: Any):

@@ -4,7 +4,7 @@ Tests for the apify_actor.py
 import unittest
 import validators
 
-from saved_tokens import token_apify
+from saved_tokens import TOKEN_APIFY
 from source.bot.apify_actor import convert_category_str_to_url, synthesize_url, call_apify_actor
 
 
@@ -75,7 +75,7 @@ class TestApifyActor(unittest.TestCase):
 
         # Search ==> athletic_scraper/my-actor
         url = synthesize_url(keyword="Τσίπρας")
-        results = call_apify_actor(token=token_apify, actor="athletic_scraper/my-actor", url=url)["results_total"]
+        results = call_apify_actor(token=TOKEN_APIFY, actor="athletic_scraper/my-actor", url=url)["results_total"]
         self.assertIsInstance(results, dict)
         self.assertIs(len(results), 10)
         for key, value in results.items():
@@ -87,7 +87,7 @@ class TestApifyActor(unittest.TestCase):
         # Test the Culture category
         url = convert_category_str_to_url(category_str="cul")
         results = call_apify_actor(actor="athletic_scraper/category-actor",
-                                   url=url, token=token_apify)["results_total"]
+                                   url=url, token=TOKEN_APIFY)["results_total"]
         self.assertIsInstance(results, dict)
         self.assertIs(len(results), 10)
         for key, value in results.items():
