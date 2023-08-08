@@ -7,7 +7,7 @@ class Text:
     save_lang_text_eng = "Language preference is saved 👍"
     save_lang_text_greek = "Η επιλογή γλώσσας αποθηκεύτηκε 👍"
     choose_lang_text = md.escape_md('👋 Hello! Please select your language.'
-                                    '\n👋 Γεια! Διάλεξε τι γλώσσα επιλογής σου')
+                                    '\n👋 Γεια! Διάλεξε τη γλώσσα επιλογής σου')
     help_text_eng = md.text(md.bold('\n👇 -- The command list -- 👇\n'),
                             '\n• /search or /s ',
                             md.escape_md('\n\n\t\t\tArticle search based on a keyword'),
@@ -25,7 +25,7 @@ class Text:
                             md.escape_md('\n\t\t\t\t\t\tRepo[rtage]'),
                             md.escape_md('\n\t\t\t\t\t\tAna[lysis]'),
                             md.escape_md('\n\t\t\t\t\t\tCul[ture]'),
-                            md.escape_md('\n\t\t\t\t\t\tAna[skopisi]'),
+                            md.escape_md('\n\t\t\t\t\t\tAnas[kopisi]'),
                             md.escape_md('\n\t\t\t\t\t\t[tpp.]radio'),
                             md.escape_md('\n\t\t\t\t\t\t[tpp.]tv'),
                             md.escape_md('\n'),
@@ -48,9 +48,9 @@ class Text:
                               md.escape_md('\n\t\t\t\t\t\tEco[nomy]'),
                               md.escape_md('\n\t\t\t\t\t\tInter[national]'),
                               md.escape_md('\n\t\t\t\t\t\tRepo[rtage]'),
-                              md.escape_md('\n\t\t\t\t\t\tAna[lysis]'),
+                              md.escape_md('\n\t\t\t\t\t\tA[nalysis]'),
                               md.escape_md('\n\t\t\t\t\t\tCul[ture]'),
-                              md.escape_md('\n\t\t\t\t\t\tAna[skopisi]'),
+                              md.escape_md('\n\t\t\t\t\t\tAnas[kopisi]'),
                               md.escape_md('\n\t\t\t\t\t\t[tpp.]radio'),
                               md.escape_md('\n\t\t\t\t\t\t[tpp.]tv'),
                               md.escape_md('\n'),

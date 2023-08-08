@@ -1,10 +1,8 @@
-# from main import debug
-from aiogram import Bot, Dispatcher, executor, types
 
-from config import DEBUG
+from aiogram import Bot, Dispatcher, types
+from config import DEBUG, PROXY_URL_PYTHONANYWHERE
 from saved_tokens import TOKEN_APIFY, TOKEN_TELEGRAM_BOT, TOKEN_TELEGRAM_BOT_TEST
 from source.bot.botvalues import BotConstructor
-from source.helper.misc import PROXY_URL_PYTHONANYWHERE
 
 
 def botify(token: str, parse_mode=types.ParseMode.MARKDOWN_V2, timeout: int = 180,
@@ -23,15 +21,14 @@ def botify(token: str, parse_mode=types.ParseMode.MARKDOWN_V2, timeout: int = 18
 
 def choose_token() -> str:
     """Re-parses the debug argument and returns the telegram token"""
-    #args = parse_arguments()
-    #debug = args.debug
+
     if DEBUG:
         return TOKEN_TELEGRAM_BOT_TEST
     else:
         return TOKEN_TELEGRAM_BOT
 
 
-bot = botify(token=choose_token(), proxy_url=PROXY_URL_PYTHONANYWHERE, debug=True)
+bot = botify(token=choose_token(), proxy_url=PROXY_URL_PYTHONANYWHERE, debug=DEBUG)
 
 dp = Dispatcher(bot)
 

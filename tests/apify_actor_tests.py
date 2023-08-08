@@ -49,18 +49,35 @@ class TestApifyActor(unittest.TestCase):
             self.assertEqual(convert_category_str_to_url(a), target_url)
         # tpp.radio
         for a in ("tpp.radio", "radio"):
-            target_url = "https://thepressproject.gr/radio/"
+            target_url = "https://thepressproject.gr/article_type/radio"
             self.assertEqual(convert_category_str_to_url(a), target_url)
+        # Reportage
         for a in ("Reportage", "Repo", "rep", "reportage", "repo", "rep",
                   "Ρεπορταζ", "Ρεπορτάζ", "ρεπο", "ρεπ"):
             target_url = "https://thepressproject.gr/article_type/report/"
             self.assertEqual(convert_category_str_to_url(a), target_url)
+        # Anything else
+        arb_text = "arbitrary category"
+        if arb_text not in ("Reportage", "Repo", "rep", "reportage", "repo", "rep",
+                            "Ρεπορταζ", "Ρεπορτάζ", "ρεπο", "ρεπ", "tpp.radio", "radio", "tpp.tv", "tv",
+                            "Culture", "culture", "cul", "Πολιτιστμός", "Πολιτισμος", "πολιτισμός",
+                            "πολιτισμος",
+                            "πολιτισ", "Ανασκόπηση", "Ανασκοπηση", "ανασκόπηση", "ανασκοπηση", "ανασ",
+                            "Anaskopisi", "anaskopisi", "anas", "Analysis", "analysis", "a", "Ανάλυση",
+                            "Αναλυση", "ανάλυση", "αναλυση", "αναλ", "International", "international",
+                            "inter", "Διεθνή", "Διεθνη", "Δ", "δ", "Economy", "economy", "eco", "e",
+                            "Οικονομία", "Οικονομια", "οικονομία", "οικονομια", "οικ", "ο", "Politics",
+                            "Pol", "politics", "pol", "p",
+                            "Πολιτική", "Πολιτικη", "πολιτικη", "πολιτική", "Πολ", "πολ", "π", "Newsroom",
+                            "newsroom", "new", "n"
+                            ):
+            self.assertEqual(convert_category_str_to_url(arb_text), "")
 
     def test_synthesize_url(self):
         self.assertEqual("https://thepressproject.gr/page/1/?s=&submit=Search", synthesize_url(keyword=""))
         # The greek letters needs to be encoded in utf-8.
         # Otherwise, an error will be raised (UnicodeEncodeError: 'charmap' codec can't encode characters in position)
-        # This can be adressed either by encode("utf-8")
+        # This can be addressed either by encode("utf-8")
         # or by changing the terminal encoding through Pycharm's settings.
         self.assertEqual("https://thepressproject.gr/page/1/?s=Τσίπρας&submit=Search".encode("utf-8"),
                          synthesize_url(keyword="Τσίπρας", debug=False).encode("utf-8"))

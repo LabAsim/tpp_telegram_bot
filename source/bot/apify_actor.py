@@ -18,7 +18,8 @@ def convert_category_str_to_url(category_str: str) -> str:
         return "https://thepressproject.gr/category/economy/"
     elif category_str in ("International", "international", "inter", "int", "Διεθνή", "Διεθνη", "Δ", "δ"):
         return "https://thepressproject.gr/category/international/"
-    elif category_str in ("Analysis", "analysis", "a", "Ανάλυση", "Αναλυση", "ανάλυση", "αναλυση", "αναλ"):
+    elif category_str in ("Analysis", "analysis", "A", "a", "Α", "α", "Ανάλυση", "Αναλυση",
+                          "ανάλυση", "αναλυση", "αναλ"):
         return "https://thepressproject.gr/article_type/analysis/"
     elif category_str in ("Ανασκόπηση", "Ανασκοπηση", "ανασκόπηση", "ανασκοπηση", "ανασ",
                           "Anaskopisi", "anaskopisi", "anas"):
@@ -32,7 +33,7 @@ def convert_category_str_to_url(category_str: str) -> str:
     elif category_str in ("tpp.tv", "tv"):
         return "https://thepressproject.gr/article_type/tv/"
     elif category_str in ("tpp.radio", "radio"):
-        return "https://thepressproject.gr/radio/"
+        return "https://thepressproject.gr/article_type/radio"
     else:
         logging.debug(f"'{category_str}' does not respond to any know category")
         return ""
@@ -84,5 +85,5 @@ def call_apify_actor(actor: str, url: str, token: str) -> dict:
 
 if __name__ == '__main__':
     url = synthesize_url(keyword="ΒΙΟΜΕ")
-    results = call_apify_actor(url=url, token=TOKEN_APIFY, actor="athletic_scraper/my-actor")
+    results = call_apify_actor(url="https://thepressproject.gr/article_type/radio", token=TOKEN_APIFY, actor="athletic_scraper/my-actor")
     print(results)

@@ -8,9 +8,15 @@ from source.bot.commands_text import Text
 
 
 @dp.message_handler(lambda message: message.text in ("English 👍", "Greek 🤝"))
+async def save_user(message: types.Message) -> None:
+    """Saves the user's name and lang preference"""
+    await save_language(message=message)
+    await save_name(message=message)
+
+
 async def save_language(message: types.Message) -> None:
     """Saves the language preference of the target user"""
-    print(message)
+    logging.info(message)
     user_id = message["from"]["id"]
     lang = message.text.strip("👍").strip("🤝").strip()
     try:
@@ -18,7 +24,7 @@ async def save_language(message: types.Message) -> None:
     except KeyError:
         _bot.settings[f"{user_id}"] = {}
         _bot.settings[f"{user_id}"]["lang"] = lang
-    print(f"{_bot.settings}")
+    # print(f"{_bot.settings}")
     _bot.save_all_settings()
     markup = types.ReplyKeyboardRemove()
     if _bot.settings[f"{user_id}"]["lang"] == "English":
@@ -28,10 +34,24 @@ async def save_language(message: types.Message) -> None:
     await show_help(message=message)
 
 
+async def save_name(message: types.Message) -> None:
+    """Saves the language preference of the target user"""
+    # print(message)
+    user_id = message["from"]["id"]
+    first_name = message["from"]["first_name"]
+    try:
+        _bot.settings[f"{user_id}"]["first_name"] = first_name
+    except KeyError:
+        _bot.settings[f"{user_id}"] = {}
+        _bot.settings[f"{user_id}"]["first_name"] = first_name
+    logging.info(f"{_bot.settings}")
+    _bot.save_all_settings()
+
+
 @dp.message_handler(commands=['lang', "language", 'start'])
 async def choose_language(message: types.message):
     """Choose and saves the language preference of the user"""
-    print(message)
+    # print(message)
     await message.answer(Text.choose_lang_text,
                          reply_markup=_bot.lang_kb)
 

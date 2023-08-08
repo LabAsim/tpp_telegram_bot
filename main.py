@@ -4,7 +4,6 @@ from aiogram import executor
 from config import DEBUG
 # Import all the bot methods
 from source.bot.bot_functions import dp
-from source.helper.helper import parse_arguments
 
 
 def app(event, debug=False):

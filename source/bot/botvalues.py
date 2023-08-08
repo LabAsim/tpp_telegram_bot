@@ -1,17 +1,13 @@
 """A module containing the Bot"""
 import json
-import logging
 import os
 import sys
 from typing import Any, Union
-
-from aiogram import Bot, Dispatcher, types, md
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
 from config import DEBUG
 from source.helper.helper import file_exists
 from source.helper.search import SearchTerm
-from source.bot.apify_actor import call_apify_actor, synthesize_url, convert_category_str_to_url
 
 
 class BotConstructor:
@@ -26,7 +22,6 @@ class BotConstructor:
         self.apify_token = apify_token
         self.proxy_url = "http://proxy.server:3128"
         self.proxies = {"http": self.proxy_url}
-        proxy_url = "http://proxy.server:3128"
         self.dp = dispatcher
         self.dir_path_exe = self.find_the_path_of_main_exe()
         self.dir_path = self.find_the_path_of_main()
@@ -86,7 +81,8 @@ class BotConstructor:
             with open(os.path.join(self.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
                 json_data = json.load(file)
                 if len(json_data) == 0:
-                    return None  # To avoid empty string in the text file
+                    #return None  # To avoid empty string in the text file
+                    return {}
                 if DEBUG:
                     print(json_data)
                 return json_data
