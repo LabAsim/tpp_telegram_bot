@@ -4,8 +4,6 @@ import os
 import sys
 from typing import Any, Union
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
-
-from config import DEBUG
 from source.helper.helper import file_exists
 from source.helper.search import SearchTerm
 
@@ -13,13 +11,14 @@ from source.helper.search import SearchTerm
 class BotConstructor:
     """Constructs the bot"""
 
-    def __init__(self, telegram_token: str, apify_token: str, dispatcher, test: bool = False):
+    def __init__(self, telegram_token: str, apify_token: str, dispatcher, debug):
 
         self.page_number = 1
         self.search_results: Union[SearchTerm, dict] = Any
         self.search_keyword: str = ""
         self.telegram_token = telegram_token
         self.apify_token = apify_token
+        self.DEBUG = debug
         self.proxy_url = "http://proxy.server:3128"
         self.proxies = {"http": self.proxy_url}
         self.dp = dispatcher
@@ -27,7 +26,7 @@ class BotConstructor:
         self.dir_path = self.find_the_path_of_main()
         # Load the saved settings
         self.settings: dict = self.read_settings_from_file()  # {user_id: {"lang": lang} }
-        if DEBUG:
+        if self.DEBUG:
             print(f"Settings: {self.settings}")
 
         # language selection
@@ -83,7 +82,7 @@ class BotConstructor:
                 if len(json_data) == 0:
                     #return None  # To avoid empty string in the text file
                     return {}
-                if DEBUG:
+                if self.DEBUG:
                     print(json_data)
                 return json_data
         return {}
@@ -97,14 +96,14 @@ class BotConstructor:
             print(getattr(sys, 'frozen', False))
             # The temporary path of the file when the app runs as an .exe
             self.dir_path_exe = os.path.dirname(os.path.realpath(sys.executable))
-            if DEBUG:
+            if self.DEBUG:
                 print(f"{self}>Exe(self.dir_path_exe):", self.dir_path_exe)
             return self.dir_path_exe
         elif __file__:
             self.dir_path_exe = os.path.dirname(__file__)  # We need the parent of the parent of this directory
             self.dir_path_exe = os.path.dirname(self.dir_path_exe)  # We need the parent of the parent of this directory
             self.dir_path_exe = os.path.dirname(self.dir_path_exe)
-            if DEBUG:
+            if self.DEBUG:
                 print(f'{self}>Script (self.dir_path_exe): {self.dir_path_exe}')
             return self.dir_path_exe
 

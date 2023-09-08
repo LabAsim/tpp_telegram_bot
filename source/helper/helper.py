@@ -19,7 +19,9 @@ def parse_arguments() -> argparse.ArgumentParser.parse_args:
     """
     my_parser = argparse.ArgumentParser()
     my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
-                           default=True, help='If True, it prints everything and runs the test bot.')
+                           default=False, help='If True, it prints everything set to DEBUG and above.')
+    my_parser.add_argument('--mode', type=str, action='store', const=True, nargs='?', required=False,
+                           default='self', help='If True, it prints everything set to DEBUG and above.')
     return my_parser.parse_args()
 
 
