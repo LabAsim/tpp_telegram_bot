@@ -1,0 +1,21 @@
+# fly.toml app configuration file generated for damp-dust-5880 on 2023-09-08T16:41:08+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "damp-dust-5880"
+primary_region = "ams"
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[services.concurrency]
+    hard_limit = 5
+    soft_limit = 3

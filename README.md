@@ -1,11 +1,12 @@
 # tpp_telegram_bot
 A simple Telegram Bot for the TPP .
 
-The bot is hosted in pythonanywhere and the scraping script in Apify.
+The bot is hosted in [fly.io](https://fly.io/) or [pythonanywhere](https://www.pythonanywhere.com/) and the scraping script in [Apify](https://apify.com/).
 
 ## Table of Contents
 
 *   [Installation](#Installation)
+  * [Docker](#Docker)
 *   [Donate](#donate)
 *   [License](#license)
 
@@ -23,6 +24,17 @@ Upload the files in pythonanywhere, open a console and run sequently
 
 The `DEBUG=True` allows the test bot to be run locally. 
 In the hosted version `DEBUG` must be `False`.
+
+## Docker
+
+Build the image
+
+``docker build --tag tppbotapp --file <path to the directory>``
+
+Run the bot locally:
+
+``docker run -d tppbotapp``
+
 
 ## Donate
 
