@@ -25,4 +25,4 @@ def main(debug: bool, mode: str) -> None:
 if __name__ == '__main__':
     args = parse_arguments()
     DEBUG, MODE = args.debug, args.mode
-    main(debug=False, mode=args.mode)
+    main(debug=DEBUG, mode=MODE)
