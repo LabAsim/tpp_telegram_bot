@@ -1,43 +1,44 @@
 """Tests for bot_functions.py"""
-import argparse
-import sys
 import unittest
 from apify_actor.main import SearchTerm
 from unittest.mock import AsyncMock, patch, MagicMock
 from example_echo_handler import echo
 from source.bot.apify_actor import synthesize_url, convert_category_str_to_url
 from apify_actor.category_actor import CategoryScraper, _header
-from source.bot.bot_functions import save_language, to_search_next_page, search_next_page, _bot, show_help, \
-    choose_language, end_search, search, search_handler, search_category
+from source.bot.bot_functions import save_language, to_search_next_page, search_next_page, show_help, \
+    choose_language, end_search, search, search_handler, search_category, settings_helper
 from aiogram import md, types
-from saved_tokens import TOKEN_APIFY, TOKEN_TELEGRAM_BOT_TEST
 from source.bot.commands_text import Text
 
 
 class TestBot(unittest.IsolatedAsyncioTestCase):
 
+    # def setUp(self) -> None:
+    #     settings_helper = pass
+
+
     @classmethod
     def setUpClass(cls) -> None:
         """Sets up the arbitrary user preferences"""
-        _bot.settings["1234"] = {"lang": "Greek"}
+        settings_helper.settings["1234"] = {"lang": "Greek"}
 
     @classmethod
     def tearDownClass(cls) -> None:
         """
         Delete all arbitrary settings
         """
-        del _bot.settings["1234"]
-        _bot.overwrite_save_settings()
+        del settings_helper.settings["1234"]
+        settings_helper.overwrite_save_settings()
 
         to_be_deleted = []
 
-        for key in _bot.settings.keys():
+        for key in settings_helper.settings.keys():
             if "MagicMock" in key:
                 to_be_deleted.append(key)
 
         for key in to_be_deleted:
-            del _bot.settings[key]
-            _bot.overwrite_save_settings()
+            del settings_helper.settings[key]
+            settings_helper.overwrite_save_settings()
 
     async def test_echo(self):
         text_mock = "test123"
@@ -71,8 +72,8 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "English"}
-        _bot.search_keyword = ""
+        settings_helper.settings["1234"] = {"lang": "English"}
+        settings_helper.search_keyword = ""
         await show_help(message=message_mock)
         answer = Text.help_text_eng
         self.assertEqual(message_mock.method_calls[0].args[0], answer)
@@ -82,8 +83,8 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "Greek"}
-        _bot.search_keyword = ""
+        settings_helper.settings["1234"] = {"lang": "Greek"}
+        settings_helper.search_keyword = ""
         await show_help(message=message_mock)
         answer = Text.help_text_greek
         self.assertEqual(message_mock.method_calls[0].args[0], answer)
@@ -161,12 +162,12 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "English"}
+        settings_helper.settings["1234"] = {"lang": "English"}
 
         await search(message=message_mock)
 
-        self.assertEqual(_bot.page_number, 2)
-        self.assertEqual(_bot.search_keyword, 'Τσιπρας')
+        self.assertEqual(settings_helper.page_number, 2)
+        self.assertEqual(settings_helper.search_keyword, 'Τσιπρας')
         self.assertEqual(len(message_mock.method_calls[0].args[0]), len(answer))
 
         for result_dict_key in list(dict_from_search_results.keys()):
@@ -192,7 +193,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
 
-        _bot.settings["1234"] = {"lang": "English"}
+        settings_helper.settings["1234"] = {"lang": "English"}
         await search_handler(message=message_mock)
 
         self.assertEqual(message_mock.method_calls[1].args[0], Text.to_search_next_page_eng)
@@ -204,7 +205,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.method_calls[1].kwargs["reply_markup"].selective, True)
         self.assertEqual(message_mock.method_calls[1].kwargs["reply_markup"].is_persistent, None)
 
-        _bot.settings["1234"] = {"lang": "Greek"}
+        settings_helper.settings["1234"] = {"lang": "Greek"}
         await search_handler(message=message_mock)
 
         self.assertEqual(message_mock.method_calls[3].args[0], Text.to_search_next_page_greek)
@@ -222,7 +223,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
         # English lang for this test user
-        _bot.settings["1234"] = {"lang": "English"}
+        settings_helper.settings["1234"] = {"lang": "English"}
         await to_search_next_page(message=message_mock)
         answer = Text.to_search_next_page_eng
         self.assertEqual(message_mock.text, text_mock)
@@ -243,7 +244,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "Greek"}
+        settings_helper.settings["1234"] = {"lang": "Greek"}
         await to_search_next_page(message=message_mock)
         answer = Text.to_search_next_page_greek
         self.assertEqual(message_mock.text, text_mock)
@@ -259,7 +260,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, True)
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].is_persistent, None)
 
-    @patch.object(_bot, 'page_number', 1)
+    @patch.object(settings_helper, 'page_number', 1)
     async def test_search_next_page(self):
         """There is nothing to search and page number is 1"""
 
@@ -268,11 +269,11 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "English"}
-        _bot.search_keyword = ""
+        settings_helper.settings["1234"] = {"lang": "English"}
+        settings_helper.search_keyword = ""
         await search_next_page(message=message_mock)
         answer = Text.search_next_page_empty_keyword_page_no_1_eng
-        print(_bot.page_number, _bot.search_keyword)
+        print(settings_helper.page_number, settings_helper.search_keyword)
         self.assertEqual(message_mock.method_calls[0].kwargs['text'], answer)
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
@@ -282,16 +283,16 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "Greek"}
-        _bot.search_keyword = ""
+        settings_helper.settings["1234"] = {"lang": "Greek"}
+        settings_helper.search_keyword = ""
         await search_next_page(message=message_mock)
         answer = Text.search_next_page_empty_keyword_page_no_1_greek
         self.assertEqual(message_mock.method_calls[0].kwargs['text'], answer)
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
 
-    @patch.object(_bot, 'page_number', 1)
-    @patch.object(_bot, 'search_keyword', 'Mitsotakis')
+    @patch.object(settings_helper, 'page_number', 1)
+    @patch.object(settings_helper, 'search_keyword', 'Mitsotakis')
     async def test_search_next_page1(self):
         """Assert that the data sent to the user is the desired one.
         Tests the default page number and a keyword"""
@@ -317,8 +318,8 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "Greek"}
-        print(f"\nnumber: {_bot.page_number}, keyword:{_bot.search_keyword}")
+        settings_helper.settings["1234"] = {"lang": "Greek"}
+        print(f"\nnumber: {settings_helper.page_number}, keyword:{settings_helper.search_keyword}")
         # call the bot method for scraping (using the apify actor)
         await search_next_page(message=message_mock)
         # Assert that the bot replies the same as the `answer`,
@@ -341,8 +342,8 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
 
-    @patch.object(_bot, 'page_number', 2)
-    @patch.object(_bot, 'search_keyword', 'Τσιπρας')
+    @patch.object(settings_helper, 'page_number', 2)
+    @patch.object(settings_helper, 'search_keyword', 'Τσιπρας')
     async def test_search_next_page2(self):
         """Assert that the data sent to the user is the desired one.
         Tests a non-default page number and a keyword"""
@@ -369,8 +370,8 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
         # English lang for this test user
-        _bot.settings["1234"] = {"lang": "English"}
-        print(f"\nnumber: {_bot.page_number}, keyword:{_bot.search_keyword}")
+        settings_helper.settings["1234"] = {"lang": "English"}
+        print(f"\nnumber: {settings_helper.page_number}, keyword:{settings_helper.search_keyword}")
         # call the bot method for scraping (using the apify actor)
         await search_next_page(message=message_mock)
         # Assert that the bot replies the same as the `answer`,
@@ -394,8 +395,8 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
 
-    @patch.object(_bot, 'page_number', 1)
-    @patch.object(_bot, 'search_keyword', '')
+    @patch.object(settings_helper, 'page_number', 1)
+    @patch.object(settings_helper, 'search_keyword', '')
     async def test_search_next_page3(self):
         """
         Tests a non-default page number and a empty string as the search keyword.
@@ -406,8 +407,8 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
 
-        _bot.settings["1234"] = {"lang": "English"}
-        print(f"\nnumber: {_bot.page_number}, keyword:{_bot.search_keyword}")
+        settings_helper.settings["1234"] = {"lang": "English"}
+        print(f"\nnumber: {settings_helper.page_number}, keyword:{settings_helper.search_keyword}")
         # call the bot method for scraping (using the apify actor)
         await search_next_page(message=message_mock)
         self.assertEqual(message_mock.method_calls[0].kwargs['text'], Text.search_next_page_empty_keyword_page_no_1_eng)
@@ -420,8 +421,8 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
 
-        _bot.settings["1234"] = {"lang": "Greek"}
-        print(f"\nnumber: {_bot.page_number}, keyword:{_bot.search_keyword}")
+        settings_helper.settings["1234"] = {"lang": "Greek"}
+        print(f"\nnumber: {settings_helper.page_number}, keyword:{settings_helper.search_keyword}")
         # call the bot method for scraping (using the apify actor)
         await search_next_page(message=message_mock)
         self.assertEqual(message_mock.method_calls[0].kwargs['text'],
@@ -429,7 +430,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
         self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
 
-    @patch.object(_bot, 'search_keyword', 'Tsipras')
+    @patch.object(settings_helper, 'search_keyword', 'Tsipras')
     async def test_end_search(self):
 
         # english
@@ -437,27 +438,27 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "English"}
+        settings_helper.settings["1234"] = {"lang": "English"}
         await end_search(message=message_mock)
 
         self.assertEqual(f"Search for 'Tsipras' is ended", message_mock.method_calls[0].args[0])
-        self.assertEqual(_bot.search_keyword, "")
-        self.assertEqual(_bot.page_number, 1)
+        self.assertEqual(settings_helper.search_keyword, "")
+        self.assertEqual(settings_helper.page_number, 1)
 
         # Greek
         text_mock = "Όχι 👎"
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "Greek"}
-        _bot.search_keyword = "Tsipras"
+        settings_helper.settings["1234"] = {"lang": "Greek"}
+        settings_helper.search_keyword = "Tsipras"
         await end_search(message=message_mock)
 
         self.assertEqual(f"Η αναζήτηση για τον όρο 'Tsipras' τερματίστηκε", message_mock.method_calls[0].args[0])
-        self.assertEqual(_bot.search_keyword, "")
-        self.assertEqual(_bot.page_number, 1)
+        self.assertEqual(settings_helper.search_keyword, "")
+        self.assertEqual(settings_helper.page_number, 1)
 
-    @patch.object(_bot, 'search_keyword', '')
+    @patch.object(settings_helper, 'search_keyword', '')
     async def test_end_search2(self):
 
         # english
@@ -465,24 +466,24 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "English"}
+        settings_helper.settings["1234"] = {"lang": "English"}
         await end_search(message=message_mock)
 
         self.assertEqual(f"Search is ended", message_mock.method_calls[0].args[0])
-        self.assertEqual(_bot.search_keyword, "")
-        self.assertEqual(_bot.page_number, 1)
+        self.assertEqual(settings_helper.search_keyword, "")
+        self.assertEqual(settings_helper.page_number, 1)
 
         # Greek
         text_mock = "Όχι 👎"
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "Greek"}
+        settings_helper.settings["1234"] = {"lang": "Greek"}
         await end_search(message=message_mock)
 
         self.assertEqual(f"Η αναζήτηση τερματίστηκε", message_mock.method_calls[0].args[0])
-        self.assertEqual(_bot.search_keyword, "")
-        self.assertEqual(_bot.page_number, 1)
+        self.assertEqual(settings_helper.search_keyword, "")
+        self.assertEqual(settings_helper.page_number, 1)
 
     async def test_search_category(self):
 
@@ -507,10 +508,10 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
         message_mock.__getitem__.side_effect = dict_for_message_mock.__getitem__
-        _bot.settings["1234"] = {"lang": "English"}
+        settings_helper.settings["1234"] = {"lang": "English"}
         await search_category(message=message_mock)
 
-        self.assertEqual(_bot.page_number, 2)
+        self.assertEqual(settings_helper.page_number, 2)
 
         self.assertEqual(len(message_mock.method_calls[0].args[0]), len(answer))
 

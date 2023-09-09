@@ -6,7 +6,7 @@ from aiogram import Dispatcher
 
 from saved_tokens import TOKEN_APIFY
 from source.bot.bot_dispatcher import botify, choose_token
-from source.bot.botvalues import BotConstructor
+from source.bot.botvalues import SettingsHelper
 from config import PROXY_URL_PYTHONANYWHERE
 from source.helper.helper import file_exists
 
@@ -14,11 +14,11 @@ from source.helper.helper import file_exists
 class TestBotConstructor(unittest.IsolatedAsyncioTestCase):
 
     def setUp(self) -> None:
-        bot = botify(token=choose_token(), proxy_url=PROXY_URL_PYTHONANYWHERE, debug=True)
+        # bot = botify(token=choose_token(), proxy_url=PROXY_URL_PYTHONANYWHERE, mode="self")
+        #
+        # dp = Dispatcher(bot)
 
-        dp = Dispatcher(bot)
-
-        self._bot = BotConstructor(telegram_token=choose_token(), apify_token=TOKEN_APIFY, dispatcher=dp)
+        self._bot = SettingsHelper()
 
     def test_save_all_settings(self):
         """

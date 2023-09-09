@@ -1,5 +1,5 @@
 """
-A module containing helper functions
+A module containing settings_helper functions
 """
 import argparse
 import os.path
@@ -21,7 +21,7 @@ def parse_arguments() -> argparse.ArgumentParser.parse_args:
     my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
                            default=False, help='If True, it prints everything set to DEBUG and above.')
     my_parser.add_argument('--mode', type=str, action='store', const=True, nargs='?', required=False,
-                           default='self', help='If True, it prints everything set to DEBUG and above.')
+                           default='self')
     return my_parser.parse_args()
 
 
