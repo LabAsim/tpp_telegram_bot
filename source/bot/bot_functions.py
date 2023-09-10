@@ -6,7 +6,7 @@ import config
 import saved_tokens
 from source.bot.apify_actor import call_apify_actor, synthesize_url, convert_category_str_to_url
 from source.bot.bot_dispatcher import choose_token, botify
-from source.bot.botvalues import SettingsHelper
+from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
 
 
@@ -17,7 +17,7 @@ bot = botify(token=token, proxy_url=config.PROXY_URL_PYTHONANYWHERE, mode=config
 dp = Dispatcher(bot)  # , run_tasks_by_default=True
 
 
-settings_helper = SettingsHelper(dispatcher=dp, apify_token=saved_tokens.TOKEN_APIFY, telegram_token=token)
+settings_helper = BotHelper(dispatcher=dp, apify_token=saved_tokens.TOKEN_APIFY, telegram_token=token)
 
 
 @dp.message_handler(lambda message: message.text in ("English 👍", "Greek 🤝"))

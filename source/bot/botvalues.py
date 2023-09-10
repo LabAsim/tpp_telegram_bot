@@ -12,15 +12,16 @@ from source.helper.helper import file_exists
 import logging
 
 
-class SettingsHelper:
+class BotHelper:
     """Configures the settings"""
 
-    def __init__(self,telegram_token: str, apify_token: str, dispatcher, test: bool = False):
+    def __init__(self, telegram_token: str, apify_token: str, dispatcher):
 
         self.page_number = 1
         self.search_results: Union[SearchTerm, dict] = Any
-        self.search_keyword: str = ""
+        self.search_keyword: str = ''
         self.telegram_token = telegram_token
+        self.apify_token = apify_token
         self.proxy_url = "http://proxy.server:3128"
         self.proxies = {"http": self.proxy_url}
         proxy_url = "http://proxy.server:3128"
