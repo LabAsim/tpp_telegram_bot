@@ -2,7 +2,6 @@
 import unittest
 from apify_actor.main import SearchTerm
 from unittest.mock import AsyncMock, patch
-from example_echo_handler import echo
 from source.bot.apify_actor import synthesize_url, convert_category_str_to_url
 from apify_actor.category_actor import CategoryScraper, _header
 from source.bot.bot_functions import (
@@ -47,13 +46,6 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         for key in to_be_deleted:
             del settings_helper.settings[key]
             settings_helper.overwrite_save_settings()
-
-    async def test_echo(self):
-        text_mock = "test123"
-        message_mock = AsyncMock(text=text_mock)
-        await echo(message=message_mock)
-        print(message_mock.answer)
-        message_mock.answer.assert_called_with(text_mock)
 
     async def test_save_language_english(self):
         text_mock = "English 👍"
@@ -618,3 +610,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=0, buffer=True)

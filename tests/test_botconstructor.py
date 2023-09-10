@@ -2,18 +2,15 @@ import json
 import os
 import unittest
 
-from aiogram import Dispatcher
+from aiogram import Dispatcher, Bot
 
-from source.bot.bot_dispatcher import botify, choose_token
 from source.bot.botvalues import BotHelper
-from config import PROXY_URL_PYTHONANYWHERE
 from source.helper.helper import file_exists
 
 
 class TestBotConstructor(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        bot = botify(token=choose_token(), proxy_url=PROXY_URL_PYTHONANYWHERE, mode="self")
-        dp = Dispatcher(bot)
+        dp = Dispatcher(Bot(token="6024787164:AAfTwaZiJqPLXeHHaa5VidccosGdeGa5it"))  # A fake token
         self._bot = BotHelper(telegram_token="", apify_token="", dispatcher=dp)
 
     def test_save_all_settings(self):
@@ -117,3 +114,7 @@ class TestBotConstructor(unittest.IsolatedAsyncioTestCase):
         :return: None
         """
         pass
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=0, buffer=True)
