@@ -1,21 +1,29 @@
 """Tests for bot_functions.py"""
 import unittest
 from apify_actor.main import SearchTerm
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 from example_echo_handler import echo
 from source.bot.apify_actor import synthesize_url, convert_category_str_to_url
 from apify_actor.category_actor import CategoryScraper, _header
-from source.bot.bot_functions import save_language, to_search_next_page, search_next_page, show_help, \
-    choose_language, end_search, search, search_handler, search_category, settings_helper
+from source.bot.bot_functions import (
+    save_language,
+    to_search_next_page,
+    search_next_page,
+    show_help,
+    choose_language,
+    end_search,
+    search,
+    search_handler,
+    search_category,
+    settings_helper,
+)
 from aiogram import md, types
 from source.bot.commands_text import Text
 
 
 class TestBot(unittest.IsolatedAsyncioTestCase):
-
     # def setUp(self) -> None:
     #     settings_helper = pass
-
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -90,7 +98,6 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.method_calls[0].args[0], answer)
 
     async def test_choose_language(self):
-
         text_mock = "/start"
         message_mock = AsyncMock(text=text_mock)
         await choose_language(message=message_mock)
@@ -99,12 +106,23 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.text, text_mock)
 
         self.assertEqual(message_mock.answer.call_args.args[0], answer)
-        self.assertIsInstance(message_mock.answer.call_args.kwargs["reply_markup"], types.ReplyKeyboardMarkup)
+        self.assertIsInstance(
+            message_mock.answer.call_args.kwargs["reply_markup"],
+            types.ReplyKeyboardMarkup,
+        )
 
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].keyboard[0][0].text, "English 👍")
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].keyboard[1][0].text, "Greek 🤝")
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].keyboard[0][0].text,
+            "English 👍",
+        )
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].keyboard[1][0].text,
+            "Greek 🤝",
+        )
 
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].one_time_keyboard, True)
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].one_time_keyboard, True
+        )
         self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].resize_keyboard, True)
 
         text_mock = "/lang"
@@ -115,12 +133,23 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.text, text_mock)
 
         self.assertEqual(message_mock.answer.call_args.args[0], answer)
-        self.assertIsInstance(message_mock.answer.call_args.kwargs["reply_markup"], types.ReplyKeyboardMarkup)
+        self.assertIsInstance(
+            message_mock.answer.call_args.kwargs["reply_markup"],
+            types.ReplyKeyboardMarkup,
+        )
 
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].keyboard[0][0].text, "English 👍")
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].keyboard[1][0].text, "Greek 🤝")
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].keyboard[0][0].text,
+            "English 👍",
+        )
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].keyboard[1][0].text,
+            "Greek 🤝",
+        )
 
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].one_time_keyboard, True)
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].one_time_keyboard, True
+        )
         self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].resize_keyboard, True)
 
         # /language
@@ -130,12 +159,23 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         answer = Text.choose_lang_text
         self.assertEqual(message_mock.text, text_mock)
         self.assertEqual(message_mock.answer.call_args.args[0], answer)
-        self.assertIsInstance(message_mock.answer.call_args.kwargs["reply_markup"], types.ReplyKeyboardMarkup)
+        self.assertIsInstance(
+            message_mock.answer.call_args.kwargs["reply_markup"],
+            types.ReplyKeyboardMarkup,
+        )
 
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].keyboard[0][0].text, "English 👍")
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].keyboard[1][0].text, "Greek 🤝")
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].keyboard[0][0].text,
+            "English 👍",
+        )
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].keyboard[1][0].text,
+            "Greek 🤝",
+        )
 
-        self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].one_time_keyboard, True)
+        self.assertEqual(
+            message_mock.answer.call_args.kwargs["reply_markup"].one_time_keyboard, True
+        )
         self.assertEqual(message_mock.answer.call_args.kwargs["reply_markup"].resize_keyboard, True)
 
     async def test_search(self):
@@ -151,12 +191,14 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         for result_dict_key in list(dict_from_search_results.keys()):
             title = result_dict_key
             url = dict_from_search_results[result_dict_key]
-            last_line = ("-" * 50)
+            last_line = "-" * 50
             answer += md.text(
                 md.text(""),
                 md.bold((md.text(title))),
                 md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)), sep="\n")
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
 
         text_mock = "/search Τσιπρας"
         message_mock = AsyncMock(text=text_mock)
@@ -167,27 +209,30 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         await search(message=message_mock)
 
         self.assertEqual(settings_helper.page_number, 2)
-        self.assertEqual(settings_helper.search_keyword, 'Τσιπρας')
+        self.assertEqual(settings_helper.search_keyword, "Τσιπρας")
         self.assertEqual(len(message_mock.method_calls[0].args[0]), len(answer))
 
         for result_dict_key in list(dict_from_search_results.keys()):
             title = result_dict_key
             url = dict_from_search_results[result_dict_key]
-            last_line = ("-" * 50)
+            last_line = "-" * 50
             single_answer = md.text(
                 md.text(""),
                 md.bold((md.text(title))),
                 md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)), sep="\n")
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
             # Assert that the `single_answer` string exists in `answer`
             temp_answer = message_mock.method_calls[0].args[0]
             self.assertTrue(single_answer in temp_answer)
 
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)
 
-    async def test_search_handler(self, ):
-
+    async def test_search_handler(
+        self,
+    ):
         text_mock = "/search Τσιπρας"
         message_mock = AsyncMock(text=text_mock)
         dict_for_message_mock = {"from": {"id": "1234"}}
@@ -197,10 +242,14 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         await search_handler(message=message_mock)
 
         self.assertEqual(message_mock.method_calls[1].args[0], Text.to_search_next_page_eng)
-        self.assertEqual(message_mock.method_calls[1].kwargs['reply_markup'].keyboard[0][0], "Yes 🆗")
-        self.assertEqual(message_mock.method_calls[1].kwargs['reply_markup'].keyboard[0][1], "No 👎")
+        self.assertEqual(
+            message_mock.method_calls[1].kwargs["reply_markup"].keyboard[0][0], "Yes 🆗"
+        )
+        self.assertEqual(message_mock.method_calls[1].kwargs["reply_markup"].keyboard[0][1], "No 👎")
 
-        self.assertEqual(message_mock.method_calls[1].kwargs["reply_markup"].one_time_keyboard, None)
+        self.assertEqual(
+            message_mock.method_calls[1].kwargs["reply_markup"].one_time_keyboard, None
+        )
         self.assertEqual(message_mock.method_calls[1].kwargs["reply_markup"].resize_keyboard, True)
         self.assertEqual(message_mock.method_calls[1].kwargs["reply_markup"].selective, True)
         self.assertEqual(message_mock.method_calls[1].kwargs["reply_markup"].is_persistent, None)
@@ -209,10 +258,16 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         await search_handler(message=message_mock)
 
         self.assertEqual(message_mock.method_calls[3].args[0], Text.to_search_next_page_greek)
-        self.assertEqual(message_mock.method_calls[3].kwargs['reply_markup'].keyboard[0][0], "Ναι 🆗")
-        self.assertEqual(message_mock.method_calls[3].kwargs['reply_markup'].keyboard[0][1], "Όχι 👎")
+        self.assertEqual(
+            message_mock.method_calls[3].kwargs["reply_markup"].keyboard[0][0], "Ναι 🆗"
+        )
+        self.assertEqual(
+            message_mock.method_calls[3].kwargs["reply_markup"].keyboard[0][1], "Όχι 👎"
+        )
 
-        self.assertEqual(message_mock.method_calls[3].kwargs["reply_markup"].one_time_keyboard, None)
+        self.assertEqual(
+            message_mock.method_calls[3].kwargs["reply_markup"].one_time_keyboard, None
+        )
         self.assertEqual(message_mock.method_calls[3].kwargs["reply_markup"].resize_keyboard, True)
         self.assertEqual(message_mock.method_calls[3].kwargs["reply_markup"].selective, True)
         self.assertEqual(message_mock.method_calls[3].kwargs["reply_markup"].is_persistent, None)
@@ -229,12 +284,19 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.text, text_mock)
         # Assert that the text replied to user is the appropriate answer
         self.assertEqual(message_mock.method_calls[0].args[0], answer)
-        self.assertIsInstance(message_mock.method_calls[0].kwargs["reply_markup"], types.ReplyKeyboardMarkup)
+        self.assertIsInstance(
+            message_mock.method_calls[0].kwargs["reply_markup"],
+            types.ReplyKeyboardMarkup,
+        )
         # Assert that a reply Keyboard was passed to the user
-        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].keyboard[0][0], "Yes 🆗")
+        self.assertEqual(
+            message_mock.method_calls[0].kwargs["reply_markup"].keyboard[0][0], "Yes 🆗"
+        )
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].keyboard[0][1], "No 👎")
         # Assert the other options
-        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].one_time_keyboard, None)
+        self.assertEqual(
+            message_mock.method_calls[0].kwargs["reply_markup"].one_time_keyboard, None
+        )
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].resize_keyboard, True)
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, True)
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].is_persistent, None)
@@ -250,17 +312,26 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(message_mock.text, text_mock)
         # Assert that the text replied to user is the appropriate answer
         self.assertEqual(message_mock.method_calls[0].args[0], answer)
-        self.assertIsInstance(message_mock.method_calls[0].kwargs["reply_markup"], types.ReplyKeyboardMarkup)
+        self.assertIsInstance(
+            message_mock.method_calls[0].kwargs["reply_markup"],
+            types.ReplyKeyboardMarkup,
+        )
         # Assert that a reply Keyboard was passed to the user
-        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].keyboard[0][0], "Ναι 🆗")
-        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].keyboard[0][1], "Όχι 👎")
+        self.assertEqual(
+            message_mock.method_calls[0].kwargs["reply_markup"].keyboard[0][0], "Ναι 🆗"
+        )
+        self.assertEqual(
+            message_mock.method_calls[0].kwargs["reply_markup"].keyboard[0][1], "Όχι 👎"
+        )
         # Assert the other options
-        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].one_time_keyboard, None)
+        self.assertEqual(
+            message_mock.method_calls[0].kwargs["reply_markup"].one_time_keyboard, None
+        )
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].resize_keyboard, True)
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, True)
         self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].is_persistent, None)
 
-    @patch.object(settings_helper, 'page_number', 1)
+    @patch.object(settings_helper, "page_number", 1)
     async def test_search_next_page(self):
         """There is nothing to search and page number is 1"""
 
@@ -274,9 +345,9 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         await search_next_page(message=message_mock)
         answer = Text.search_next_page_empty_keyword_page_no_1_eng
         print(settings_helper.page_number, settings_helper.search_keyword)
-        self.assertEqual(message_mock.method_calls[0].kwargs['text'], answer)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
+        self.assertEqual(message_mock.method_calls[0].kwargs["text"], answer)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)
 
         # Greek
         text_mock = "Ναι 🆗"
@@ -287,12 +358,12 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         settings_helper.search_keyword = ""
         await search_next_page(message=message_mock)
         answer = Text.search_next_page_empty_keyword_page_no_1_greek
-        self.assertEqual(message_mock.method_calls[0].kwargs['text'], answer)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
+        self.assertEqual(message_mock.method_calls[0].kwargs["text"], answer)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)
 
-    @patch.object(settings_helper, 'page_number', 1)
-    @patch.object(settings_helper, 'search_keyword', 'Mitsotakis')
+    @patch.object(settings_helper, "page_number", 1)
+    @patch.object(settings_helper, "search_keyword", "Mitsotakis")
     async def test_search_next_page1(self):
         """Assert that the data sent to the user is the desired one.
         Tests the default page number and a keyword"""
@@ -307,12 +378,14 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         for result_dict_key in list(dict_from_search_results.keys()):
             title = result_dict_key
             url = dict_from_search_results[result_dict_key]
-            last_line = ("-" * 50)
+            last_line = "-" * 50
             answer += md.text(
                 md.text(""),
                 md.bold((md.text(title))),
                 md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)), sep="\n")
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
         # Mocked message
         text_mock = "Yes 🆗"
         message_mock = AsyncMock(text=text_mock)
@@ -329,21 +402,23 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         for result_dict_key in list(dict_from_search_results.keys()):
             title = result_dict_key
             url = dict_from_search_results[result_dict_key]
-            last_line = ("-" * 50)
+            last_line = "-" * 50
             single_answer = md.text(
                 md.text(""),
                 md.bold((md.text(title))),
                 md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)), sep="\n")
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
             # Assert that the `single_answer` string exists in `answer`
             temp_answer = message_mock.method_calls[0].args[0]
             self.assertTrue(single_answer in temp_answer)
 
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)
 
-    @patch.object(settings_helper, 'page_number', 2)
-    @patch.object(settings_helper, 'search_keyword', 'Τσιπρας')
+    @patch.object(settings_helper, "page_number", 2)
+    @patch.object(settings_helper, "search_keyword", "Τσιπρας")
     async def test_search_next_page2(self):
         """Assert that the data sent to the user is the desired one.
         Tests a non-default page number and a keyword"""
@@ -358,12 +433,14 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         for result_dict_key in list(dict_from_search_results.keys()):
             title = result_dict_key
             url = dict_from_search_results[result_dict_key]
-            last_line = ("-" * 50)
+            last_line = "-" * 50
             answer += md.text(
                 md.text(""),
                 md.bold((md.text(title))),
                 md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)), sep="\n")
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
         # Mocked message
         text_mock = "Yes"
         message_mock = AsyncMock(text=text_mock)
@@ -382,21 +459,23 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         for result_dict_key in list(dict_from_search_results.keys()):
             title = result_dict_key
             url = dict_from_search_results[result_dict_key]
-            last_line = ("-" * 50)
+            last_line = "-" * 50
             single_answer = md.text(
                 md.text(""),
                 md.bold((md.text(title))),
                 md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)), sep="\n")
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
             # Assert that the `single_answer` string exists in `answer`
             temp_answer = message_mock.method_calls[0].args[0]
             self.assertTrue(single_answer in temp_answer)
         # self.assertEqual(message_mock.method_calls[0].args[0], answer)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)
 
-    @patch.object(settings_helper, 'page_number', 1)
-    @patch.object(settings_helper, 'search_keyword', '')
+    @patch.object(settings_helper, "page_number", 1)
+    @patch.object(settings_helper, "search_keyword", "")
     async def test_search_next_page3(self):
         """
         Tests a non-default page number and a empty string as the search keyword.
@@ -411,9 +490,12 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         print(f"\nnumber: {settings_helper.page_number}, keyword:{settings_helper.search_keyword}")
         # call the bot method for scraping (using the apify actor)
         await search_next_page(message=message_mock)
-        self.assertEqual(message_mock.method_calls[0].kwargs['text'], Text.search_next_page_empty_keyword_page_no_1_eng)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
+        self.assertEqual(
+            message_mock.method_calls[0].kwargs["text"],
+            Text.search_next_page_empty_keyword_page_no_1_eng,
+        )
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)
 
         # Greek lang
         text_mock = "Yes"
@@ -425,14 +507,15 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         print(f"\nnumber: {settings_helper.page_number}, keyword:{settings_helper.search_keyword}")
         # call the bot method for scraping (using the apify actor)
         await search_next_page(message=message_mock)
-        self.assertEqual(message_mock.method_calls[0].kwargs['text'],
-                         Text.search_next_page_empty_keyword_page_no_1_greek)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
+        self.assertEqual(
+            message_mock.method_calls[0].kwargs["text"],
+            Text.search_next_page_empty_keyword_page_no_1_greek,
+        )
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)
 
-    @patch.object(settings_helper, 'search_keyword', 'Tsipras')
+    @patch.object(settings_helper, "search_keyword", "Tsipras")
     async def test_end_search(self):
-
         # english
         text_mock = "No 👎"
         message_mock = AsyncMock(text=text_mock)
@@ -441,7 +524,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         settings_helper.settings["1234"] = {"lang": "English"}
         await end_search(message=message_mock)
 
-        self.assertEqual(f"Search for 'Tsipras' is ended", message_mock.method_calls[0].args[0])
+        self.assertEqual("Search for 'Tsipras' is ended", message_mock.method_calls[0].args[0])
         self.assertEqual(settings_helper.search_keyword, "")
         self.assertEqual(settings_helper.page_number, 1)
 
@@ -454,13 +537,15 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         settings_helper.search_keyword = "Tsipras"
         await end_search(message=message_mock)
 
-        self.assertEqual(f"Η αναζήτηση για τον όρο 'Tsipras' τερματίστηκε", message_mock.method_calls[0].args[0])
+        self.assertEqual(
+            "Η αναζήτηση για τον όρο 'Tsipras' τερματίστηκε",
+            message_mock.method_calls[0].args[0],
+        )
         self.assertEqual(settings_helper.search_keyword, "")
         self.assertEqual(settings_helper.page_number, 1)
 
-    @patch.object(settings_helper, 'search_keyword', '')
+    @patch.object(settings_helper, "search_keyword", "")
     async def test_end_search2(self):
-
         # english
         text_mock = "No 👎"
         message_mock = AsyncMock(text=text_mock)
@@ -469,7 +554,7 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         settings_helper.settings["1234"] = {"lang": "English"}
         await end_search(message=message_mock)
 
-        self.assertEqual(f"Search is ended", message_mock.method_calls[0].args[0])
+        self.assertEqual("Search is ended", message_mock.method_calls[0].args[0])
         self.assertEqual(settings_helper.search_keyword, "")
         self.assertEqual(settings_helper.page_number, 1)
 
@@ -481,13 +566,12 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         settings_helper.settings["1234"] = {"lang": "Greek"}
         await end_search(message=message_mock)
 
-        self.assertEqual(f"Η αναζήτηση τερματίστηκε", message_mock.method_calls[0].args[0])
+        self.assertEqual("Η αναζήτηση τερματίστηκε", message_mock.method_calls[0].args[0])
         self.assertEqual(settings_helper.search_keyword, "")
         self.assertEqual(settings_helper.page_number, 1)
 
     async def test_search_category(self):
-
-        url = convert_category_str_to_url(category_str='news')
+        url = convert_category_str_to_url(category_str="news")
         search_results = CategoryScraper(url=url, header=_header())
         dict_from_search_results = {}
         for _dataclass in search_results.news_list:
@@ -497,12 +581,14 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         for result_dict_key in list(dict_from_search_results.keys()):
             title = result_dict_key
             url = dict_from_search_results[result_dict_key]
-            last_line = ("-" * 50)
+            last_line = "-" * 50
             answer += md.text(
                 md.text(""),
                 md.bold((md.text(title))),
                 md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)), sep="\n")
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
 
         text_mock = "/c news"
         message_mock = AsyncMock(text=text_mock)
@@ -518,15 +604,17 @@ class TestBot(unittest.IsolatedAsyncioTestCase):
         for result_dict_key in list(dict_from_search_results.keys()):
             title = result_dict_key
             url = dict_from_search_results[result_dict_key]
-            last_line = ("-" * 50)
+            last_line = "-" * 50
             single_answer = md.text(
                 md.text(""),
                 md.bold((md.text(title))),
                 md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)), sep="\n")
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
             # Assert that the `single_answer` string exists in `answer`
             temp_answer = message_mock.method_calls[0].args[0]
             self.assertTrue(single_answer in temp_answer)
 
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].remove_keyboard, True)
-        self.assertEqual(message_mock.method_calls[0].kwargs['reply_markup'].selective, None)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].remove_keyboard, True)
+        self.assertEqual(message_mock.method_calls[0].kwargs["reply_markup"].selective, None)

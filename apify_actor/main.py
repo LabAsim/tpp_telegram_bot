@@ -1,5 +1,3 @@
-
-
 import requests
 from apify import Actor
 from bs4 import BeautifulSoup, NavigableString
@@ -9,7 +7,7 @@ import re
 import time
 import unicodedata
 from datetime import datetime, timedelta
-from typing import Any, Union
+from typing import Union
 
 
 @dataclasses.dataclass
@@ -17,10 +15,11 @@ class NewsDataclass:
     """
     A Dataclass containing the scraped info.
     """
-    url: str = ''
-    main_content: str = ''
-    summary: str = ''
-    title: str = ''
+
+    url: str = ""
+    main_content: str = ""
+    summary: str = ""
+    title: str = ""
     debug: bool = True
 
     def __post_init__(self):
@@ -33,7 +32,7 @@ class NewsDataclass:
     def __str__(self):
         return f'Name:"{self.url}"'
 
-    def strip_ansi_characters(self, text=''):
+    def strip_ansi_characters(self, text=""):
         """
         https://stackoverflow.com/questions/48782529/exclude-ansi-escape-sequences-from-output-log-file
         https://www.tutorialspoint.com/How-can-I-remove-the-ANSI-escape-sequences-from-a-string-in-python
@@ -41,16 +40,16 @@ class NewsDataclass:
         try:
             # ansi_re = re.compile(r'[^\x00-\x7F]+')
             # return re.sub(r'[^\x00-\x7F]+', ' ', text)
-            '''text = text.encode("ascii", "ignore")
-                        text = text.decode()
-                        print(text)
-                        return text'''
+            """text = text.encode("ascii", "ignore")
+            text = text.decode()
+            print(text)
+            return text"""
             #  γνωστό ότι\xa0τα ΜΜΕ\xa0θα ενημερώνοντ
-            ansi_re = re.compile(r'\x1b\[[0-9;]*m')
-            text = re.sub(ansi_re, ' ', text)
-            ansi_re = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
-            ansi_re = re.compile('([\\\]x[\w\d]{,3})')
-            text = re.sub(ansi_re, ' ', text)
+            ansi_re = re.compile(r"\x1b\[[0-9;]*m")
+            text = re.sub(ansi_re, " ", text)
+            ansi_re = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]")
+            ansi_re = re.compile("([\\\]x[\w\d]{,3})")
+            text = re.sub(ansi_re, " ", text)
             # https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize
             # https://stackoverflow.com/a/34669482
 
@@ -77,21 +76,25 @@ class NewsDataclass:
         # Note that date is an attribute of this Dataclass. Do not override it.
         _date = str(_date)
         # If the date is in the form of "Πριν 6 ώρες/λεπτά"
-        if re.match('[Ππ]ρ[ιίΙ]ν', _date):
+        if re.match("[Ππ]ρ[ιίΙ]ν", _date):
             # Remove 'Πριν/πριν'
             # See docs: https://docs.python.org/3/library/re.html#re.sub
-            _date = re.sub(pattern='[Ππ]ρ[ιίΙ]ν', repl="", string=_date).lstrip(' ')
-            if 'δευ' in _date:  # "39 δευτερόλεπτα"
+            _date = re.sub(pattern="[Ππ]ρ[ιίΙ]ν", repl="", string=_date).lstrip(" ")
+            if "δευ" in _date:  # "39 δευτερόλεπτα"
                 date_now = datetime.now()
-                _date = _date.split(' ')
+                _date = _date.split(" ")
                 _date = float(_date[0].strip(" ́").strip())
                 unix_date = date_now - timedelta(seconds=_date)
                 unix_date = time.mktime(unix_date.timetuple())
                 return unix_date
-            elif 'λεπτ' in _date:  # "2 λεπτά"
+            elif "λεπτ" in _date:  # "2 λεπτά"
                 date_now = datetime.now()
-                _date = re.sub(pattern='[Λλ]{,2}επτ[αΑάΆοοΟόΌ]{,1}', repl="", string=_date, flags=re.IGNORECASE).lstrip(
-                    ' ')
+                _date = re.sub(
+                    pattern="[Λλ]{,2}επτ[αΑάΆοοΟόΌ]{,1}",
+                    repl="",
+                    string=_date,
+                    flags=re.IGNORECASE,
+                ).lstrip(" ")
                 _date = float(_date.strip(" ́").strip())
                 unix_date = date_now - timedelta(minutes=_date)
                 unix_date = time.mktime(unix_date.timetuple())
@@ -108,14 +111,14 @@ class NewsDataclass:
                 return unix_date
             else:  # '1 ημέρα'
                 date_now = datetime.now()
-                _date = _date.split(' ')
+                _date = _date.split(" ")
                 _date = float(_date[0])
                 unix_date = date_now - timedelta(days=_date)
                 unix_date = time.mktime(unix_date.timetuple())
                 return unix_date
         # Date is in the form of "19/10/22"
         elif "/" in _date:
-            _date = _date.split('/')
+            _date = _date.split("/")
             year = int(_date[-1])
             month = int(_date[1])
             day = int(_date[0])
@@ -141,35 +144,35 @@ class NewsDataclass:
         :param month: str
         :return: int
         """
-        if re.match('Ιανου[αά]ρ[ιί][οuη]{,2}', month) or re.match('Γεν[αά]ρης', month):
+        if re.match("Ιανου[αά]ρ[ιί][οuη]{,2}", month) or re.match("Γεν[αά]ρης", month):
             return 1
-        elif re.match('Φεβρου[αά]ρ[ιί][οuη]{,2}', month) or re.match('Φλεβ[αά]ρης', month):
+        elif re.match("Φεβρου[αά]ρ[ιί][οuη]{,2}", month) or re.match("Φλεβ[αά]ρης", month):
             return 2
-        elif re.match('Μ[αά]ρτ[ιί][οuη]{,2}', month):
+        elif re.match("Μ[αά]ρτ[ιί][οuη]{,2}", month):
             return 3
-        elif re.match('Απρ[ιί]λ[ιί][οuη]{,2}', month):
+        elif re.match("Απρ[ιί]λ[ιί][οuη]{,2}", month):
             return 4
-        elif re.match('Μ[αά][ιί][οuη]{,2}', month):
+        elif re.match("Μ[αά][ιί][οuη]{,2}", month):
             return 5
-        elif re.match('Ιο[υύ]ν[ιί][οuη]{,2}', month):
+        elif re.match("Ιο[υύ]ν[ιί][οuη]{,2}", month):
             return 6
-        elif re.match('Ιο[υύ][ιί][οuη]{,2}', month):
+        elif re.match("Ιο[υύ][ιί][οuη]{,2}", month):
             return 7
-        elif re.match('Α[υύ]γο[υύ]στου', month):
+        elif re.match("Α[υύ]γο[υύ]στου", month):
             return 8
-        elif re.match('Σεπτ[εέ]μβρ[ιί][οuη]{,2}', month):
+        elif re.match("Σεπτ[εέ]μβρ[ιί][οuη]{,2}", month):
             return 9
-        elif re.match('Οκτ[ωώ]βρ[ιί][οuη]{,2}', month):
+        elif re.match("Οκτ[ωώ]βρ[ιί][οuη]{,2}", month):
             return 10
-        elif re.match('Νο[εέ]μβρ[ιί][οuη]{,2}', month):
+        elif re.match("Νο[εέ]μβρ[ιί][οuη]{,2}", month):
             return 11
-        elif re.match('Δεκ[εέ]μβρ[ιί][οuη]{,2}', month):
+        elif re.match("Δεκ[εέ]μβρ[ιί][οuη]{,2}", month):
             return 12
 
     @staticmethod
     def unix_to_datetime(unixtimestamp: int) -> str:
         """Converts unix timestampe to datetime format (DD/MM/YYYY)"""
-        return datetime.utcfromtimestamp(unixtimestamp).strftime('%d/%m/%Y')
+        return datetime.utcfromtimestamp(unixtimestamp).strftime("%d/%m/%Y")
 
     def return_as_tuple(self):
         """
@@ -177,12 +180,21 @@ class NewsDataclass:
         Alternative, just use dataclasses.astuple(object).
         See: https://docs.python.org/3/library/dataclasses.html#dataclasses.astuple
         """
-        tuple_to_return = [self.date, self.url, self.main_content, self.summary, self.title, self.author,
-                           self.author_url, self.date_unix, self.category]
+        tuple_to_return = [
+            self.date,
+            self.url,
+            self.main_content,
+            self.summary,
+            self.title,
+            self.author,
+            self.author_url,
+            self.date_unix,
+            self.category,
+        ]
         for number, a in enumerate(tuple_to_return):
             if a not in (self.date_unix, None):
-                tuple_to_return[number] = unicodedata.normalize('NFKD', a)
-                tuple_to_return[number] = tuple_to_return[number].strip('\'').strip("\"")
+                tuple_to_return[number] = unicodedata.normalize("NFKD", a)
+                tuple_to_return[number] = tuple_to_return[number].strip("'").strip('"')
         return tuple(tuple_to_return)
 
 
@@ -198,13 +210,13 @@ class SearchTerm:
         # Holds only the scraped news from one scraping call.
         # If the next page is scraped, it will hold only the new one scraped news.
         self.temporary_list = []
-        '''self.base_url = "https://thepressproject.gr/page/"
+        """self.base_url = "https://thepressproject.gr/page/"
         self.base_url_preterm = "/?s="
         self.page_number = str(page_number)
         self.suffix_url = "&submit=Search"
         "https://thepressproject.gr/page/2"
         self.term = str(term)
-        self.final_url = self.base_url + self.page_number + self.base_url_preterm + self.term + self.suffix_url'''
+        self.final_url = self.base_url + self.page_number + self.base_url_preterm + self.term + self.suffix_url"""
         self.final_url = final_url
         self.debug = debug
         # Call the functions
@@ -215,8 +227,6 @@ class SearchTerm:
     def connect_to_url(self):
         """Connects to the url and gets the response"""
         try:
-            PROXY_URL = "http://proxy.server:3128"
-            proxies = {"http": PROXY_URL}
             self.response = requests.get(self.final_url)  # , proxies=proxies)
         except requests.exceptions as err:
             print(err)
@@ -236,7 +246,6 @@ class SearchTerm:
         for number, item in enumerate(sample):
             title = ""
             link = ""
-            date = ""
             summary = ""
             h2_find = item.find("h2")
             p_find = item.find("p")
@@ -246,7 +255,7 @@ class SearchTerm:
                 for a in item.find("h2"):
                     if not isinstance(a, NavigableString):
                         # print(f"{number}\t: {a}\n")
-                        link = a['href'].strip()
+                        link = a["href"].strip()
                         title = a.text
                     else:
                         link = ""
@@ -261,20 +270,24 @@ class SearchTerm:
             if date_find:
                 for _date in item.find("div", class_="entry-meta"):
                     if not isinstance(_date, NavigableString):
-                        date = _date.text.strip()
+                        _date.text.strip()
                     else:
-                        date = "20/3/2023"
+                        pass
                 # print(_date.text)
             # The date = "" will raise an IndexError in Newsdataclass, but we don't care about the unixtimestamp
             # in this occasion. Thus, debug is set to False. It remains True, for the rest of the program which uses
             # the Newsdataclass
             self.list.append(NewsDataclass(url=link, title=title, summary=summary, debug=False))
-            self.temporary_list.append(NewsDataclass(url=link, title=title, summary=summary, debug=False))
+            self.temporary_list.append(
+                NewsDataclass(url=link, title=title, summary=summary, debug=False)
+            )
 
     def scrape_next_page(self):
         """Scrapes the next page. If it is the first time to be called, it scrapes the next one"""
         self.page_number = str(int(self.page_number) + 1)
-        self.final_url = self.base_url + self.page_number + self.base_url_preterm + self.term + self.suffix_url
+        self.final_url = (
+            self.base_url + self.page_number + self.base_url_preterm + self.term + self.suffix_url
+        )
         self.connect_to_url()
         self.soup_the_request()
         self.scrape_data()
@@ -284,28 +297,30 @@ async def main():
     async with Actor:
         # Read the Actor input
         actor_input = await Actor.get_input() or {}
-        start_urls = actor_input.get('start_urls')#, [{'url': 'https://thepressproject.gr/?s=tsipras&submit=Search'}])
-        max_depth = actor_input.get('max_depth', 1)
-        Actor.log.info(f'start_urls: {start_urls}')
+        start_urls = actor_input.get(
+            "start_urls"
+        )  # , [{'url': 'https://thepressproject.gr/?s=tsipras&submit=Search'}])
+        actor_input.get("max_depth", 1)
+        Actor.log.info(f"start_urls: {start_urls}")
 
-        print(f'start_urls: {start_urls}')
+        print(f"start_urls: {start_urls}")
         if not start_urls:
-            Actor.log.info('No start URLs specified in actor input, exiting...')
+            Actor.log.info("No start URLs specified in actor input, exiting...")
             await Actor.exit()
 
         # Enqueue the starting URLs in the default request queue
         default_queue = await Actor.open_request_queue()
         for start_url in start_urls:
-            if not isinstance(start_url.get('url'), NavigableString):
-                url = start_url.get('url')
-                Actor.log.info(f'Enqueuing {url} ...')
-                await default_queue.add_request({'url': url, 'userData': {'depth': 0}})
+            if not isinstance(start_url.get("url"), NavigableString):
+                url = start_url.get("url")
+                Actor.log.info(f"Enqueuing {url} ...")
+                await default_queue.add_request({"url": url, "userData": {"depth": 0}})
 
         # Process the requests in the queue one by one
         while request := await default_queue.fetch_next_request():
-            url = request['url']
-            depth = request['userData']['depth']
-            Actor.log.info(f'Scraping {url} ...')
+            url = request["url"]
+            # request["userData"]["depth"]
+            Actor.log.info(f"Scraping {url} ...")
 
             try:
                 search_results = SearchTerm(final_url=url, debug=False)
@@ -316,8 +331,8 @@ async def main():
                     dict_to_push[_dataclass.title] = _dataclass.url
 
                 await Actor.push_data({"results_total": dict_to_push})
-            except:
-                Actor.log.exception(f'Cannot extract data from {url}.')
+            except Exception:
+                Actor.log.exception(f"Cannot extract data from {url}.")
             finally:
                 # Mark the request as handled so it's not processed again
                 await default_queue.mark_request_as_handled(request)

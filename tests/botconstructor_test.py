@@ -4,7 +4,6 @@ import unittest
 
 from aiogram import Dispatcher
 
-from saved_tokens import TOKEN_APIFY
 from source.bot.bot_dispatcher import botify, choose_token
 from source.bot.botvalues import BotHelper
 from config import PROXY_URL_PYTHONANYWHERE
@@ -12,7 +11,6 @@ from source.helper.helper import file_exists
 
 
 class TestBotConstructor(unittest.IsolatedAsyncioTestCase):
-
     def setUp(self) -> None:
         bot = botify(token=choose_token(), proxy_url=PROXY_URL_PYTHONANYWHERE, mode="self")
         dp = Dispatcher(bot)
@@ -31,59 +29,82 @@ class TestBotConstructor(unittest.IsolatedAsyncioTestCase):
         """
 
         original_settings_json = {}
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding="utf-8"
+        ) as file:
             original_settings_json = json.load(file)
         settings_to_dump = {"234": {"lang": "English"}}
         self._bot.settings.update(settings_to_dump)
         self._bot.save_all_settings()
 
         # 1
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding="utf-8"
+        ) as file:
             json_data = json.load(file)
             self.assertEqual(self._bot.settings, json_data)
 
-        del self._bot.settings['234']
+        del self._bot.settings["234"]
 
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding="utf-8"
+        ) as file:
             json.dump(self._bot.settings, file, indent=4)
 
         # 2
         empty_dict = {}
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding="utf-8"
+        ) as file:
             json.dump(empty_dict, file, indent=4)
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding="utf-8"
+        ) as file:
             json_data = json.load(file)
             self.assertEqual(json_data, empty_dict)
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding="utf-8"
+        ) as file:
             json.dump(self._bot.settings, file, indent=4)
 
         # 3
         if file_exists(name="settings.json", dir_path=self._bot.dir_path):
             os.remove(os.path.join(self._bot.dir_path, "settings.json"))
         self._bot.overwrite_save_settings()
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding="utf-8"
+        ) as file:
             json_data = json.load(file)
             self.assertEqual(self._bot.settings, json_data)
 
         # Rewrite the original settings
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding="utf-8"
+        ) as file:
             json.dump(original_settings_json, file, indent=4)
 
     def test_overwrite_save_settings(self):
         """
-        Read the saved settings, overwrite the file, check that the file is indeed overwritten and rewrite the previous settings.
+        Read the saved settings, overwrite the file,
+        check that the file is indeed overwritten and rewrite the previous settings.
         :return: None
         """
         original_settings = self._bot.settings
         settings_to_dump = {"234": {"lang": "English"}}
         self._bot.settings = settings_to_dump
         self._bot.save_all_settings()
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding="utf-8"
+        ) as file:
             json.dump(settings_to_dump, file, indent=4)
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "r+", encoding="utf-8"
+        ) as file:
             json_data = json.load(file)
             self.assertEqual(json_data, settings_to_dump)
-        with open(os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding='utf-8') as file:
+        with open(
+            os.path.join(self._bot.dir_path, "settings.json"), "w+", encoding="utf-8"
+        ) as file:
             json.dump(original_settings, file, indent=4)
 
     def test_read_settings_from_file(self):

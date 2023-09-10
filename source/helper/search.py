@@ -22,7 +22,9 @@ class SearchTerm:
         self.suffix_url = "&submit=Search"
         "https://thepressproject.gr/page/2"
         self.term = str(term)
-        self.final_url = self.base_url + self.page_number + self.base_url_preterm + self.term + self.suffix_url
+        self.final_url = (
+            self.base_url + self.page_number + self.base_url_preterm + self.term + self.suffix_url
+        )
         self.debug = debug
         # Call the functions
         self.connect_to_url()
@@ -32,8 +34,6 @@ class SearchTerm:
     def connect_to_url(self):
         """Connects to the url and gets the response"""
         try:
-            PROXY_URL = "http://proxy.server:3128"
-            proxies = {"http": PROXY_URL}
             self.response = requests.get(self.final_url)  # , proxies=proxies)
         except requests.exceptions as err:
             print(err)
@@ -62,7 +62,7 @@ class SearchTerm:
             if h2_find:
                 for a in item.find("h2"):
                     # print(f"{number}\t: {a}\n")
-                    link = a['href'].strip()
+                    link = a["href"].strip()
                     title = a.text
             if p_find:
                 for p in item.find("p"):
@@ -75,13 +75,19 @@ class SearchTerm:
             # The date = "" will raise an IndexError in Newsdataclass, but we don't care about the unixtimestamp
             # in this occasion. Thus, debug is set to False. It remains True, for the rest of the program which uses
             # the Newsdataclass
-            self.list.append(NewsDataclass(url=link, title=title, date=date, summary=summary, debug=False))
-            self.temporary_list.append(NewsDataclass(url=link, title=title, date=date, summary=summary, debug=False))
+            self.list.append(
+                NewsDataclass(url=link, title=title, date=date, summary=summary, debug=False)
+            )
+            self.temporary_list.append(
+                NewsDataclass(url=link, title=title, date=date, summary=summary, debug=False)
+            )
 
     def scrape_next_page(self):
         """Scrapes the next page. If it is the first time to be called, it scrapes the next one"""
         self.page_number = str(int(self.page_number) + 1)
-        self.final_url = self.base_url + self.page_number + self.base_url_preterm + self.term + self.suffix_url
+        self.final_url = (
+            self.base_url + self.page_number + self.base_url_preterm + self.term + self.suffix_url
+        )
         self.connect_to_url()
         self.soup_the_request()
         self.scrape_data()
