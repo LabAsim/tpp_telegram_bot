@@ -103,6 +103,8 @@ def convert_category_str_to_url(category_str: str) -> str:
         return "https://thepressproject.gr/article_type/tv/"
     elif category_str in ("tpp.radio", "radio"):
         return "https://thepressproject.gr/article_type/radio"
+    elif category_str in ("greece", "gre", "Ελλάδα", "Ελλαδα", "Ελλ"):
+        return "https://thepressproject.gr/category/greece/"
     else:
         logging.debug(f"'{category_str}' does not respond to any know category")
         return ""

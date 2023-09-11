@@ -13,16 +13,16 @@ The bot is hosted in [fly.io](https://fly.io/) or [pythonanywhere](https://www.p
 ## Installation
 Run `pip install -r requirements.txt` to install the dependencies.
 
-Create two .py files: 
-*   `saved_tokens.py` which must contain the API keys as constants: 
-`TOKEN_TELEGRAM_BOT`, `TOKEN_TELEGRAM_BOT_TEST`, `TOKEN_APIFY` 
+Create two .py files:
+*   `saved_tokens.py` which must contain the API keys as constants:
+`TOKEN_TELEGRAM_BOT`, `TOKEN_TELEGRAM_BOT_TEST`, `TOKEN_APIFY`
 * `config.py` which must contain `PROXY_URL_PYTHONANYWHERE = "http://proxy.server:3128"`
 
-*   If you want to run the test bot, run `python -m main.py --debug True` (default is `False`).
+*   If you want to run the test bot, run `python main.py --debug True` (default is `False`).
 
 ### Pythonanywhere
-Upload the files in pythonanywhere, open a console and run sequently 
-* `cd telegram_bot` 
+Upload the files in pythonanywhere, open a console and run sequently
+* `cd telegram_bot`
 * `source venv/bin/activate` (activate the virtual environment)
 * `python -m main`
 

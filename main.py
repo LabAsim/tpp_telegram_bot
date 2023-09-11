@@ -11,7 +11,7 @@ from source.helper.helper import parse_arguments
 if __name__ == "__main__":
     args = parse_arguments()
     DEBUG, MODE = args.debug, args.mode
-    config.DEBUG, config.MODE = True, MODE
+    config.DEBUG, config.MODE = DEBUG, MODE
 
 from source.bot.bot_functions import dp
 
@@ -23,9 +23,10 @@ def main(debug: bool, dp: Dispatcher):
         )  # Force is needed here to re config logging
     else:
         logging.basicConfig(level=logging.INFO, force=True)
+    logging.info(f"DEBUG: {debug}, MODE: {MODE}")
     executor.start_polling(dp, timeout=25)
 
 
 if __name__ == "__main__":
     # asyncio.run(main(debug=True, dp=dp))
-    main(debug=True, dp=dp)
+    main(debug=config.DEBUG, dp=dp)
