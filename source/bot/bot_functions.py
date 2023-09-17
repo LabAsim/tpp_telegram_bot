@@ -1,5 +1,8 @@
 """A module containing the Bot"""
+import asyncio
 import logging
+from typing import Coroutine
+
 from aiogram import types, md, Dispatcher
 
 import config
@@ -13,13 +16,11 @@ from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
 
-
 token = choose_token(debug=config.DEBUG)
 
 # The dp needs to be instantiated here. Otherwise, the functions are not registered (don't know why though)
 bot = botify(token=token, proxy_url=config.PROXY_URL_PYTHONANYWHERE, mode=config.MODE)
 dp = Dispatcher(bot)  # , run_tasks_by_default=True
-
 
 settings_helper = BotHelper(
     dispatcher=dp, apify_token=saved_tokens.TOKEN_APIFY, telegram_token=token
@@ -68,26 +69,44 @@ async def save_name(message: types.Message) -> None:
 
 
 @dp.message_handler(commands=["lang", "language", "start"])
-async def choose_language(message: types.message):
+async def choose_language(message: types.message) -> Coroutine:
     """Choose and saves the language preference of the user"""
-    # print(message)
-    await message.answer(Text.choose_lang_text, reply_markup=settings_helper.lang_kb)
+
+    return await message.answer(Text.choose_lang_text, reply_markup=settings_helper.lang_kb)
 
 
 @dp.message_handler(commands=["help"])
 async def show_help(message: types.Message):
     """Shows the help message"""
     user_id = message["from"]["id"]
-    if settings_helper.settings[f"{user_id}"]["lang"] == "English":
-        answer = Text.help_text_eng
+    if str(user_id) in list(settings_helper.settings.keys()):
+        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
+            answer = Text.help_text_eng
+        else:
+            answer = Text.help_text_greek
+        await message.answer(answer)
     else:
-        answer = Text.help_text_greek
-    await message.answer(answer)
+        # while str(user_id) not in list(settings_helper.settings.keys()):
+        asyncio.get_event_loop()
+        # new_loop = asyncio.new_event_loop()
+        # loop.run_until_complete(asyncio.gather(choose_language(message=message)))
+
+        # task = asyncio.create_task(choose_language(message=message))
+
+        # r =  asyncio.gather(choose_language(message=message))
+        # logging.info(f"\n\n\n\t\t\t\t {r}  {type(r)}")
+        # await asyncio.wait(r)
+        # done, pending = await asyncio.wait(r)
+
+        # await asyncio.sleep(1)
+        await choose_language(message=message)
+        if str(user_id) in list(settings_helper.settings.keys()):
+            await show_help(message=message)
 
 
 async def search(message: types.Message):
     """Searches based on the user's input and replies with the search results"""
-    logging.info(f"{message.from_user.first_name}: {message.text}")
+    logging.info(f"{message.from_user.first_name}: {message.text}\n\n\n\n")
     # Reset the counter
     settings_helper.page_number = 1
     settings_helper.search_keyword = message.text.strip().replace("/search", "").strip()
@@ -100,9 +119,14 @@ async def search(message: types.Message):
     url = synthesize_url(keyword=settings_helper.search_keyword, page_number=1)
     # Add 1 one to the counter
     settings_helper.page_number += 1
-    settings_helper.search_results = call_apify_actor(
-        actor="athletic_scraper/my-actor", url=url, token=settings_helper.apify_token
-    )["results_total"]
+    # settings_helper.search_results = call_apify_actor(
+    #     actor="athletic_scraper/my-actor", url=url, token=settings_helper.apify_token
+    # )["results_total"]
+    loop = asyncio.get_event_loop()
+    results = await loop.run_in_executor(
+        None, call_apify_actor, "athletic_scraper/my-actor", url, settings_helper.apify_token
+    )
+    settings_helper.search_results = results["results_total"]
     answer = md.text()
     for result_dict_key in list(settings_helper.search_results.keys()):
         title = result_dict_key
@@ -129,9 +153,7 @@ async def search(message: types.Message):
 @dp.message_handler(commands=["search", "s", "σ"])
 async def search_handler(message: types.Message):
     """Searches based on the user's input, replies with the search results and waits the user to interact"""
-
     await search(message=message)
-
     await to_search_next_page(message=message)
 
 
@@ -140,17 +162,21 @@ async def to_search_next_page(message: types.Message) -> None:
     """
     Asks the user whether to search the next page
     """
-
     # Configure ReplyKeyboardMarkup
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
     user_id = message["from"]["id"]
-
-    if settings_helper.settings[f"{user_id}"]["lang"] == "English":
-        markup.add("Yes 🆗", "No 👎")
-        await message.reply(Text.to_search_next_page_eng, reply_markup=markup)
+    if str(user_id) in list(settings_helper.settings.keys()):
+        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
+            markup.add("Yes 🆗", "No 👎")
+            await message.reply(Text.to_search_next_page_eng, reply_markup=markup)
+        else:
+            markup.add("Ναι 🆗", "Όχι 👎")
+            await message.reply(Text.to_search_next_page_greek, reply_markup=markup)
     else:
-        markup.add("Ναι 🆗", "Όχι 👎")
-        await message.reply(Text.to_search_next_page_greek, reply_markup=markup)
+        await choose_language(message=message)
+        # await asyncio.sleep(6)
+        if str(user_id) in list(settings_helper.settings.keys()):
+            await to_search_next_page(message=message)
 
 
 @dp.message_handler(lambda message: "Yes 🆗" == message.text)
@@ -178,10 +204,19 @@ async def search_next_page(message: types.Message) -> None:
     )
     # Add 1 to the counter
     settings_helper.page_number += 1
+
+    # This is a non-async way, which blocks main loop.
+
+    # settings_helper.search_results = call_apify_actor(
+    #     url=url, token=settings_helper.apify_token, actor="athletic_scraper/my-actor"
+    # )["results_total"]
+
     # Fetch the results
-    settings_helper.search_results = call_apify_actor(
-        url=url, token=settings_helper.apify_token, actor="athletic_scraper/my-actor"
-    )["results_total"]
+    loop = asyncio.get_event_loop()
+    results = await loop.run_in_executor(
+        None, call_apify_actor, "athletic_scraper/my-actor", url, settings_helper.apify_token
+    )
+    settings_helper.search_results = results["results_total"]
     answer = ""
     for result_dict_key in list(settings_helper.search_results.keys()):
         title = result_dict_key
@@ -281,11 +316,20 @@ async def search_category(message: types.Message):
         return None
     # Add 1 one to the counter
     settings_helper.page_number += 1
-    settings_helper.search_results = call_apify_actor(
-        actor="athletic_scraper/category-actor",
-        url=url,
-        token=settings_helper.apify_token,
-    )["results_total"]
+    loop = asyncio.get_event_loop()
+    results = await loop.run_in_executor(
+        None, call_apify_actor, "athletic_scraper/category-actor", url, settings_helper.apify_token
+    )
+    settings_helper.search_results = results["results_total"]
+
+    # That is a sync way, which blocks main loop
+
+    # settings_helper.search_results = call_apify_actor(
+    #     actor="athletic_scraper/category-actor",
+    #     url=url,
+    #     token=settings_helper.apify_token,
+    # )["results_total"]
+
     answer = md.text()
     for result_dict_key in list(settings_helper.search_results.keys()):
         title = result_dict_key
@@ -307,3 +351,18 @@ async def search_category(message: types.Message):
         disable_web_page_preview=True,
         parse_mode=types.ParseMode.MARKDOWN_V2,
     )
+
+
+# @dp.message_handler(lambda message: message)
+async def check_user(message: types.Message):
+    user_id = message["from"]["id"]
+
+    async def loop_check(message: types.Message):
+        # while True:
+        if str(user_id) not in list(settings_helper.settings.keys()):
+            await choose_language(message=message)
+        else:
+            await asyncio.sleep(10)
+
+    task = asyncio.create_task(loop_check(message))
+    await task
