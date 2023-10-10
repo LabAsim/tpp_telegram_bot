@@ -37,6 +37,16 @@ def parse_arguments() -> argparse.ArgumentParser.parse_args:
         required=False,
         default="self",
     )
+    my_parser.add_argument(
+        "--test",
+        type=str2bool,
+        action="store",
+        const=True,
+        nargs="?",
+        required=False,
+        default=False,
+        help="If True, the bot uses the TEST token.",
+    )
     return my_parser.parse_args()
 
 

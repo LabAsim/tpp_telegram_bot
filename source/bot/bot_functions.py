@@ -16,7 +16,7 @@ from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
 
-token = choose_token(debug=config.DEBUG)
+token = choose_token(test=config.TEST)
 
 # The dp needs to be instantiated here. Otherwise, the functions are not registered (don't know why though)
 bot = botify(token=token, proxy_url=config.PROXY_URL_PYTHONANYWHERE, mode=config.MODE)
@@ -87,7 +87,7 @@ async def show_help(message: types.Message):
         await message.answer(answer)
     else:
         # while str(user_id) not in list(settings_helper.settings.keys()):
-        asyncio.get_event_loop()
+        # asyncio.get_event_loop()
         # new_loop = asyncio.new_event_loop()
         # loop.run_until_complete(asyncio.gather(choose_language(message=message)))
 

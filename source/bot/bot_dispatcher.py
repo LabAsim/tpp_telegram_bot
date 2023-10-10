@@ -20,10 +20,10 @@ def botify(
     return bot_to_return
 
 
-def choose_token(debug: bool = False) -> str:
+def choose_token(test: bool = True) -> str:
     """Re-parses the debug argument and returns the telegram token"""
 
-    if debug:
+    if test:
         return TOKEN_TELEGRAM_BOT_TEST
     else:
         return TOKEN_TELEGRAM_BOT
