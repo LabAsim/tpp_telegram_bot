@@ -1,5 +1,7 @@
 """Main module"""
 import logging
+import os
+
 from aiogram import Dispatcher
 from aiogram.utils import executor
 
@@ -12,6 +14,7 @@ if __name__ == "__main__":
     args = parse_arguments()
     DEBUG, MODE, TEST = args.debug, args.mode, args.test
     config.DEBUG, config.MODE, config.TEST = DEBUG, MODE, TEST
+    os.environ["dbpass"] = args.dbpass
 
 from source.bot.bot_functions import dp
 

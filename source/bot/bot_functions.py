@@ -7,6 +7,7 @@ from aiogram import types, md, Dispatcher
 
 import config
 import saved_tokens
+import source.db.funcs
 from source.bot.apify_actor import (
     call_apify_actor,
     synthesize_url,
@@ -32,6 +33,7 @@ async def save_user(message: types.Message) -> None:
     """Saves the user's name and lang preference"""
     await save_language(message=message)
     await save_name(message=message)
+    await source.db.funcs.connect(message=message)
 
 
 async def save_language(message: types.Message) -> None:

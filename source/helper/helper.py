@@ -47,6 +47,15 @@ def parse_arguments() -> argparse.ArgumentParser.parse_args:
         default=False,
         help="If True, the bot uses the TEST token.",
     )
+    my_parser.add_argument(
+        "--dbpass",
+        type=str,
+        action="store",
+        const=True,
+        nargs="?",
+        required=True,
+        default="Abcd1234",
+    )
     return my_parser.parse_args()
 
 
