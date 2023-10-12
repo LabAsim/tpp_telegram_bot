@@ -54,7 +54,7 @@ def parse_arguments() -> argparse.ArgumentParser.parse_args:
         const=True,
         nargs="?",
         required=True,
-        default="Abcd1234",
+        default="changeit",
     )
     return my_parser.parse_args()
 

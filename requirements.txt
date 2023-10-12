@@ -61,3 +61,4 @@ validators==0.20.0
 virtualenv==20.24.5
 websockets==10.4
 yarl==1.9.2
+asyncpg~=0.28.0

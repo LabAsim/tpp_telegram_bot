@@ -1,93 +1,62 @@
 import logging
 import os
-
-
-# conn = psycopg2.connect(
-#     host="localhost",
-#     database="postgres",
-#     user="postgres",
-#     password="Abcd1234")
-# async def connect():
-#     """ Connect to the PostgreSQL database server """
-#     #conn = None
-#     try:
-#         # read connection parameters
-#         #params = config()
-#
-#         # connect to the PostgreSQL server
-#         print('Connecting to the PostgreSQL database...')
-#         #conn = psycopg2.connect(**params)
-#
-#         # create a cursor
-#         cur = conn.cursor()
-#         #cur.execute("""PRAGMA encoding = 'UTF-8';""")
-#         # execute a statement
-#         print('PostgreSQL database version:')
-#         await cur.execute('SELECT version()')
-#
-#         # display the PostgreSQL database server version
-#         db_version = await cur.fetchone()
-#         print(db_version)
-#         cur.execute("""
-#                         CREATE TABLE IF NOT EXISTS users(
-#                             id INT PRIMARY KEY,
-#                             name TEXT NOT NULL,
-#                             lang TEXT NOT NULL);
-#                         """)
-#         conn.commit()
-#         # cur.execute(f"""
-#         #                                INSERT INTO news users(?,?)
-#         #                                ON CONFLICT(news.id) DO UPDATE SET
-#         #                                    name = ?,
-#         #                                    lang = ?;
-#         #                                """, list_to_insert)
-#         # close the communication with the PostgreSQL
-#         cur.close()
-#     except (Exception, psycopg2.DatabaseError) as error:
-#         print(error)
-#     finally:
-#         if conn is not None:
-#             conn.close()
-#             print('Database connection closed.')
-
-
-# if __name__ == '__main__':
-#     connect()
-
 import asyncpg
+
 from aiogram import types
 
 
 async def connect(message: types.Message) -> None:
+    """
+    It connects to the Postgresql db and saves the user's id, name, lang.
+    If there is not an environmental var `DATABASE_URL` (for example, if you run the bot locally),
+    it will the url from the defaults
+    """
     id = int(message["from"]["id"])
     lang = message.text.strip("👍").strip("🤝").strip()
     name = message["from"]["first_name"]
-    conn = await asyncpg.connect(
-        host="127.0.0.1", database="postgres", user="postgres", password=os.environ.get("dbpass")
-    )
-    # ψur = conn.cursor()
-    await conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users(
-            id INT PRIMARY KEY,
-            name TEXT NOT NULL,
-            lang TEXT NOT NULL
-        );
-        """
-    )
-    # await conn.commit()
+    if not os.environ.get("DATABASE_URL"):
+        # ``postgres://user:pass@host:port/database?option=value``
+        host = "127.0.0.1"
+        port = 5432
+        user = "postgres"
+        database = "postgres"
+        password = os.environ.get("dbpass")
+        os.environ["DATABASE_URL"] = f"postgres://{user}:{password}@{host}:{port}/{database}"
+    async with asyncpg.create_pool(
+        dsn=os.environ.get("DATABASE_URL")
+        # host="127.0.0.1", database="postgres", user="postgres", password=os.environ.get("dbpass")
+        ,
+        command_timeout=60,
+    ) as pool:
+        async with pool.acquire() as conn:
+            # async with asyncpg.connect(
+            #     host="127.0.0.1", database="postgres", user="postgres", password=os.environ.get("dbpass")
+            # ) as conn:
+            # ψur = conn.cursor()
+            await conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS users(
+                    id BIGINT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    lang TEXT NOT NULL
+                );
+                """
+            )
+            # await conn.commit()
 
-    await conn.execute(
-        """
-       INSERT INTO users(id,name,lang) VALUES($1,$2,$3)
-       ON CONFLICT(id)
-       DO UPDATE SET
-           name = $2,
-           lang = $3;
-        """,
-        id,
-        name,
-        lang,
-    )
-    logging.debug(await conn.execute("""SELECT * FROM users"""))
-    await conn.close()
+            await conn.execute(
+                """
+               INSERT INTO users(id,name,lang) VALUES($1,$2,$3)
+               ON CONFLICT(id)
+               DO UPDATE SET
+                   name = $2,
+                   lang = $3;
+                """,
+                id,
+                name,
+                lang,
+            )
+            logging.debug(await conn.execute("""SELECT id,name,lang FROM users;"""))
+            # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch
+            rows = await conn.fetch("""SELECT id,name,lang FROM users;""")
+            logging.debug(rows)
