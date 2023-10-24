@@ -27,7 +27,7 @@ def main(debug: bool, dp: Dispatcher):
     else:
         logging.basicConfig(level=logging.INFO, force=True)
     logging.info(f"DEBUG: {debug}, MODE: {MODE}, TEST: {TEST}")
-    executor.start_polling(dp, timeout=25)
+    executor.start_polling(dp, timeout=60)
 
 
 if __name__ == "__main__":

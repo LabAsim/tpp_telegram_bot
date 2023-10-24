@@ -35,7 +35,7 @@ Open a powershell and type:
 
 *   `cd <path to your bot directory>`
 *   ``flyctl auth login``
-*   `fly launch`
+*   `fly launch` (Attach a Postgresql to the app)
 *   `fly deploy`
 
 # Docker

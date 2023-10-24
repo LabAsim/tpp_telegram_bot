@@ -59,4 +59,4 @@ async def connect(message: types.Message) -> None:
             logging.debug(await conn.execute("""SELECT id,name,lang FROM users;"""))
             # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch
             rows = await conn.fetch("""SELECT id,name,lang FROM users;""")
-            logging.debug(rows)
+            logging.info(rows)
