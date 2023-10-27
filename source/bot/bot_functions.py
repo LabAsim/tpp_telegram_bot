@@ -1,8 +1,11 @@
 """A module containing the Bot"""
 import asyncio
 import logging
+import os
+import shutil
+import threading
+import colorama
 from typing import Coroutine
-
 from aiogram import types, md, Dispatcher
 
 import config
@@ -16,6 +19,7 @@ from source.bot.apify_actor import (
 from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
+from source.helper.youtube_funcs import download_playlist, download_send
 
 token = choose_token(test=config.TEST)
 
@@ -368,3 +372,36 @@ async def check_user(message: types.Message):
 
     task = asyncio.create_task(loop_check(message))
     await task
+
+
+@dp.message_handler(commands=["youtube", "video", "yt"])
+async def send_video(message: types.Message) -> None:
+    """Downloads and sends the video(s) from the url provided by the user"""
+
+    if "playlist" in message.text:
+        playlist_folder = await download_playlist(message.text)
+        count_files = len(os.listdir(playlist_folder))
+        for video in os.listdir(playlist_folder):
+            video_path = os.path.join(playlist_folder, video)
+            input_file = types.InputFile(video_path)
+            await message.answer_document(document=input_file)
+        else:
+            await asyncio.sleep(3 * count_files)
+            thr = threading.Thread(target=lambda: shutil.rmtree(playlist_folder))
+            thr.start()
+            logging.debug(
+                f"{colorama.Fore.GREEN}Folder: {playlist_folder} removed{colorama.Style.RESET_ALL}"
+            )
+            return None
+
+    downloaded_file = None
+
+    try:
+        downloaded_file = await download_send(message=message)
+        await message.answer_document(document=downloaded_file)
+    finally:
+        thr = threading.Thread(target=lambda: os.remove(downloaded_file.file.name))
+        thr.start()
+        logging.debug(
+            f"{colorama.Fore.GREEN}{downloaded_file.file.name} deleted{colorama.Style.RESET_ALL}"
+        )

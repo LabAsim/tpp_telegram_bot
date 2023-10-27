@@ -2,14 +2,16 @@
 A module containing settings_helper functions
 """
 import argparse
+import asyncio
 import os.path
 import pathlib
 import re
 import traceback
 from datetime import datetime
+from functools import wraps, partial
 from colorama import Fore, Style
 from source.helper.misc import dir_path
-from typing import Union
+from typing import Union, Callable
 
 
 def parse_arguments() -> argparse.ArgumentParser.parse_args:
@@ -150,6 +152,17 @@ def trace_error(to_print_error=True):
                     f"{strip_ansi_characters(get_current_time())}{line}\n"
                 )  # Add \n in the end to format nicely
     print(f"Errors saved in {error_filepath}")
+
+
+def wrap_as_async(func) -> Callable:
+    @wraps(func)
+    async def run(*args, loop=None, executor=None, **kwargs):
+        if loop is None:
+            loop = asyncio.get_event_loop()
+        pfunc = partial(func, *args, **kwargs)
+        return await loop.run_in_executor(executor, pfunc)
+
+    return run
 
 
 if __name__ == "__main__":
