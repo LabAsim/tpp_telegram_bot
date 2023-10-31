@@ -1,10 +1,14 @@
 import logging
 import os
 import shutil
+import time
+
 import colorama
 import pytube
 from aiogram import types
 from source.helper.helper import wrap_as_async
+
+logger = logging.getLogger(__name__)
 
 
 def download_video(video_url: str, target_path=None) -> str | None:
@@ -18,12 +22,12 @@ def download_video(video_url: str, target_path=None) -> str | None:
         yt = pytube.YouTube(video_url)
         video = yt.streams.filter(only_audio=True).first()
         file = video.download(output_path=target_path)
-        logging.debug(f"Song [{video.title}] has been successfully downloaded.")
+        logger.debug(f"Song [{video.title}] has been successfully downloaded.")
         return file
     except pytube.exceptions.RegexMatchError:
-        logging.debug("Link is not valid")
+        logger.warning("Link is not valid")
     except Exception as err:
-        logging.debug(err)
+        logger.debug(err)
 
 
 def convert_to_mp3(file: str) -> str:
@@ -43,7 +47,7 @@ def convert_to_mp3(file: str) -> str:
 
 
 @wrap_as_async
-def download_playlist(url: str) -> str | None:
+def download_playlist(url: str) -> str:
     """
     Downloads the given playlist
     :param url: (str) The url of the playlist
@@ -57,33 +61,35 @@ def download_playlist(url: str) -> str | None:
         os.mkdir(playlist_folder)
     except FileExistsError:
         shutil.rmtree(playlist_folder)
-        logging.debug(
+        logger.debug(
             f"{colorama.Fore.GREEN}Previous folder [{playlist_folder.title()}] was deleted"
             f"{colorama.Style.RESET_ALL}"
         )
         os.mkdir(playlist_folder)
-        logging.debug(f"A new folder [{playlist_folder.title()}] is created")
-    try:
-        for video_url in playlist.video_urls:
+        logger.debug(f"A new folder [{playlist_folder.title()}] is created")
+    for video_url in playlist.video_urls:
+        try:
             video = download_video(video_url=video_url, target_path=playlist_folder)
             convert_to_mp3(video)
-        logging.debug(
-            f"{colorama.Fore.GREEN}"
-            f"Playlist [{playlist.title}] has been successfully downloaded and saved in {playlist_folder}."
-            f"{colorama.Style.RESET_ALL}"
-        )
-        return playlist_folder
-    except pytube.exceptions.RegexMatchError as err:
-        logging.debug(f"{colorama.Fore.RED}Link is not valid \n {err}{colorama.Style.RESET_ALL}")
-    except Exception as err:
-        logging.debug(err)
+            time.sleep(0.1)  # Not to raise Http 429 Too many requests
+            logger.debug(
+                f"{colorama.Fore.GREEN}"
+                f"Playlist [{playlist.title}] has been successfully downloaded and saved in {playlist_folder}."
+                f"{colorama.Style.RESET_ALL}"
+            )
+        except pytube.exceptions.RegexMatchError as err:
+            logger.debug(f"{colorama.Fore.RED}Link is not valid \n {err}{colorama.Style.RESET_ALL}")
+        except Exception as err:
+            logger.debug(err)
+
+    return playlist_folder
 
 
 @wrap_as_async
 def download_send(message: types.Message) -> types.InputFile:
     """Downloads the video from the url in the message and return the uploaded file"""
     current_dir = os.path.dirname(__file__)
-    logging.debug(f"message text: {message.text}")
+    logger.debug(f"message text: {message.text}")
     file = download_video(video_url=message.text, target_path=current_dir)
     file = convert_to_mp3(file)
     file = types.InputFile(file)

@@ -21,6 +21,8 @@ from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
 from source.helper.youtube_funcs import download_playlist, download_send
 
+logger = logging.getLogger(__name__)
+
 token = choose_token(test=config.TEST)
 
 # The dp needs to be instantiated here. Otherwise, the functions are not registered (don't know why though)
@@ -42,7 +44,7 @@ async def save_user(message: types.Message) -> None:
 
 async def save_language(message: types.Message) -> None:
     """Saves the language preference of the target user"""
-    logging.info(message)
+    logger.info(message)
     user_id = message["from"]["id"]
     lang = message.text.strip("👍").strip("🤝").strip()
     try:
@@ -70,7 +72,7 @@ async def save_name(message: types.Message) -> None:
     except KeyError:
         settings_helper.settings[f"{user_id}"] = {}
         settings_helper.settings[f"{user_id}"]["first_name"] = first_name
-    logging.info(f"{settings_helper.settings}")
+    logger.info(f"{settings_helper.settings}")
     settings_helper.save_all_settings()
 
 
@@ -112,7 +114,7 @@ async def show_help(message: types.Message):
 
 async def search(message: types.Message):
     """Searches based on the user's input and replies with the search results"""
-    logging.info(f"{message.from_user.first_name}: {message.text}\n\n\n\n")
+    logger.info(f"{message.from_user.first_name}: {message.text}\n\n\n\n")
     # Reset the counter
     settings_helper.page_number = 1
     settings_helper.search_keyword = message.text.strip().replace("/search", "").strip()
@@ -299,7 +301,7 @@ async def search_category(message: types.Message):
     """
     Scrapes the provided news category athletic_scraper/category-actor
     """
-    logging.info(f"{message.from_user.first_name}: {message.text}")
+    logger.info(f"{message.from_user.first_name}: {message.text}")
     # Reset the counter
     settings_helper.page_number = 1
     settings_helper.search_keyword = message.text.strip().replace("/category", "").strip()
@@ -389,8 +391,8 @@ async def send_video(message: types.Message) -> None:
             await asyncio.sleep(3 * count_files)
             thr = threading.Thread(target=lambda: shutil.rmtree(playlist_folder))
             thr.start()
-            logging.debug(
-                f"{colorama.Fore.GREEN}Folder: {playlist_folder} removed{colorama.Style.RESET_ALL}"
+            logger.debug(
+                f"{colorama.Fore.GREEN}'Folder: {playlist_folder} removed'{colorama.Style.RESET_ALL}"
             )
             return None
 
@@ -399,9 +401,11 @@ async def send_video(message: types.Message) -> None:
     try:
         downloaded_file = await download_send(message=message)
         await message.answer_document(document=downloaded_file)
+    except Exception as err:
+        logger.warning(err)
     finally:
         thr = threading.Thread(target=lambda: os.remove(downloaded_file.file.name))
         thr.start()
-        logging.debug(
+        logger.debug(
             f"{colorama.Fore.GREEN}{downloaded_file.file.name} deleted{colorama.Style.RESET_ALL}"
         )
