@@ -94,19 +94,6 @@ async def show_help(message: types.Message):
             answer = Text.help_text_greek
         await message.answer(answer)
     else:
-        # while str(user_id) not in list(settings_helper.settings.keys()):
-        # asyncio.get_event_loop()
-        # new_loop = asyncio.new_event_loop()
-        # loop.run_until_complete(asyncio.gather(choose_language(message=message)))
-
-        # task = asyncio.create_task(choose_language(message=message))
-
-        # r =  asyncio.gather(choose_language(message=message))
-        # logging.info(f"\n\n\n\t\t\t\t {r}  {type(r)}")
-        # await asyncio.wait(r)
-        # done, pending = await asyncio.wait(r)
-
-        # await asyncio.sleep(1)
         await choose_language(message=message)
         if str(user_id) in list(settings_helper.settings.keys()):
             await show_help(message=message)
@@ -359,21 +346,6 @@ async def search_category(message: types.Message):
         disable_web_page_preview=True,
         parse_mode=types.ParseMode.MARKDOWN_V2,
     )
-
-
-# @dp.message_handler(lambda message: message)
-async def check_user(message: types.Message):
-    user_id = message["from"]["id"]
-
-    async def loop_check(message: types.Message):
-        # while True:
-        if str(user_id) not in list(settings_helper.settings.keys()):
-            await choose_language(message=message)
-        else:
-            await asyncio.sleep(10)
-
-    task = asyncio.create_task(loop_check(message))
-    await task
 
 
 @dp.message_handler(commands=["youtube", "video", "yt"])
