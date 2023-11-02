@@ -4,6 +4,8 @@ import asyncpg
 
 from aiogram import types
 
+logger = logging.getLogger(__name__)
+
 
 async def connect(message: types.Message) -> None:
     """
@@ -56,7 +58,7 @@ async def connect(message: types.Message) -> None:
                 name,
                 lang,
             )
-            logging.debug(await conn.execute("""SELECT id,name,lang FROM users;"""))
+            logger.debug(await conn.execute("""SELECT id,name,lang FROM users;"""))
             # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch
             rows = await conn.fetch("""SELECT id,name,lang FROM users;""")
-            logging.info(rows)
+            logger.info(rows)

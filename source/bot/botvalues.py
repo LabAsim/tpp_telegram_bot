@@ -2,7 +2,6 @@
 import json
 import os
 import sys
-from pprint import pprint
 from typing import Union, Any
 
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
@@ -10,6 +9,8 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from apify_actor.main import SearchTerm
 from source.helper.helper import file_exists
 import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BotHelper:
@@ -34,7 +35,6 @@ class BotHelper:
         self.dir_path = self.find_the_path_of_main()
         # Load the saved settings
         self.settings: dict = self.read_settings_from_file()  # {user_id: {"lang": lang} }
-        logging.debug(pprint(f"Settings: {self.settings}"))
 
     def save_all_settings(self):
         """
@@ -53,7 +53,7 @@ class BotHelper:
                     json_data.update(save_settings_to_dump)
             with open(os.path.join(dir_path, "settings.json"), "w+", encoding="utf-8") as file:
                 json.dump(json_data, file, indent=4)
-                logging.debug(
+                logger.debug(
                     f"Settings saved in: {os.path.join(dir_path, 'settings.json')}"
                     f"\n Settings: {save_settings_to_dump}"
                 )
@@ -61,7 +61,7 @@ class BotHelper:
             with open(os.path.join(dir_path, "settings.json"), "w+", encoding="utf-8") as file:
                 json_data = save_settings_to_dump
                 json.dump(json_data, file, indent=4)
-                logging.debug(
+                logger.debug(
                     f"Settings saved in: {os.path.join(dir_path, 'settings.json')}"
                     f"\n Settings: {save_settings_to_dump}"
                 )
@@ -72,7 +72,7 @@ class BotHelper:
         save_settings_to_dump = self.settings
         with open(os.path.join(dir_path, "settings.json"), "w+", encoding="utf-8") as file:
             json.dump(save_settings_to_dump, file, indent=4)
-            logging.debug(
+            logger.debug(
                 f"Settings saved in: {os.path.join(dir_path, 'settings.json')}"
                 f"\n Settings: {save_settings_to_dump}"
             )
@@ -91,7 +91,7 @@ class BotHelper:
                     # return None  # To avoid empty string in the text file
                     return {}
 
-                logging.debug(json_data)
+                logger.debug(json_data)
                 return json_data
         return {}
 
@@ -101,11 +101,11 @@ class BotHelper:
         :return: The path of the directory of main.py or .exe
         """
         if getattr(sys, "frozen", False):
-            logging.debug(getattr(sys, "frozen", False))
+            logger.debug(getattr(sys, "frozen", False))
             # The temporary path of the file when the app runs as an .exe
             self.dir_path_exe = os.path.dirname(os.path.realpath(sys.executable))
 
-            logging.debug(f"{self}>Exe(self.dir_path_exe):", self.dir_path_exe)
+            logger.debug(f"{self}>Exe(self.dir_path_exe):", self.dir_path_exe)
             return self.dir_path_exe
         elif __file__:
             self.dir_path_exe = os.path.dirname(
@@ -115,7 +115,7 @@ class BotHelper:
                 self.dir_path_exe
             )  # We need the parent of the parent of this directory
             self.dir_path_exe = os.path.dirname(self.dir_path_exe)
-            logging.debug(f"{self}>Script (self.dir_path_exe): {self.dir_path_exe}")
+            logger.debug(f"{self}>Script (self.dir_path_exe): {self.dir_path_exe}")
             return self.dir_path_exe
 
     def find_the_path_of_main(self) -> str:
@@ -125,7 +125,7 @@ class BotHelper:
         :return: The path of the directory of main.py or the temporary folder
         """
         if getattr(sys, "frozen", False):
-            logging.debug(getattr(sys, "frozen", False))
+            logger.debug(getattr(sys, "frozen", False))
             # The temporary path of the file when the app runs as an .exe
             self.dir_path = os.path.dirname(os.path.realpath(__file__))
             self.dir_path = os.path.dirname(
@@ -134,7 +134,7 @@ class BotHelper:
             self.dir_path = os.path.dirname(
                 self.dir_path
             )  # We need the parent of the parent of this directory
-            logging.debug(f"{self}>Exe (self.dir_path):", self.dir_path)
+            logger.debug(f"{self}>Exe (self.dir_path):", self.dir_path)
             return self.dir_path
         elif __file__:
             self.dir_path = os.path.dirname(
@@ -144,5 +144,5 @@ class BotHelper:
                 self.dir_path
             )  # We need the parent of the parent of this directory
             self.dir_path = os.path.dirname(self.dir_path)
-            logging.debug(f"{self}>Script (self.dir_path): {self.dir_path}")
+            logger.debug(f"{self}>Script (self.dir_path): {self.dir_path}")
             return self.dir_path
