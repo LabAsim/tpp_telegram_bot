@@ -5,8 +5,7 @@ saved_tokens.py
 example*
 settings.json
 venv
-**/__pycache__
-config.py
+**/__pycache_
 **/.pytest_cache
 __pycache__
 Dockerfile
