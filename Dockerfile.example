@@ -4,4 +4,4 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
 # Uncomment the following line. Add the desired values.
-# CMD ["python", "main.py", "--debug", "True", "--mode", "self", "--dbpass", "changethispassword"]
+# CMD ["python", "main.py", "--test", "True", "--debug", "True", "--mode", "self", "--dbpass", "changethispassword"]
