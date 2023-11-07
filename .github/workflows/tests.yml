@@ -28,10 +28,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Test with unittest
-      run: |
-        python -m unittest discover -s ./tests # python -m unittest tests/test_botconstructor.py
+    - name: Set env vars
+      run:
+        echo "TOKEN_TELEGRAM_BOT=${{ secrets.TOKEN_TELEGRAM_BOT }}" >> "$GITHUB_ENV"
+        echo "TOKEN_TELEGRAM_BOT_TEST=${{ secrets.TOKEN_TELEGRAM_BOT_TEST }}" >> "$GITHUB_ENV"
+        echo "TOKEN_APIFY=${{ secrets.TOKEN_APIFY }}" >> "$GITHUB_ENV"
       env:
         TOKEN_TELEGRAM_BOT: ${{ secrets.TOKEN_TELEGRAM_BOT }}
         TOKEN_TELEGRAM_BOT_TEST: ${{ secrets.TOKEN_TELEGRAM_BOT_TEST }}
         TOKEN_APIFY: ${{ secrets.TOKEN_APIFY }}
+    - name: Test with unittest
+      run: |
+        python -m unittest discover -s ./tests # python -m unittest tests/test_botconstructor.py
