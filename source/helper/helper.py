@@ -4,6 +4,7 @@ A module containing settings_helper functions
 import argparse
 import asyncio
 import copy
+import dataclasses
 import logging
 import os.path
 import pathlib
@@ -132,3 +133,10 @@ def color_logging(level: int) -> logging.StreamHandler:
     # tell the handler to use this format
     console.setFormatter(formatter)
     return console
+
+
+@dataclasses.dataclass
+class EnvVars:
+    TOKEN_TELEGRAM_BOT = os.environ.get("TOKEN_TELEGRAM_BOT")
+    TOKEN_TELEGRAM_BOT_TEST = os.environ.get("TOKEN_TELEGRAM_BOT_TEST")
+    TOKEN_APIFY = os.environ.get("TOKEN_APIFY")

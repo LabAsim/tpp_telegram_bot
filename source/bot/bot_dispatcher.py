@@ -1,6 +1,9 @@
 from aiogram import Bot, types
 
-from saved_tokens import TOKEN_TELEGRAM_BOT, TOKEN_TELEGRAM_BOT_TEST
+try:
+    import saved_tokens
+except ModuleNotFoundError:
+    from source.helper.helper import EnvVars as saved_tokens
 
 
 def botify(
@@ -24,6 +27,6 @@ def choose_token(test: bool = True) -> str:
     """Re-parses the debug argument and returns the telegram token"""
 
     if test:
-        return TOKEN_TELEGRAM_BOT_TEST
+        return saved_tokens.TOKEN_TELEGRAM_BOT_TEST
     else:
-        return TOKEN_TELEGRAM_BOT
+        return saved_tokens.TOKEN_TELEGRAM_BOT

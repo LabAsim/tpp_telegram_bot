@@ -3,7 +3,6 @@ import logging
 
 from apify_client import ApifyClient
 from typing import Union
-from saved_tokens import TOKEN_APIFY
 
 
 def convert_category_str_to_url(category_str: str) -> str:
@@ -155,10 +154,14 @@ def call_apify_actor(actor: str, url: str, token: str) -> dict:
 
 
 if __name__ == "__main__":
+    try:
+        import saved_tokens
+    except ModuleNotFoundError:
+        from source.helper.helper import EnvVars as saved_tokens
     url = synthesize_url(keyword="ΒΙΟΜΕ")
     results = call_apify_actor(
         url="https://thepressproject.gr/article_type/radio",
-        token=TOKEN_APIFY,
+        token=saved_tokens.TOKEN_APIFY,
         actor="athletic_scraper/my-actor",
     )
     print(results)

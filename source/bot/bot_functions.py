@@ -9,7 +9,7 @@ from typing import Coroutine
 from aiogram import types, md, Dispatcher
 
 import config
-import saved_tokens
+
 import source.db.funcs
 from source.bot.apify_actor import (
     call_apify_actor,
@@ -20,6 +20,11 @@ from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
 from source.helper.youtube_funcs import download_playlist, download_send
+
+try:
+    import saved_tokens
+except ModuleNotFoundError:
+    from source.helper.helper import EnvVars as saved_tokens
 
 logger = logging.getLogger(__name__)
 
