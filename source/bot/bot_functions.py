@@ -1,13 +1,13 @@
 """A module containing the Bot"""
 import asyncio
-import logging
 import os
 import shutil
 import threading
 import colorama
-from typing import Coroutine
-from aiogram import types, md, Dispatcher
-
+import logging
+from typing import Coroutine, AsyncIterable
+from aiogram import types, md, Dispatcher, utils
+from itertools import islice
 import config
 
 import source.db.funcs
@@ -19,6 +19,8 @@ from source.bot.apify_actor import (
 from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
+from source.helper.helper import parse_commands_for_rssfeed
+from source.helper.rss_funcs import fetch_news
 from source.helper.youtube_funcs import download_playlist, download_send
 
 try:
@@ -385,4 +387,84 @@ async def send_video(message: types.Message) -> None:
         thr.start()
         logger.debug(
             f"{colorama.Fore.GREEN}{downloaded_file.file.name} deleted{colorama.Style.RESET_ALL}"
+        )
+
+
+@dp.message_handler(
+    commands=[
+        "efsyn",
+        "kath",
+        "kathemerinieng",
+        "tovima",
+        "tov",
+        "tpp",
+        "docu",
+        "doc",
+        "documento",
+        "naftemporiki",
+        "naft",
+        "naf",
+        "ert",
+    ]
+)
+async def send_rssfeed(message: types.Message) -> None:
+    """Sends the fetched news from the rss feed"""
+    # logger.info(f"{message.text}")
+    target = await parse_commands_for_rssfeed(message.text.strip("/"))
+    results = await fetch_news(target=target)
+    answer = md.text()
+    for entry in results:
+        title = entry.title
+        url = entry.link
+        last_line = "-" * 50
+        answer += md.text(
+            md.text(""),
+            md.bold((md.text(title))),
+            md.text(md.escape_md(url)),
+            md.text(md.escape_md(last_line)),
+            sep="\n",
+        )
+
+    markup = types.ReplyKeyboardRemove()
+    try:
+        await message.reply(
+            answer,
+            reply_markup=markup,
+            disable_web_page_preview=True,
+            parse_mode=types.ParseMode.MARKDOWN_V2,
+        )
+    except utils.exceptions.MessageIsTooLong as err:
+        logger.warning(f"{len(results)=} {len(answer)=}\n{err=}")
+        await send_chunks_rssfeed(results=results, message=message)
+
+
+async def send_chunks_rssfeed(results: list, message: types.Message) -> None:
+    """Sends chunks of the rssfeed"""
+
+    async def chunks(data: list, size: int) -> AsyncIterable[list]:
+        """https://stackoverflow.com/a/66555740"""
+        it = iter(data)
+        for i in range(0, len(data), size):
+            yield [k for k in islice(it, size)]
+            # yield {k: data[k] for k in islice(it, size)}
+
+    async for item in chunks(data=results, size=10):
+        answer = md.text()
+        for entry in item:
+            title = entry.title
+            url = entry.link
+            last_line = "-" * 50
+            answer += md.text(
+                md.text(""),
+                md.bold((md.text(title))),
+                md.text(md.escape_md(url)),
+                md.text(md.escape_md(last_line)),
+                sep="\n",
+            )
+        markup = types.ReplyKeyboardRemove()
+        await message.reply(
+            answer,
+            reply_markup=markup,
+            disable_web_page_preview=True,
+            parse_mode=types.ParseMode.MARKDOWN_V2,
         )
