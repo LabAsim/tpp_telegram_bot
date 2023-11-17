@@ -132,3 +132,24 @@ def color_logging(level: int) -> logging.StreamHandler:
     # tell the handler to use this format
     console.setFormatter(formatter)
     return console
+
+
+async def parse_commands_for_rssfeed(command: str) -> str:
+    """Matches the command to the proper newspaper"""
+    match command:
+        case "efsyn":
+            return command
+        case "kath" | "kat" | "kathimerini":
+            return "kathimerinieng"
+        case "naftemporiki" | "naft" | "naf":
+            return "naftemporiki"
+        case "tovima" | "tov":
+            return "tovima"
+        case "ert":
+            return command
+        case "documento" | "docu" | "doc":
+            return "documento"
+        case "tpp":
+            return command
+        case _:
+            raise ValueError(f"Unknown command passed {command=}")
