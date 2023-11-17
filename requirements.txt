@@ -7,5 +7,3 @@ requests==2.31.0
 #pytube~=15.0.0
 pytube @ git+https://github.com/LabAsim/pytube.git
 feedparser~=6.0.10
-validators~=0.22.0
-asyncpg~0.29.0
