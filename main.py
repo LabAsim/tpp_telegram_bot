@@ -22,18 +22,15 @@ from source.bot.bot_functions import dp
 colorama.init(convert=True)
 
 
-def main(debug: bool, dp: Dispatcher):
-    if debug:
-        console = color_logging(level=logging.DEBUG)
-        logging.basicConfig(
-            level=logging.DEBUG,
-            force=True,
-            handlers=[console],
-        )  # Force is needed here to re config logging
-        # color_logging(level=logging.DEBUG)
-    else:
-        # logging.basicConfig(level=logging.INFO, force=True)
-        color_logging(level=logging.INFO)
+def main(debug: bool, dp: Dispatcher) -> None:
+    level = logging.DEBUG if debug else logging.INFO
+    console = color_logging(level=level)
+    logging.basicConfig(
+        level=level,
+        force=True,
+        handlers=[console],
+    )  # Force is needed here to re config logging
+
     logging.info(f"DEBUG: {debug}, MODE: {MODE}, TEST: {TEST}")
     executor.start_polling(dp, timeout=60)
 
