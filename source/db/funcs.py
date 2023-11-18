@@ -3,6 +3,7 @@ import os
 import asyncpg
 
 from aiogram import types
+from datetime import datetime, UTC
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,9 @@ async def connect(message: types.Message) -> None:
     id = int(message["from"]["id"])
     lang = message.text.strip("👍").strip("🤝").strip()
     name = message["from"]["first_name"]
+    last_seen = datetime.now(UTC)  # This is UTC+0
+    # The date in the db will be timezone aware (UTC+2 for Greece)
+    date_added = last_seen
     if not os.environ.get("DATABASE_URL"):
         # ``postgres://user:pass@host:port/database?option=value``
         host = "127.0.0.1"
@@ -25,9 +29,8 @@ async def connect(message: types.Message) -> None:
         password = os.environ.get("dbpass")
         os.environ["DATABASE_URL"] = f"postgres://{user}:{password}@{host}:{port}/{database}"
     async with asyncpg.create_pool(
-        dsn=os.environ.get("DATABASE_URL")
+        dsn=os.environ.get("DATABASE_URL"),
         # host="127.0.0.1", database="postgres", user="postgres", password=os.environ.get("dbpass")
-        ,
         command_timeout=60,
     ) as pool:
         async with pool.acquire() as conn:
@@ -40,25 +43,46 @@ async def connect(message: types.Message) -> None:
                 CREATE TABLE IF NOT EXISTS users(
                     id BIGINT PRIMARY KEY,
                     name TEXT NOT NULL,
-                    lang TEXT NOT NULL
+                    lang TEXT NOT NULL,
+                    date_added timestamp with time zone,
+                    last_seen timestamp with time zone
                 );
                 """
             )
-            # await conn.commit()
 
             await conn.execute(
                 """
-               INSERT INTO users(id,name,lang) VALUES($1,$2,$3)
+                ALTER TABLE users
+                    ADD if not exists id BIGINT PRIMARY KEY,
+                    ADD if not exists name TEXT NOT NULL,
+                    ADD if not exists lang TEXT NOT NULL,
+                    ADD if not exists date_added timestamp with time zone,
+                    ADD if not exists last_seen timestamp with time zone;
+                """
+            )
+
+            await conn.execute(
+                """
+               INSERT INTO users(id,name,lang,date_added,last_seen) VALUES($1,$2,$3,$4,$5)
                ON CONFLICT(id)
                DO UPDATE SET
                    name = $2,
-                   lang = $3;
+                   lang = $3,
+                   last_seen = $5,
+                   date_added = (
+                        CASE
+                            WHEN users.date_added IS NULL THEN $4
+                        END
+                   );
                 """,
                 id,
                 name,
                 lang,
+                date_added,
+                last_seen,
             )
-            logger.debug(await conn.execute("""SELECT id,name,lang FROM users;"""))
+
+            logger.info(await conn.execute("""SELECT id,name,lang FROM users;"""))
             # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch
-            rows = await conn.fetch("""SELECT id,name,lang FROM users;""")
+            rows = await conn.fetch("""SELECT * FROM users;""")
             logger.info(rows)
