@@ -1,9 +1,9 @@
 import logging
 import os
 import asyncpg
+import datetime
 
 from aiogram import types
-from datetime import datetime, UTC
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ async def connect(message: types.Message) -> None:
     id = int(message["from"]["id"])
     lang = message.text.strip("👍").strip("🤝").strip()
     name = message["from"]["first_name"]
-    last_seen = datetime.now(UTC)  # This is UTC+0
+    last_seen = datetime.datetime.now(datetime.timezone.utc)  # This is UTC+0
     # The date in the db will be timezone aware (UTC+2 for Greece)
     date_added = last_seen
     if not os.environ.get("DATABASE_URL"):

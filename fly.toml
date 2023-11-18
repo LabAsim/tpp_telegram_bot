@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for damp-dust-5880 on 2023-11-18T01:13:29+02:00
+# fly.toml app configuration file generated for damp-dust-5880 on 2023-11-18T18:43:20+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -22,3 +22,8 @@ primary_region = "ams"
   [services.concurrency]
     hard_limit = 5
     soft_limit = 3
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1GB"
+  processes = ["app"]

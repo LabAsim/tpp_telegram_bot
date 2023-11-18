@@ -434,7 +434,11 @@ async def send_rssfeed(message: types.Message) -> None:
             parse_mode=types.ParseMode.MARKDOWN_V2,
         )
     except utils.exceptions.MessageIsTooLong as err:
-        logger.warning(f"{len(results)=} {len(answer)=}\n{err=}")
+        logger.warning(
+            f"{len(results)=} {len(answer)=}"
+            f"\n{err=}"
+            f"\nAttempting to send chunks of the rss feed"
+        )
         await send_chunks_rssfeed(results=results, message=message)
 
 
