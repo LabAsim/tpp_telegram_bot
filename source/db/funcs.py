@@ -72,6 +72,9 @@ async def connect(message: types.Message) -> None:
                    date_added = (
                         CASE
                             WHEN users.date_added IS NULL THEN $4
+                            ELSE (
+                                SELECT users.date_added FROM users WHERE id=$1
+                            )
                         END
                    );
                 """,
