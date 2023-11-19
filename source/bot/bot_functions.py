@@ -5,9 +5,12 @@ import shutil
 import threading
 import colorama
 import logging
-from typing import Coroutine, AsyncIterable
+from typing import Coroutine, AsyncIterable, Callable, Any
 from aiogram import types, md, Dispatcher, utils
 from itertools import islice
+
+from asyncpg import NotNullViolationError
+
 import config
 
 import source.db.funcs
@@ -41,7 +44,49 @@ settings_helper = BotHelper(
 )
 
 
+def save_last_seen(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
+    """A decorator to save the last_seen date in the db"""
+
+    async def wrapper(*args, **kwargs):
+        """The inner wrapper function"""
+        try:
+            logger.info(f"{args=}")
+            logger.info(f'{kwargs.get("message")=}')
+            # logger.info(type(args[0]))
+            await source.db.funcs.save_last_seen_date(
+                message=args[0]
+            )  # if len(args) > 0 else kwargs["message"])
+            return await func(*args)  # if len(args) > 0 else kwargs)
+        except IndexError:
+            # Avoid spamming from subsequent calls to another func
+            # i.e. save_lang calls save_user which calls show_help and the args become kwargs
+            pass
+        except (Exception, NotNullViolationError) as err:
+            logger.warning(f"{err=}")
+            raise err
+
+    return wrapper
+
+
+@dp.message_handler(commands=["help"])
+@save_last_seen
+async def show_help(message: types.Message) -> None:
+    """Shows the help message"""
+    user_id = message["from"]["id"]
+    if str(user_id) in list(settings_helper.settings.keys()):
+        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
+            answer = Text.help_text_eng
+        else:
+            answer = Text.help_text_greek
+        await message.answer(answer)
+    else:
+        await choose_language(message=message)
+        if str(user_id) in list(settings_helper.settings.keys()):
+            await show_help(message=message)
+
+
 @dp.message_handler(lambda message: message.text in ("English 👍", "Greek 🤝"))
+@save_last_seen
 async def save_user(message: types.Message) -> None:
     """Saves the user's name and lang preference"""
     await save_language(message=message)
@@ -84,26 +129,11 @@ async def save_name(message: types.Message) -> None:
 
 
 @dp.message_handler(commands=["lang", "language", "start"])
+@save_last_seen
 async def choose_language(message: types.message) -> Coroutine:
     """Choose and saves the language preference of the user"""
 
-    return await message.answer(Text.choose_lang_text, reply_markup=settings_helper.lang_kb)
-
-
-@dp.message_handler(commands=["help"])
-async def show_help(message: types.Message):
-    """Shows the help message"""
-    user_id = message["from"]["id"]
-    if str(user_id) in list(settings_helper.settings.keys()):
-        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
-            answer = Text.help_text_eng
-        else:
-            answer = Text.help_text_greek
-        await message.answer(answer)
-    else:
-        await choose_language(message=message)
-        if str(user_id) in list(settings_helper.settings.keys()):
-            await show_help(message=message)
+    await message.answer(Text.choose_lang_text, reply_markup=settings_helper.lang_kb)
 
 
 async def search(message: types.Message):
@@ -153,6 +183,7 @@ async def search(message: types.Message):
 
 
 @dp.message_handler(commands=["search", "s", "σ"])
+@save_last_seen
 async def search_handler(message: types.Message):
     """Searches based on the user's input, replies with the search results and waits the user to interact"""
     await search(message=message)
@@ -160,6 +191,7 @@ async def search_handler(message: types.Message):
 
 
 @dp.message_handler(lambda message: "arbitrary text, it does not mean anything" == message.text)
+@save_last_seen
 async def to_search_next_page(message: types.Message) -> None:
     """
     Asks the user whether to search the next page
@@ -183,6 +215,7 @@ async def to_search_next_page(message: types.Message) -> None:
 
 @dp.message_handler(lambda message: "Yes 🆗" == message.text)
 @dp.message_handler(lambda message: "Ναι 🆗" == message.text)
+@save_last_seen
 async def search_next_page(message: types.Message) -> None:
     """Searches the next page"""
     user_id = message["from"]["id"]
@@ -253,6 +286,7 @@ async def search_next_page(message: types.Message) -> None:
 
 @dp.message_handler(lambda message: "No 👎" == message.text)
 @dp.message_handler(lambda message: "Όχι 👎" == message.text)
+@save_last_seen
 async def end_search(message: types.Message):
     """
     Removes the keyboard and inform the user that the search was ended.
@@ -291,6 +325,7 @@ async def end_search(message: types.Message):
         "κ",
     ]
 )
+@save_last_seen
 async def search_category(message: types.Message):
     """
     Scrapes the provided news category athletic_scraper/category-actor
@@ -356,6 +391,7 @@ async def search_category(message: types.Message):
 
 
 @dp.message_handler(commands=["youtube", "video", "yt"])
+@save_last_seen
 async def send_video(message: types.Message) -> None:
     """Downloads and sends the video(s) from the url provided by the user"""
 
@@ -407,6 +443,7 @@ async def send_video(message: types.Message) -> None:
         "ert",
     ]
 )
+@save_last_seen
 async def send_rssfeed(message: types.Message) -> None:
     """Sends the fetched news from the rss feed"""
     # logger.info(f"{message.text}")
