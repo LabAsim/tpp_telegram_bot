@@ -145,8 +145,8 @@ class EnvVars:
 async def parse_commands_for_rssfeed(command: str) -> str:
     """Matches the command to the proper newspaper"""
     match command:
-        case "efsyn":
-            return command
+        case "efsyn" | "εφσυν":
+            return "efsyn"
         case "kath" | "kat" | "kathimerini" | "καθ" | "καθη" | "καθημερινη":
             return "kathimerinieng"
         case "naftemporiki" | "naft" | "naf" | "ναφ" | "ναφτ" | "ναυτ" | "ναυ":
@@ -154,10 +154,10 @@ async def parse_commands_for_rssfeed(command: str) -> str:
         case "tovima" | "tov" | "τοβ" | "τοβημα":
             return "tovima"
         case "ert" | "ερτ":
-            return command
+            return "ert"
         case "documento" | "ντοκουμεντο" | "docu" | "δοκυ" | "doc" | "δοκ" | "ντοκ":
             return "documento"
         case "tpp" | "τππ":
-            return command
+            return "tpp"
         case _:
             raise ValueError(f"Unknown command passed {command=}")
