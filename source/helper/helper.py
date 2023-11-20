@@ -147,17 +147,17 @@ async def parse_commands_for_rssfeed(command: str) -> str:
     match command:
         case "efsyn":
             return command
-        case "kath" | "kat" | "kathimerini":
+        case "kath" | "kat" | "kathimerini" | "καθ" | "καθη" | "καθημερινη":
             return "kathimerinieng"
-        case "naftemporiki" | "naft" | "naf":
+        case "naftemporiki" | "naft" | "naf" | "ναφ" | "ναφτ" | "ναυτ" | "ναυ":
             return "naftemporiki"
-        case "tovima" | "tov":
+        case "tovima" | "tov" | "τοβ" | "τοβημα":
             return "tovima"
-        case "ert":
+        case "ert" | "ερτ":
             return command
-        case "documento" | "docu" | "doc":
+        case "documento" | "ντοκουμεντο" | "docu" | "δοκυ" | "doc" | "δοκ" | "ντοκ":
             return "documento"
-        case "tpp":
+        case "tpp" | "τππ":
             return command
         case _:
             raise ValueError(f"Unknown command passed {command=}")

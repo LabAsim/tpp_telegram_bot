@@ -22,6 +22,7 @@ from source.bot.apify_actor import (
 from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
+from source.helper.constants import rss_feed
 from source.helper.helper import parse_commands_for_rssfeed
 from source.helper.rss_funcs import fetch_news
 from source.helper.youtube_funcs import download_playlist, download_send
@@ -426,23 +427,7 @@ async def send_video(message: types.Message) -> None:
         )
 
 
-@dp.message_handler(
-    commands=[
-        "efsyn",
-        "kath",
-        "kathemerinieng",
-        "tovima",
-        "tov",
-        "tpp",
-        "docu",
-        "doc",
-        "documento",
-        "naftemporiki",
-        "naft",
-        "naf",
-        "ert",
-    ]
-)
+@dp.message_handler(commands=rss_feed)
 @save_last_seen
 async def send_rssfeed(message: types.Message) -> None:
     """Sends the fetched news from the rss feed"""
