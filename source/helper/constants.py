@@ -1,8 +1,10 @@
 # Keywords for commands to fetch rss feed
 rss_feed = [
     "efsyn",
-    "εφσυν" "kath",
+    "εφσυν",
+    "kath",
     "καθ",
+    "kat",
     "καθη",
     "kathemerinieng",
     "καθημερινη" "tovima",

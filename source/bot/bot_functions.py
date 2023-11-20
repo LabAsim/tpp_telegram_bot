@@ -45,8 +45,8 @@ settings_helper = BotHelper(
 )
 
 
-def save_last_seen(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
-    """A decorator to save the last_seen date in the db"""
+def update_user(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
+    """A decorator to save the last_seen date,  in the db"""
 
     async def wrapper(*args, **kwargs):
         """The inner wrapper function"""
@@ -54,7 +54,7 @@ def save_last_seen(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]
             logger.info(f"{args=}")
             logger.info(f'{kwargs.get("message")=}')
             # logger.info(type(args[0]))
-            await source.db.funcs.save_last_seen_date(
+            await source.db.funcs.update_user_infos(
                 message=args[0]
             )  # if len(args) > 0 else kwargs["message"])
             return await func(*args)  # if len(args) > 0 else kwargs)
@@ -70,74 +70,36 @@ def save_last_seen(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]
 
 
 @dp.message_handler(commands=["help"])
-@save_last_seen
+@update_user
 async def show_help(message: types.Message) -> None:
     """Shows the help message"""
-    user_id = message["from"]["id"]
-    if str(user_id) in list(settings_helper.settings.keys()):
-        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
-            answer = Text.help_text_eng
-        else:
-            answer = Text.help_text_greek
-        await message.answer(answer)
+
+    lang = await source.db.funcs.fetch_lang(message=message)
+
+    if lang == "English":
+        answer = Text.help_text_eng
     else:
-        await choose_language(message=message)
-        if str(user_id) in list(settings_helper.settings.keys()):
-            await show_help(message=message)
+        answer = Text.help_text_greek
+    await message.answer(answer)
 
 
 @dp.message_handler(lambda message: message.text in ("English 👍", "Greek 🤝"))
-@save_last_seen
+@update_user
 async def save_user(message: types.Message) -> None:
     """Saves the user's name and lang preference"""
-    await save_language(message=message)
-    await save_name(message=message)
+
     await source.db.funcs.connect(message=message)
 
 
-async def save_language(message: types.Message) -> None:
-    """Saves the language preference of the target user"""
-    logger.info(message)
-    user_id = message["from"]["id"]
-    lang = message.text.strip("👍").strip("🤝").strip()
-    try:
-        settings_helper.settings[f"{user_id}"]["lang"] = lang
-    except KeyError:
-        settings_helper.settings[f"{user_id}"] = {}
-        settings_helper.settings[f"{user_id}"]["lang"] = lang
-    # print(f"{settings_helper.settings}")
-    settings_helper.save_all_settings()
-    markup = types.ReplyKeyboardRemove()
-    if settings_helper.settings[f"{user_id}"]["lang"] == "English":
-        await message.answer(Text.save_lang_text_eng, reply_markup=markup)
-    else:
-        await message.answer(Text.save_lang_text_greek, reply_markup=markup)
-    await show_help(message=message)
-
-
-async def save_name(message: types.Message) -> None:
-    """Saves the language preference of the target user"""
-    # print(message)
-    user_id = message["from"]["id"]
-    first_name = message["from"]["first_name"]
-    try:
-        settings_helper.settings[f"{user_id}"]["first_name"] = first_name
-    except KeyError:
-        settings_helper.settings[f"{user_id}"] = {}
-        settings_helper.settings[f"{user_id}"]["first_name"] = first_name
-    logger.info(f"{settings_helper.settings}")
-    settings_helper.save_all_settings()
-
-
 @dp.message_handler(commands=["lang", "language", "start"])
-@save_last_seen
-async def choose_language(message: types.message) -> Coroutine:
+@update_user
+async def choose_language(message: types.message) -> None:
     """Choose and saves the language preference of the user"""
 
     await message.answer(Text.choose_lang_text, reply_markup=settings_helper.lang_kb)
 
 
-async def search(message: types.Message):
+async def search(message: types.Message) -> None:
     """Searches based on the user's input and replies with the search results"""
     logger.info(f"{message.from_user.first_name}: {message.text}\n\n\n\n")
     # Reset the counter
@@ -184,47 +146,45 @@ async def search(message: types.Message):
 
 
 @dp.message_handler(commands=["search", "s", "σ"])
-@save_last_seen
-async def search_handler(message: types.Message):
+@update_user
+async def search_handler(message: types.Message) -> None:
     """Searches based on the user's input, replies with the search results and waits the user to interact"""
     await search(message=message)
+    logger.info(f"{message=}")
     await to_search_next_page(message=message)
+    logger.info("ended..")
 
 
 @dp.message_handler(lambda message: "arbitrary text, it does not mean anything" == message.text)
-@save_last_seen
 async def to_search_next_page(message: types.Message) -> None:
     """
     Asks the user whether to search the next page
     """
     # Configure ReplyKeyboardMarkup
+    logger.info("to_search_next_page called")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-    user_id = message["from"]["id"]
-    if str(user_id) in list(settings_helper.settings.keys()):
-        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
-            markup.add("Yes 🆗", "No 👎")
-            await message.reply(Text.to_search_next_page_eng, reply_markup=markup)
-        else:
-            markup.add("Ναι 🆗", "Όχι 👎")
-            await message.reply(Text.to_search_next_page_greek, reply_markup=markup)
+    lang = await source.db.funcs.fetch_lang(message=message)
+    logger.info(f"{lang=}")
+    if lang == "English":
+        markup.add("Yes 🆗", "No 👎")
+        await message.reply(Text.to_search_next_page_eng, reply_markup=markup)
     else:
-        await choose_language(message=message)
-        # await asyncio.sleep(6)
-        if str(user_id) in list(settings_helper.settings.keys()):
-            await to_search_next_page(message=message)
+        markup.add("Ναι 🆗", "Όχι 👎")
+        await message.reply(Text.to_search_next_page_greek, reply_markup=markup)
 
 
 @dp.message_handler(lambda message: "Yes 🆗" == message.text)
 @dp.message_handler(lambda message: "Ναι 🆗" == message.text)
-@save_last_seen
+@update_user
 async def search_next_page(message: types.Message) -> None:
     """Searches the next page"""
-    user_id = message["from"]["id"]
+
+    lang = await source.db.funcs.fetch_lang(message=message)
     # Check if the keyword is empty and the page number is 1.
     # If True, then prompt to search something first and stop the function.
     if settings_helper.search_keyword == "" and settings_helper.page_number == 1:
         markup = types.ReplyKeyboardRemove()
-        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
+        if lang == "English":
             await message.answer(
                 text=Text.search_next_page_empty_keyword_page_no_1_eng,
                 reply_markup=markup,
@@ -287,15 +247,16 @@ async def search_next_page(message: types.Message) -> None:
 
 @dp.message_handler(lambda message: "No 👎" == message.text)
 @dp.message_handler(lambda message: "Όχι 👎" == message.text)
-@save_last_seen
+@update_user
 async def end_search(message: types.Message):
     """
     Removes the keyboard and inform the user that the search was ended.
     """
-    user_id = message["from"]["id"]
+    message["from"]["id"]
     markup = types.ReplyKeyboardRemove()
+    lang = await source.db.funcs.fetch_lang(message=message)
     if settings_helper.search_keyword != "":
-        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
+        if lang == "English":
             await message.answer(
                 f"Search for '{settings_helper.search_keyword}' is ended",
                 reply_markup=markup,
@@ -306,7 +267,7 @@ async def end_search(message: types.Message):
                 reply_markup=markup,
             )
     else:
-        if settings_helper.settings[f"{user_id}"]["lang"] == "English":
+        if lang == "English":
             await message.answer("Search is ended", reply_markup=markup)
         else:
             await message.answer("Η αναζήτηση τερματίστηκε", reply_markup=markup)
@@ -326,8 +287,8 @@ async def end_search(message: types.Message):
         "κ",
     ]
 )
-@save_last_seen
-async def search_category(message: types.Message):
+@update_user
+async def search_category(message: types.Message) -> None:
     """
     Scrapes the provided news category athletic_scraper/category-actor
     """
@@ -352,7 +313,8 @@ async def search_category(message: types.Message):
     # If the url does not exist (it's empty string), stop the method
     if url == "":
         return None
-    # Add 1 one to the counter
+
+    # Update the counter
     settings_helper.page_number += 1
     loop = asyncio.get_event_loop()
     results = await loop.run_in_executor(
@@ -392,7 +354,7 @@ async def search_category(message: types.Message):
 
 
 @dp.message_handler(commands=["youtube", "video", "yt"])
-@save_last_seen
+@update_user
 async def send_video(message: types.Message) -> None:
     """Downloads and sends the video(s) from the url provided by the user"""
 
@@ -428,7 +390,7 @@ async def send_video(message: types.Message) -> None:
 
 
 @dp.message_handler(commands=rss_feed)
-@save_last_seen
+@update_user
 async def send_rssfeed(message: types.Message) -> None:
     """Sends the fetched news from the rss feed"""
     # logger.info(f"{message.text}")
@@ -448,6 +410,7 @@ async def send_rssfeed(message: types.Message) -> None:
         )
 
     markup = types.ReplyKeyboardRemove()
+
     try:
         await message.reply(
             answer,
@@ -472,7 +435,6 @@ async def send_chunks_rssfeed(results: list, message: types.Message) -> None:
         it = iter(data)
         for i in range(0, len(data), size):
             yield [k for k in islice(it, size)]
-            # yield {k: data[k] for k in islice(it, size)}
 
     async for item in chunks(data=results, size=10):
         answer = md.text()

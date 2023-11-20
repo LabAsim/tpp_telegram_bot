@@ -23,7 +23,7 @@ class DbPoolSingleton:
     async def create_pool():
         database_url = construct_database_url()
         pool: asyncpg.Pool = await asyncpg.create_pool(dsn=database_url, min_size=1, max_size=6)
-        logger.debug("Pool created")
+        logger.info("Database Pool created")
         return pool
 
     @staticmethod
@@ -36,7 +36,7 @@ class DbPoolSingleton:
     async def terminate_pool():
         (await DbPoolSingleton.get_pool()).terminate()
         DbPoolSingleton.db_pool = None
-        logger.debug("Pool terminated")
+        logger.warning("Database Pool terminated")
 
 
 def construct_database_url() -> str:
@@ -120,7 +120,7 @@ async def connect(message: types.Message) -> None:
         logger.info(rows)
 
 
-async def save_last_seen_date(message: types.Message) -> None:
+async def update_user_infos(message: types.Message) -> None:
     id = int(message["from"]["id"])
     lang = "English"
     name = message["from"]["first_name"]
@@ -161,7 +161,7 @@ async def save_last_seen_date(message: types.Message) -> None:
         # logger.info(await conn.execute("""SELECT id,name,lang FROM users;"""))
         # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch
         rows = await conn.fetch("""SELECT * FROM users;""")
-        logger.info(rows)
+        logger.debug(rows)
 
 
 async def fetch_lang(message: types.Message) -> None:
@@ -171,5 +171,5 @@ async def fetch_lang(message: types.Message) -> None:
     # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch
     rows = await conn.fetch("""SELECT lang FROM users WHERE users.id = $1;""", id)
 
-    logger.info(rows)
+    logger.debug(rows)
     return rows[0]
