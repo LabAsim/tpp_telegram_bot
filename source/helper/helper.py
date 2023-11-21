@@ -140,24 +140,3 @@ class EnvVars:
     TOKEN_TELEGRAM_BOT = os.environ.get("TOKEN_TELEGRAM_BOT")
     TOKEN_TELEGRAM_BOT_TEST = os.environ.get("TOKEN_TELEGRAM_BOT_TEST")
     TOKEN_APIFY = os.environ.get("TOKEN_APIFY")
-
-
-async def parse_commands_for_rssfeed(command: str) -> str:
-    """Matches the command to the proper newspaper"""
-    match command:
-        case "efsyn" | "εφσυν":
-            return "efsyn"
-        case "kath" | "kat" | "kathimerini" | "καθ" | "καθη" | "καθημερινη":
-            return "kathimerinieng"
-        case "naftemporiki" | "naft" | "naf" | "ναφ" | "ναφτ" | "ναυτ" | "ναυ":
-            return "naftemporiki"
-        case "tovima" | "tov" | "τοβ" | "τοβημα":
-            return "tovima"
-        case "ert" | "ερτ":
-            return "ert"
-        case "documento" | "ντοκουμεντο" | "docu" | "δοκυ" | "doc" | "δοκ" | "ντοκ":
-            return "documento"
-        case "tpp" | "τππ":
-            return "tpp"
-        case _:
-            raise ValueError(f"Unknown command passed {command=}")

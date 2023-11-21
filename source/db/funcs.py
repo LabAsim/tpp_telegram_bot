@@ -30,6 +30,7 @@ class DbPoolSingleton:
     async def get_pool() -> asyncpg.pool.Pool:
         if not DbPoolSingleton.db_pool:
             DbPoolSingleton.db_pool = await DbPoolSingleton.create_pool()
+        logger.debug("Fetching pool")
         return DbPoolSingleton.db_pool
 
     @staticmethod
@@ -120,7 +121,8 @@ async def connect(message: types.Message) -> None:
         logger.info(rows)
 
 
-async def update_user_infos(message: types.Message) -> None:
+async def update_user_info(message: types.Message) -> None:
+    """Updates the user's info"""
     id = int(message["from"]["id"])
     lang = "English"
     name = message["from"]["first_name"]
@@ -165,6 +167,7 @@ async def update_user_infos(message: types.Message) -> None:
 
 
 async def fetch_lang(message: types.Message) -> None:
+    """Returns the language preference of the user"""
     id = int(message["from"]["id"])
     database_url = construct_database_url()
     conn = await asyncpg.connect(dsn=database_url)

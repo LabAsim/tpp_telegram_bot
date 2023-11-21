@@ -15,21 +15,9 @@ urls = {
     "documento": "https://www.documentonews.gr/rss",
     "tpp": "https://thepressproject.gr/feed/rss/",
     "efsyn": "https://www.efsyn.gr/rss.xml",
+    "kontra": "http://eksegersi.gr/?feed=rss2",
+    "prin": "https://prin.gr/feed",
 }
-
-# feed = feedparser.parse(urls["ert"])
-# print("Feed Title:", feed.feed.title)
-# print("Feed Description:", feed.feed.description)
-# print("Feed Link:", feed.feed.link)
-# # for key,value in feed.items():
-# #     print(key, value)
-# for entry in feed.entries:
-#     print("Entry Title:", entry.title)
-#     print("Entry Link:", entry.link)
-#     print("Entry Published Date:", entry.get("published"))
-#     # print("Entry Summary:", entry.get("summary"))
-#     # print(f"{entry.summary_detail=}")
-#     print("\n")
 
 
 async def fetch_news(target: str) -> list:
@@ -40,3 +28,28 @@ async def fetch_news(target: str) -> list:
     results = [entry for entry in feed.entries]
 
     return results
+
+
+async def parse_commands_for_rssfeed(command: str) -> str:
+    """Matches the command to the proper newspaper"""
+    match command:
+        case "efsyn" | "εφσυν":
+            return "efsyn"
+        case "kath" | "kat" | "kathimerini" | "καθ" | "καθη" | "καθημερινη":
+            return "kathimerinieng"
+        case "naftemporiki" | "naft" | "naf" | "ναφ" | "ναφτ" | "ναυτ" | "ναυ":
+            return "naftemporiki"
+        case "tovima" | "tov" | "τοβ" | "τοβημα":
+            return "tovima"
+        case "ert" | "ερτ":
+            return "ert"
+        case "documento" | "ντοκουμεντο" | "docu" | "δοκυ" | "doc" | "δοκ" | "ντοκ":
+            return "documento"
+        case "tpp" | "τππ":
+            return "tpp"
+        case "kontra" | "kon" | "κον" | "κοντρα" | "κόντρα":
+            return "kontra"
+        case "prin" | "πριν":
+            return "prin"
+        case _:
+            raise ValueError(f"Unknown command passed {command=}")

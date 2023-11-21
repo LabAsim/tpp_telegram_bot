@@ -23,8 +23,7 @@ from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
 from source.helper.constants import rss_feed
-from source.helper.helper import parse_commands_for_rssfeed
-from source.helper.rss_funcs import fetch_news
+from source.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
 from source.helper.youtube_funcs import download_playlist, download_send
 
 try:
@@ -51,10 +50,10 @@ def update_user(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
     async def wrapper(*args, **kwargs):
         """The inner wrapper function"""
         try:
-            logger.info(f"{args=}")
-            logger.info(f'{kwargs.get("message")=}')
+            logger.debug(f"{args=}")
+            logger.debug(f'{kwargs.get("message")=}')
             # logger.info(type(args[0]))
-            await source.db.funcs.update_user_infos(
+            await source.db.funcs.update_user_info(
                 message=args[0]
             )  # if len(args) > 0 else kwargs["message"])
             return await func(*args)  # if len(args) > 0 else kwargs)
@@ -396,6 +395,7 @@ async def send_rssfeed(message: types.Message) -> None:
     # logger.info(f"{message.text}")
     target = await parse_commands_for_rssfeed(message.text.strip("/"))
     results = await fetch_news(target=target)
+    logger.debug(f"{results=}")
     answer = md.text()
     for entry in results:
         title = entry.title
@@ -456,3 +456,10 @@ async def send_chunks_rssfeed(results: list, message: types.Message) -> None:
             disable_web_page_preview=True,
             parse_mode=types.ParseMode.MARKDOWN_V2,
         )
+
+
+@dp.message_handler(lambda message: message.text)
+@update_user
+async def random_text(message: types.Message) -> None:
+    """Just to update the user's info, if anything is sent to the bot"""
+    pass
