@@ -4,6 +4,7 @@ rss_feed = [
     "εφσυν",
     "kath",
     "καθ",
+    "κατ",
     "kat",
     "καθη",
     "kathemerinieng",
