@@ -35,7 +35,7 @@ async def parse_commands_for_rssfeed(command: str) -> str:
     match command:
         case "efsyn" | "εφσυν":
             return "efsyn"
-        case "kath" | "kat" | "kathimerini" | "καθ" | "καθη" | "καθημερινη":
+        case "kath" | "kat" | "kathimerini" | "καθ" | "κατ" | "καθη" | "καθημερινη":
             return "kathimerinieng"
         case "naftemporiki" | "naft" | "naf" | "ναφ" | "ναφτ" | "ναυτ" | "ναυ":
             return "naftemporiki"
