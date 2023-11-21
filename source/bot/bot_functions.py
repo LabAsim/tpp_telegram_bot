@@ -3,6 +3,8 @@ import asyncio
 import os
 import shutil
 import threading
+from functools import wraps
+
 import colorama
 import logging
 from typing import Coroutine, AsyncIterable, Callable, Any
@@ -45,23 +47,31 @@ settings_helper = BotHelper(
 
 
 def update_user(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
-    """A decorator to save the last_seen date,  in the db"""
+    """
+    A decorator to save the last_seen date,  in the db
+    Modified from here: https://stackoverflow.com/a/14412901
+    """
 
+    @wraps(func)
     async def wrapper(*args, **kwargs):
         """The inner wrapper function"""
         try:
-            logger.debug(f"{args=}")
-            logger.debug(f'{kwargs.get("message")=}')
-            # logger.info(type(args[0]))
-            await source.db.funcs.update_user_info(
-                message=args[0]
-            )  # if len(args) > 0 else kwargs["message"])
-            return await func(*args)  # if len(args) > 0 else kwargs)
-        except IndexError:
-            # Avoid spamming from subsequent calls to another func
-            # i.e. save_lang calls save_user which calls show_help and the args become kwargs
-            pass
-        except (Exception, NotNullViolationError) as err:
+            if len(args) == 1 and len(kwargs) == 0:
+                # Actual decorated function
+                logger.debug("Plain decorator")
+                # logger.debug(f"{args=}")
+                # logger.debug(f'{kwargs.get("message")=}')
+                # logger.info(type(args[0]))
+                await source.db.funcs.update_user_info(message=args[0])
+                return await func(*args)
+            else:
+                # Decorator with arguments
+                logger.info("Decorator called with arguments")
+                logger.info(f"{args=}\n{kwargs=}")
+                await source.db.funcs.update_user_info(message=kwargs.get("message"))
+                return await func(*args, **kwargs)
+
+        except (Exception, NotNullViolationError, RuntimeWarning, IndexError) as err:
             logger.warning(f"{err=}")
             raise err
 
@@ -72,14 +82,16 @@ def update_user(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
 @update_user
 async def show_help(message: types.Message) -> None:
     """Shows the help message"""
-
     lang = await source.db.funcs.fetch_lang(message=message)
 
     if lang == "English":
         answer = Text.help_text_eng
+        answer2 = Text.help_text_eng2
     else:
         answer = Text.help_text_greek
+        answer2 = Text.help_text_greek2
     await message.answer(answer)
+    await message.answer(answer2)
 
 
 @dp.message_handler(lambda message: message.text in ("English 👍", "Greek 🤝"))
@@ -88,6 +100,7 @@ async def save_user(message: types.Message) -> None:
     """Saves the user's name and lang preference"""
 
     await source.db.funcs.connect(message=message)
+    await show_help(message=message)
 
 
 @dp.message_handler(commands=["lang", "language", "start"])
