@@ -166,7 +166,7 @@ async def update_user_info(message: types.Message) -> None:
         logger.debug(rows)
 
 
-async def fetch_lang(message: types.Message) -> None:
+async def fetch_lang(message: types.Message) -> asyncpg.Record:
     """Returns the language preference of the user"""
     id = int(message["from"]["id"])
     database_url = construct_database_url()

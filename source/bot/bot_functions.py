@@ -5,7 +5,6 @@ import shutil
 import threading
 from functools import wraps
 
-import colorama
 import logging
 from typing import Coroutine, AsyncIterable, Callable, Any
 from aiogram import types, md, Dispatcher, utils
@@ -37,7 +36,8 @@ logger = logging.getLogger(__name__)
 
 token = choose_token(test=config.TEST)
 
-# The dp needs to be instantiated here. Otherwise, the functions are not registered (don't know why though)
+# The dp needs to be instantiated here.
+# Otherwise, the functions are not registered (don't know why though)
 bot = botify(token=token, proxy_url=config.PROXY_URL_PYTHONANYWHERE, mode=config.MODE)
 dp = Dispatcher(bot)  # , run_tasks_by_default=True
 
@@ -46,14 +46,14 @@ settings_helper = BotHelper(
 )
 
 
-def update_user(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
+def update_user(func: Callable) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
     """
     A decorator to save the last_seen date,  in the db
     Modified from here: https://stackoverflow.com/a/14412901
     """
 
     @wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs) -> Coroutine:
         """The inner wrapper function"""
         try:
             if len(args) == 1 and len(kwargs) == 0:
@@ -66,8 +66,8 @@ def update_user(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
                 return await func(*args)
             else:
                 # Decorator with arguments
-                logger.info("Decorator called with arguments")
-                logger.info(f"{args=}\n{kwargs=}")
+                logger.debug("Decorator called with arguments")
+                # logger.debug(f"{args=}\n{kwargs=}")
                 await source.db.funcs.update_user_info(message=kwargs.get("message"))
                 return await func(*args, **kwargs)
 
@@ -83,7 +83,7 @@ def update_user(func) -> Callable[[tuple[Any, ...]], Coroutine[Any, Any, Any]]:
 async def show_help(message: types.Message) -> None:
     """Shows the help message"""
     lang = await source.db.funcs.fetch_lang(message=message)
-
+    lang = lang.get("lang")
     if lang == "English":
         answer = Text.help_text_eng
         answer2 = Text.help_text_eng2
@@ -160,7 +160,9 @@ async def search(message: types.Message) -> None:
 @dp.message_handler(commands=["search", "s", "σ"])
 @update_user
 async def search_handler(message: types.Message) -> None:
-    """Searches based on the user's input, replies with the search results and waits the user to interact"""
+    """
+    Searches based on the user's input,
+    replies with the search results and waits the user to interact"""
     await search(message=message)
     logger.info(f"{message=}")
     await to_search_next_page(message=message)
@@ -241,7 +243,8 @@ async def search_next_page(message: types.Message) -> None:
     # Remove the Keyboard
     markup = types.ReplyKeyboardRemove()
 
-    # If there is not any scraped data from the next page, the answer is empty and an exception will be raised.
+    # If there is not any scraped data from the next page,
+    # the answer is empty and an exception will be raised.
     reply_to_empty_results = ""
     if answer == "":
         reply_to_empty_results = (
@@ -264,7 +267,6 @@ async def end_search(message: types.Message):
     """
     Removes the keyboard and inform the user that the search was ended.
     """
-    message["from"]["id"]
     markup = types.ReplyKeyboardRemove()
     lang = await source.db.funcs.fetch_lang(message=message)
     if settings_helper.search_keyword != "":
@@ -381,9 +383,7 @@ async def send_video(message: types.Message) -> None:
             await asyncio.sleep(3 * count_files)
             thr = threading.Thread(target=lambda: shutil.rmtree(playlist_folder))
             thr.start()
-            logger.debug(
-                f"{colorama.Fore.GREEN}'Folder: {playlist_folder} removed'{colorama.Style.RESET_ALL}"
-            )
+            logger.debug(f"'Folder: {playlist_folder} removed'")
             return None
 
     downloaded_file = None
@@ -396,9 +396,7 @@ async def send_video(message: types.Message) -> None:
     finally:
         thr = threading.Thread(target=lambda: os.remove(downloaded_file.file.name))
         thr.start()
-        logger.debug(
-            f"{colorama.Fore.GREEN}{downloaded_file.file.name} deleted{colorama.Style.RESET_ALL}"
-        )
+        logger.debug(f"{downloaded_file.file.name} deleted")
 
 
 @dp.message_handler(commands=rss_feed)
@@ -431,7 +429,7 @@ async def send_rssfeed(message: types.Message) -> None:
             disable_web_page_preview=True,
             parse_mode=types.ParseMode.MARKDOWN_V2,
         )
-    except utils.exceptions.MessageIsTooLong as err:
+    except (utils.exceptions.MessageIsTooLong, utils.exceptions.BadRequest, Exception) as err:
         logger.warning(
             f"{len(results)=} {len(answer)=}"
             f"\n{err=}"
@@ -440,7 +438,7 @@ async def send_rssfeed(message: types.Message) -> None:
         await send_chunks_rssfeed(results=results, message=message)
 
 
-async def send_chunks_rssfeed(results: list, message: types.Message) -> None:
+async def send_chunks_rssfeed(results: list, message: types.Message, size: int = 10) -> None:
     """Sends chunks of the rssfeed"""
 
     async def chunks(data: list, size: int) -> AsyncIterable[list]:
@@ -449,7 +447,7 @@ async def send_chunks_rssfeed(results: list, message: types.Message) -> None:
         for i in range(0, len(data), size):
             yield [k for k in islice(it, size)]
 
-    async for item in chunks(data=results, size=10):
+    async for item in chunks(data=results, size=size):
         answer = md.text()
         for entry in item:
             title = entry.title
