@@ -17,6 +17,25 @@ urls = {
     "efsyn": "https://www.efsyn.gr/rss.xml",
     "kontra": "http://eksegersi.gr/?feed=rss2",
     "prin": "https://prin.gr/feed",
+    "bbc_top_stories": "http://feeds.bbci.co.uk/news/rss.xml",  # not implemented
+    "bbc_top_stories_international": "http://feeds.bbci.co.uk/news/rss.xml?edition=int",
+    "bbc_world": "http://feeds.bbci.co.uk/news/world/rss.xml",
+    "bbc_health": "http://feeds.bbci.co.uk/news/health/rss.xml",
+    "bbc_science": "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+    "bbc_tech": "http://feeds.bbci.co.uk/news/technology/rss.xml",  # not implemented
+    "bbc_europe": "http://feeds.bbci.co.uk/news/world/europe/rss.xml",
+    "guardian_europe": "https://www.theguardian.com/europe/rss",
+    "guardian_middle_east": "https://www.theguardian.com/world/middleeast/rss",
+    "guardian_world": "https://www.theguardian.com/world/rss",
+    "reuters": "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best",
+    "reuters_int": "https://www.reutersagency.com/feed/?taxonomy=best-regions&post_type=best",
+    "reuters_politics": (
+        "https://www.reutersagency.com/feed/?best-topics=political-general&post_type=best"
+    ),
+    "reuters_europe": "https://www.reutersagency.com/feed/?best-regions=europe&post_type=best",
+    "reuters_news": (
+        "https://www.reutersagency.com/feed/?best-types=reuters-news-first&post_type=best"
+    ),
 }
 
 
@@ -51,5 +70,33 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "kontra"
         case "prin" | "πριν":
             return "prin"
+        case "bbc_world" | "bbcworld" | "bbcw" | "bbcwo" | "ββψ" | "ββσ" | "ββψγ":
+            return "bbc_world"
+        # Use of fmt is crucial here as black unwraps the two lines and ruff points to a too long line
+        # fmt: off
+        case "bbc_top_stories_international" | "bbctopstoriesinternational" \
+             | "bbctopint" | "bbctpint" | "ββψτοπιντ" | "ββστπιντ" | "ββψτπιντ":
+            return "bbc_top_stories_international"
+        # fmt: on
+        case "bbc_europe" | "bbceurope" | "bbceu" | "bbce" | "ββψευ" | "ββσευ" | "ββψεθ":
+            return "bbc_europe"
+        case "bbc_science" | "bbcscience" | "bbcsc" | "bbcs" | "ββψσψ" | "ββσσψ" | "ββψσψ" | "ββσεπ":
+            return "bbc_science"
+        case "guardian_europe" | "guaeu" | "geu" | "γθεθ" | "γευ":
+            return "guardian_europe"
+        case "guardian_middle_east" | "guame" | "gme" | "γθμε" | "γμε":
+            return "guardian_middle_east"
+        case "guardian_world" | "guaw" | "gw" | "γθς" | "γγ":
+            return "guardian_world"
+        case "reuters" | "reuter" | "reu" | "ρεθτερσ" | "ρευ" | "ρεθ":
+            return "reuters"
+        case "reuters_int" | "reutersint" | "reuint" | "ρεθτερσιντ" | "ρευιντ" | "ρεθιντ" | "ριντ" | "rint":
+            return "reuters_int"
+        case "reuters_pol" | "reuterspol" | "reupol" | "ρεθτερσπολ" | "ρευπολ" | "ρεθπολ" | "rpol" | "ρπολ":
+            return "reuters_politics"
+        case "reuters_eu" | "reuterseu" | "reueu" | "ρεθτερσευ" | "ρευευ" | "ρεθευ" | "reur" | "ρευρ" | "ρεθρ":
+            return "reuters_europe"
+        case "reuters_news" | "reutersnews" | "reunews" | "ρεθτερσνιουζ" | "ρνιουζ" | "ρεθνιουζ" | "rnews" | "ρνιουζ":
+            return "reuters_news"
         case _:
             raise ValueError(f"Unknown command passed {command=}")
