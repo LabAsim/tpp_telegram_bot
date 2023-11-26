@@ -36,6 +36,9 @@ urls = {
     "reuters_news": (
         "https://www.reutersagency.com/feed/?best-types=reuters-news-first&post_type=best"
     ),
+    "cnn": "http://rss.cnn.com/rss/cnn_latest.rss",
+    "cnn_world": "http://rss.cnn.com/rss/edition_world.rss",
+    "cnn_eu": "http://rss.cnn.com/rss/edition_europe.rss",
 }
 
 
@@ -72,15 +75,16 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "prin"
         case "bbc_world" | "bbcworld" | "bbcw" | "bbcwo" | "ββψ" | "ββσ" | "ββψγ":
             return "bbc_world"
-        # Use of fmt is crucial here as black unwraps the two lines and ruff points to a too long line
+        # Use of fmt is crucial here
+        # as black unwraps the two lines and ruff points to a too long line
         # fmt: off
         case "bbc_top_stories_international" | "bbctopstoriesinternational" \
              | "bbctopint" | "bbctpint" | "ββψτοπιντ" | "ββστπιντ" | "ββψτπιντ":
             return "bbc_top_stories_international"
-        # fmt: on
         case "bbc_europe" | "bbceurope" | "bbceu" | "bbce" | "ββψευ" | "ββσευ" | "ββψεθ":
             return "bbc_europe"
-        case "bbc_science" | "bbcscience" | "bbcsc" | "bbcs" | "ββψσψ" | "ββσσψ" | "ββψσψ" | "ββσεπ":
+        case "bbc_science" | "bbcscience" | "bbcsc" | "bbcs" |\
+             "ββψσψ" | "ββσσψ" | "ββψσψ" | "ββσεπ":
             return "bbc_science"
         case "guardian_europe" | "guaeu" | "geu" | "γθεθ" | "γευ":
             return "guardian_europe"
@@ -90,13 +94,24 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "guardian_world"
         case "reuters" | "reuter" | "reu" | "ρεθτερσ" | "ρευ" | "ρεθ":
             return "reuters"
-        case "reuters_int" | "reutersint" | "reuint" | "ρεθτερσιντ" | "ρευιντ" | "ρεθιντ" | "ριντ" | "rint":
+        case "reuters_int" | "reutersint" | "reuint" |\
+             "ρεθτερσιντ" | "ρευιντ" | "ρεθιντ" | "ριντ" | "rint":
             return "reuters_int"
-        case "reuters_pol" | "reuterspol" | "reupol" | "ρεθτερσπολ" | "ρευπολ" | "ρεθπολ" | "rpol" | "ρπολ":
+        case "reuters_pol" | "reuterspol" | "reupol" |\
+             "ρεθτερσπολ" | "ρευπολ" | "ρεθπολ" | "rpol" | "ρπολ":
             return "reuters_politics"
-        case "reuters_eu" | "reuterseu" | "reueu" | "ρεθτερσευ" | "ρευευ" | "ρεθευ" | "reur" | "ρευρ" | "ρεθρ":
+        case "reuters_eu" | "reuterseu" | "reueu" |\
+            "ρεθτερσευ" | "ρευευ" | "ρεθευ" | "reur" | "ρευρ" | "ρεθρ":
             return "reuters_europe"
-        case "reuters_news" | "reutersnews" | "reunews" | "ρεθτερσνιουζ" | "ρνιουζ" | "ρεθνιουζ" | "rnews" | "ρνιουζ":
+        case "reuters_news" | "reutersnews" | "reunews" |\
+             "ρεθτερσνιουζ" | "ρνιουζ" | "ρεθνιουζ" | "rnews" | "ρνιουζ":
             return "reuters_news"
+        case "cnn":
+            return command
+        case "cnn_world" | "cnnw" | "ψννς" | "σννγ":
+            return "cnn_world"
+        case "cnn_eu" | "cnneu" | "ψννεθ" | "ψννευ":
+            return "cnn_eu"
         case _:
             raise ValueError(f"Unknown command passed {command=}")
+        # fmt: on

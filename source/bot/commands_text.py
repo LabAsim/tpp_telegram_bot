@@ -97,6 +97,15 @@ class Text:
         md.escape_md("\n• /bbcsc"),
         md.escape_md("\nBBC Science"),
         "\n",
+        md.escape_md("\n• /cnn"),
+        md.escape_md("\nCNN"),
+        "\n",
+        md.escape_md("\n• /cnnw"),
+        md.escape_md("\nCNN world"),
+        "\n",
+        md.escape_md("\n• /cnneu"),
+        md.escape_md("\nCNN Europe"),
+        "\n",
     )
     help_text_greek = md.text(
         md.bold("\n👇 -- Η λίστα με όλες τις εντολές -- 👇\n"),
@@ -183,6 +192,15 @@ class Text:
         "\n",
         md.escape_md("\n• /bbcsc"),
         md.escape_md("\nBBC Science"),
+        "\n",
+        md.escape_md("\n• /cnn"),
+        md.escape_md("\nCNN"),
+        "\n",
+        md.escape_md("\n• /cnnw"),
+        md.escape_md("\nCNN world"),
+        "\n",
+        md.escape_md("\n• /cnneu"),
+        md.escape_md("\nCNN Europe"),
         "\n",
     )
     to_search_next_page_eng = "Do you want to search the next page?"
