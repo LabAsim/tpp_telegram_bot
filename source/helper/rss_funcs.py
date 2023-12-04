@@ -39,6 +39,12 @@ urls = {
     "cnn": "http://rss.cnn.com/rss/cnn_latest.rss",
     "cnn_world": "http://rss.cnn.com/rss/edition_world.rss",
     "cnn_eu": "http://rss.cnn.com/rss/edition_europe.rss",
+    "dw": "http://rss.dw.com/rdf/rss-en-all",
+    "dweu": "http://rss.dw.com/rdf/rss-en-eu",
+    "dww": "http://rss.dw.com/rdf/rss-en-world",
+    "dwsc": "http://rss.dw.com/xml/rss_en_science",
+    "dwasia": "http://rss.dw.com/rdf/rss-en-asia",
+    "dwenv": "http://rss.dw.com/xml/rss_en_environment",
 }
 
 
@@ -83,7 +89,7 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "bbc_top_stories_international"
         case "bbc_europe" | "bbceurope" | "bbceu" | "bbce" | "ββψευ" | "ββσευ" | "ββψεθ":
             return "bbc_europe"
-        case "bbc_science" | "bbcscience" | "bbcsc" | "bbcs" |\
+        case "bbc_science" | "bbcscience" | "bbcsc" | "bbcs" | \
              "ββψσψ" | "ββσσψ" | "ββψσψ" | "ββσεπ":
             return "bbc_science"
         case "guardian_europe" | "guaeu" | "geu" | "γθεθ" | "γευ":
@@ -94,16 +100,16 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "guardian_world"
         case "reuters" | "reuter" | "reu" | "ρεθτερσ" | "ρευ" | "ρεθ":
             return "reuters"
-        case "reuters_int" | "reutersint" | "reuint" |\
+        case "reuters_int" | "reutersint" | "reuint" | \
              "ρεθτερσιντ" | "ρευιντ" | "ρεθιντ" | "ριντ" | "rint":
             return "reuters_int"
-        case "reuters_pol" | "reuterspol" | "reupol" |\
+        case "reuters_pol" | "reuterspol" | "reupol" | \
              "ρεθτερσπολ" | "ρευπολ" | "ρεθπολ" | "rpol" | "ρπολ":
             return "reuters_politics"
-        case "reuters_eu" | "reuterseu" | "reueu" |\
-            "ρεθτερσευ" | "ρευευ" | "ρεθευ" | "reur" | "ρευρ" | "ρεθρ":
+        case "reuters_eu" | "reuterseu" | "reueu" | \
+             "ρεθτερσευ" | "ρευευ" | "ρεθευ" | "reur" | "ρευρ" | "ρεθρ":
             return "reuters_europe"
-        case "reuters_news" | "reutersnews" | "reunews" |\
+        case "reuters_news" | "reutersnews" | "reunews" | \
              "ρεθτερσνιουζ" | "ρνιουζ" | "ρεθνιουζ" | "rnews" | "ρνιουζ":
             return "reuters_news"
         case "cnn":
@@ -112,6 +118,18 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "cnn_world"
         case "cnn_eu" | "cnneu" | "ψννεθ" | "ψννευ":
             return "cnn_eu"
+        case "dw" | "δς":
+            return "dw"
+        case "dweu" | "δςεθ" | "δςευ":
+            return "dweu"
+        case "dww" | "dwworld" | "δςς":
+            return "dww"
+        case "dwsc" | "dwscience" | "δς`σψ":
+            return "dww"
+        case "dwasia" | "dwas" | "δςασια" | "δςασ":
+            return "dwasia"
+        case "dwenv" | "δςενω" | "δςενβ":
+            return "dwenv"
         case _:
             raise ValueError(f"Unknown command passed {command=}")
         # fmt: on
