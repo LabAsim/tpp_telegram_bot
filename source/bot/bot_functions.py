@@ -78,7 +78,7 @@ def update_user(func: Callable) -> Callable[[tuple[Any, ...]], Coroutine[Any, An
     return wrapper
 
 
-@dp.message_handler(commands=["help"])
+@dp.message_handler(commands=["help", "χελπ", "ηελπ"])
 @update_user
 async def show_help(message: types.Message) -> None:
     """Shows the help message"""
