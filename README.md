@@ -1,5 +1,5 @@
 # tpp_telegram_bot
-A simple Telegram Bot for the TPP .
+A simple Telegram Bot for TPP and other greek news sites.
 
 The bot is hosted in [fly.io](https://fly.io/) or [pythonanywhere](https://www.pythonanywhere.com/) and the scraping script in [Apify](https://apify.com/).
 
@@ -59,5 +59,6 @@ Do not forget to donate monthly to [ThePressProject team](https://community.thep
 ## License
 
 ThePressProject Trademark, name and all of its content belong to the ThePressProject team.
+The same applies to the other news sites.
 The 3rd party packages have their own licenses.
 All the code written by me is released under the MIT license.
