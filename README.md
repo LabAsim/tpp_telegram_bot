@@ -17,6 +17,10 @@ Run `pip install -r requirements.txt` to install the dependencies.
 * Create a .py file:  `saved_tokens.py` which must contain the API keys as constants:
 `TOKEN_TELEGRAM_BOT`, `TOKEN_TELEGRAM_BOT_TEST`, `TOKEN_APIFY`
 
+* If you don't want to hard code the tokens into `saved_tokens.py`,
+you can set the tokens to environmental variables named as the constants above.
+In this case, do not create the `saved_tokens.py` at all.
+
 *   If you want to run the test bot, run `python main.py --test True` (default is `False`).
 
 ### Pythonanywhere
@@ -33,8 +37,8 @@ Open a powershell and type:
 
 *   `cd <path to your bot directory>`
 *   ``flyctl auth login``
-*   `fly launch` (Attach a Postgresql to the app)
-*   `fly deploy`
+*   `fly launch`
+*   `fly deploy` (use deploy to update the app if you have already launched it once)
 
 # Docker
 
