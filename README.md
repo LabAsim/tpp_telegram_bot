@@ -31,7 +31,7 @@ Upload the files in pythonanywhere, open a console and run sequently
 
 
 ### Fly.io
-Install [flyctl](#https://fly.io/docs/hands-on/install-flyctl/)
+Install [flyctl](https://fly.io/docs/hands-on/install-flyctl/)
 
 Open a powershell and type:
 
@@ -50,11 +50,18 @@ Run the bot locally:
 
 ``docker run -d tppbotapp``
 
+# Roadmap
+
+* [ ]  integrate **APSchedule**
+
+* [ ] Migrate to Aiogram 3.X
+
 
 
 ## Donate
 
-Do not forget to donate monthly to [ThePressProject team](https://community.thepressproject.gr/?lang=en). Recurrent monthly donation/funding is the only way for a truly independent journalism to exist.
+Do not forget to donate monthly to [ThePressProject team](https://community.thepressproject.gr/?lang=en).
+Recurrent monthly donation/funding is the only way for a truly independent journalism to exist.
 
 ## License
 
