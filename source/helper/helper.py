@@ -5,6 +5,7 @@ import argparse
 import asyncio
 import copy
 import dataclasses
+import inspect
 import logging
 import os.path
 import pathlib
@@ -140,3 +141,13 @@ class EnvVars:
     TOKEN_TELEGRAM_BOT = os.environ.get("TOKEN_TELEGRAM_BOT")
     TOKEN_TELEGRAM_BOT_TEST = os.environ.get("TOKEN_TELEGRAM_BOT_TEST")
     TOKEN_APIFY = os.environ.get("TOKEN_APIFY")
+
+
+def func_name(frame) -> str:
+    """Returns the name of the function passed"""
+    return inspect.getframeinfo(frame)[2]
+
+
+def log_func_name(thelogger: logging.getLogger, fun_name: str) -> None:
+    """Logs the name of the function"""
+    thelogger.info(f"\t{fun_name}() called\n")
