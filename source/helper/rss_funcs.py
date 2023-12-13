@@ -11,7 +11,9 @@ urls = {
     "naftemporiki": "http://www.naftemporiki.gr/rssFeed",
     "tovima": "http://www.tovima.gr/feed/",
     "meteogr": "http://www.meteo.gr/rss/news.cfm",
-    "ert": "http://www.ert.gr/feed/",
+    "ert_latest": "http://www.ert.gr/feed/",
+    # add /feed in the of each category to get the rss feed
+    "ert": "https://www.ertnews.gr/news/eidiseis/ellada/feed",
     "documento": "https://www.documentonews.gr/rss",
     "tpp": "https://thepressproject.gr/feed/rss/",
     "efsyn": "https://www.efsyn.gr/rss.xml",
@@ -71,6 +73,8 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "tovima"
         case "ert" | "ερτ":
             return "ert"
+        case "ertnews" | "ερτνεςσ" | "ερτνιουζ" | "ertlatest":
+            return "ert_latest"
         case "documento" | "ντοκουμεντο" | "docu" | "δοκυ" | "doc" | "δοκ" | "ντοκ":
             return "documento"
         case "tpp" | "τππ":
