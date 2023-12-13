@@ -1,14 +1,15 @@
 """Main module"""
 import logging
 import os
-
 import colorama
 from aiogram import Dispatcher
 from aiogram.utils import executor
 
 # from aiogram.enums import ParseMode https://github.com/aiogram/aiogram/blob/v3.0.0/examples/echo_bot.py
 import config
+
 from source.helper.helper import parse_arguments, color_logging
+from source.scheduler.funcs import start_scheduler_as_task
 
 # This is a hacky way to parse the variables and save the user's preference of DEBUG etc
 if __name__ == "__main__":
@@ -17,6 +18,7 @@ if __name__ == "__main__":
     config.DEBUG, config.MODE, config.TEST = DEBUG, MODE, TEST
     os.environ["dbpass"] = args.dbpass
 
+# These need to be here, otherwise the imports are messed up!
 from source.bot.bot_functions import dp
 
 colorama.init(convert=True)
@@ -32,9 +34,14 @@ def main(debug: bool, dp: Dispatcher) -> None:
     )  # Force is needed here to re config logging
 
     logging.info(f"DEBUG: {debug}, MODE: {MODE}, TEST: {TEST}")
-    executor.start_polling(dp, timeout=60)
+
+    executor.start_polling(
+        dispatcher=dp,
+        timeout=60,
+        on_startup=start_scheduler_as_task,
+        skip_updates=True,
+    )
 
 
 if __name__ == "__main__":
-    # asyncio.run(main(debug=True, dp=dp))
     main(debug=config.DEBUG, dp=dp)
