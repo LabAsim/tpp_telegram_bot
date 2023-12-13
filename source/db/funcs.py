@@ -47,7 +47,7 @@ def construct_database_url() -> str:
         host = "127.0.0.1"
         port = 5432
         user = "postgres"
-        database = "postgres"
+        database = os.environ.get("database", "postgres")
         password = os.environ.get("dbpass")
         os.environ["DATABASE_URL"] = f"postgres://{user}:{password}@{host}:{port}/{database}"
 
@@ -123,6 +123,9 @@ async def connect(message: types.Message) -> None:
 
 async def update_user_info(message: types.Message) -> None:
     """Updates the user's info"""
+    if not message:
+        # If there is no messages at all
+        return None
     id = int(message["from"]["id"])
     lang = "English"
     name = message["from"]["first_name"]
