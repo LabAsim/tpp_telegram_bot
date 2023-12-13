@@ -1,19 +1,17 @@
 """A module containing the Bot"""
 import asyncio
+import inspect
 import os
 import shutil
 import threading
 from functools import wraps
-
 import logging
 from typing import Coroutine, AsyncIterable, Callable, Any
 from aiogram import types, md, Dispatcher, utils
 from itertools import islice
-
 from asyncpg import NotNullViolationError
 
 import config
-
 import source.db.funcs
 from source.bot.apify_actor import (
     call_apify_actor,
@@ -26,6 +24,8 @@ from source.bot.commands_text import Text
 from source.helper.constants import rss_feed
 from source.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
 from source.helper.youtube_funcs import download_playlist, download_send
+from source.helper.helper import log_func_name, func_name
+from source.scheduler.funcs import schedule_rss_feed
 
 try:
     import saved_tokens
@@ -306,6 +306,7 @@ async def search_category(message: types.Message) -> None:
     """
     Scrapes the provided news category athletic_scraper/category-actor
     """
+    log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     logger.info(f"{message.from_user.first_name}: {message.text}")
     # Reset the counter
     settings_helper.page_number = 1
@@ -401,12 +402,19 @@ async def send_video(message: types.Message) -> None:
 
 @dp.message_handler(commands=rss_feed)
 @update_user
-async def send_rssfeed(message: types.Message) -> None:
+async def send_rssfeed(
+    message: types.Message = None, target_rss: str = None, chat_id: int = None
+) -> None:
     """Sends the fetched news from the rss feed"""
     # logger.info(f"{message.text}")
-    target = await parse_commands_for_rssfeed(message.text.strip("/"))
+    assert (message and target_rss) is None
+    if not message:
+        assert (target_rss and chat_id) is not None
+
+    target = target_rss if not message else message.text.strip("/")
+    target = await parse_commands_for_rssfeed(target)
     results = await fetch_news(target=target)
-    logger.debug(f"{results=}")
+    # logger.debug(f"{results=}")
     answer = md.text()
     for entry in results:
         title = entry.title
@@ -423,22 +431,36 @@ async def send_rssfeed(message: types.Message) -> None:
     markup = types.ReplyKeyboardRemove()
 
     try:
-        await message.reply(
-            answer,
-            reply_markup=markup,
-            disable_web_page_preview=True,
-            parse_mode=types.ParseMode.MARKDOWN_V2,
-        )
+        if message:
+            await message.reply(
+                answer,
+                reply_markup=markup,
+                disable_web_page_preview=True,
+                parse_mode=types.ParseMode.MARKDOWN_V2,
+            )
+        else:
+            await bot.send_message(
+                chat_id=chat_id,
+                text=answer,
+                disable_web_page_preview=True,
+                parse_mode=types.ParseMode.MARKDOWN_V2,
+            )
     except (utils.exceptions.MessageIsTooLong, utils.exceptions.BadRequest, Exception) as err:
         logger.warning(
             f"{len(results)=} {len(answer)=}"
             f"\n{err=}"
             f"\nAttempting to send chunks of the rss feed"
         )
-        await send_chunks_rssfeed(results=results, message=message)
+        await send_chunks_rssfeed(
+            results=results,
+            message=message,
+            chat_id=chat_id,
+        )
 
 
-async def send_chunks_rssfeed(results: list, message: types.Message, size: int = 10) -> None:
+async def send_chunks_rssfeed(
+    results: list, message: types.Message, size: int = 10, chat_id: int = None
+) -> None:
     """Sends chunks of the rssfeed"""
 
     async def chunks(data: list, size: int) -> AsyncIterable[list]:
@@ -461,16 +483,34 @@ async def send_chunks_rssfeed(results: list, message: types.Message, size: int =
                 sep="\n",
             )
         markup = types.ReplyKeyboardRemove()
-        await message.reply(
-            answer,
-            reply_markup=markup,
-            disable_web_page_preview=True,
-            parse_mode=types.ParseMode.MARKDOWN_V2,
-        )
+        if message:
+            await message.reply(
+                answer,
+                reply_markup=markup,
+                disable_web_page_preview=True,
+                parse_mode=types.ParseMode.MARKDOWN_V2,
+            )
+        else:
+            await bot.send_message(
+                chat_id=chat_id,
+                text=answer,
+                disable_web_page_preview=True,
+                parse_mode=types.ParseMode.MARKDOWN_V2,
+            )
+
+
+@dp.message_handler(commands=["schedule", "sch"])
+@update_user
+async def schedule(message: types.Message):
+    log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+    chat_id = message["from"]["id"]
+    target_rss = await parse_commands_for_rssfeed(message.text.strip("/").strip("schedule").strip())
+    await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss)
 
 
 @dp.message_handler(lambda message: message.text)
 @update_user
 async def random_text(message: types.Message) -> None:
     """Just to update the user's info, if anything is sent to the bot"""
+    log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     pass
