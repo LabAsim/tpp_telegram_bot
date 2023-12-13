@@ -10,4 +10,4 @@ validators~=0.22.0
 asyncpg~=0.29.0
 SQLAlchemy~=2.0.23
 pytube~=15.0.0
-APScheduler~=4.0.0a4.post30
+APScheduler @ git+https://github.com/agronholm/apscheduler.git
