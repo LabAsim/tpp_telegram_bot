@@ -503,8 +503,12 @@ async def send_chunks_rssfeed(
 @update_user
 async def schedule(message: types.Message):
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+    logger.info(f"{message.text=}")
     chat_id = message["from"]["id"]
-    target_rss = await parse_commands_for_rssfeed(message.text.strip("/").strip("schedule").strip())
+    target_rss = message.text.strip("/").replace("schedule", "").replace("sch", "").strip()
+    logger.info(f"{target_rss=}")
+    target_rss = await parse_commands_for_rssfeed(target_rss)
+
     await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss)
 
 
