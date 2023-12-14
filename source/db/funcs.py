@@ -178,4 +178,18 @@ async def fetch_lang(message: types.Message) -> asyncpg.Record:
     rows = await conn.fetch("""SELECT lang FROM users WHERE users.id = $1;""", id)
 
     logger.debug(rows)
+
     return rows[0]
+
+
+async def fetch_schedule(message: types.Message) -> list[asyncpg.Record]:
+    """Fetches the schedule of the user (based on `id.`)"""
+    chat_id = str(message["from"]["id"])
+    chat_id_with_dot = chat_id + "."  # This distinguishes the user id from schedule id
+    database_url = construct_database_url()
+    conn = await asyncpg.connect(dsn=database_url)
+    rows = await conn.fetch(
+        """SELECT * FROM schedules WHERE schedules.id LIKE  $1 || '%' ;""", chat_id_with_dot
+    )
+    logger.debug(rows)
+    return rows
