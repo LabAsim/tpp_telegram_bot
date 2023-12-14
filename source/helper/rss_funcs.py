@@ -19,6 +19,8 @@ urls = {
     "efsyn": "https://www.efsyn.gr/rss.xml",
     "kontra": "http://eksegersi.gr/?feed=rss2",
     "prin": "https://prin.gr/feed",
+    # reporters_united has 1 rss feed
+    "reporters_united": "https://www.reportersunited.gr/feed/",
     "bbc_top_stories": "http://feeds.bbci.co.uk/news/rss.xml",  # not implemented
     "bbc_top_stories_international": "http://feeds.bbci.co.uk/news/rss.xml?edition=int",
     "bbc_world": "http://feeds.bbci.co.uk/news/world/rss.xml",
@@ -83,6 +85,10 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "kontra"
         case "prin" | "πριν":
             return "prin"
+        case "ru" | "repun" | "reportersunited" | "reporters_united" | "ρθ" | "ρυ":
+            return "reporters_united"
+        case "rurepo" | "rur" | "ρθρ" | "ρυρ" | "reporters_united_reportage":
+            return "reporters_united"  # reportage is the same rss feed as above
         case "bbc_world" | "bbcworld" | "bbcw" | "bbcwo" | "ββψ" | "ββσ" | "ββψγ":
             return "bbc_world"
         # Use of fmt is crucial here
