@@ -11,7 +11,7 @@ import os.path
 import pathlib
 import colorama
 from functools import wraps, partial
-from typing import Union, Callable
+from typing import Union, Callable, Iterable, Any, AsyncIterator
 
 
 def parse_arguments() -> argparse.ArgumentParser.parse_args:
@@ -151,3 +151,9 @@ def func_name(frame) -> str:
 def log_func_name(thelogger: logging.getLogger, fun_name: str) -> None:
     """Logs the name of the function"""
     thelogger.info(f"\t{fun_name}() called\n")
+
+
+async def convert_iterable_to_async_iterator(iterable: Iterable[Any]) -> AsyncIterator[Any]:
+    """Converts any iterable to Async iterator"""
+    for i in iterable:
+        yield i
