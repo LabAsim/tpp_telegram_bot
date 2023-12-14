@@ -18,6 +18,7 @@ from source.bot.apify_actor import (
     synthesize_url,
     convert_category_str_to_url,
 )
+from source.db.funcs import fetch_schedule
 from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
@@ -25,7 +26,7 @@ from source.helper.constants import rss_feed
 from source.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
 from source.helper.youtube_funcs import download_playlist, download_send
 from source.helper.helper import log_func_name, func_name
-from source.scheduler.funcs import schedule_rss_feed
+from source.scheduler.funcs import schedule_rss_feed, get_my_schedules
 
 try:
     import saved_tokens
@@ -510,6 +511,19 @@ async def schedule(message: types.Message):
     target_rss = await parse_commands_for_rssfeed(target_rss)
 
     await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss)
+
+
+@dp.message_handler(commands=["mysch", "myschedule", "μυσψη"])
+@update_user
+async def my_schedule(message: types.Message) -> None:
+    log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+    myschedule_records = await fetch_schedule(message=message)
+    logger.info(f"{myschedule_records=}")
+    my_sched = get_my_schedules(myschedule_records)
+    logger.info(f"{my_sched=}")
+    async for _schedule in my_sched:
+        b = await _schedule
+        logger.info(f"{b=}")
 
 
 @dp.message_handler(lambda message: message.text)
