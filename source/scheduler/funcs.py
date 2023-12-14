@@ -5,13 +5,15 @@ import logging
 import os
 import traceback
 from datetime import datetime, timezone, timedelta
+from typing import Any, AsyncGenerator, Coroutine
+from uuid import uuid4
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from apscheduler import AsyncScheduler
 from apscheduler.datastores.sqlalchemy import SQLAlchemyDataStore
 from apscheduler.triggers.interval import IntervalTrigger
 
 from source.db.funcs import construct_database_url
-from source.helper.helper import log_func_name, func_name
+from source.helper.helper import log_func_name, func_name, convert_iterable_to_async_iterator
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +94,20 @@ async def schedule_rss_feed(chat_id: str | int, target_rss: str) -> None:
                     seconds=20,
                     start_time=datetime.now(timezone.utc),
                 ),
-                misfire_grace_time=10
-                # id=f"{str(uuid4())}"
+                misfire_grace_time=10,
+                id=f"{chat_id}.{str(uuid4())}",
             )
-
     except Exception:
         logger.warning(traceback.print_exc())
+
+
+async def get_my_schedules(schedule_ids: list[Any]) -> AsyncGenerator[Coroutine]:
+    """Fetches the schedules info from the db"""
+    engine = create_async_engine(
+        construct_database_url().replace("postgres://", "postgresql+asyncpg://")
+    )
+    data_store = SQLAlchemyDataStore(engine)
+
+    async with AsyncScheduler(data_store) as scheduler:
+        async for schedule_id in convert_iterable_to_async_iterator(schedule_ids):
+            yield scheduler.get_schedule(id=schedule_id["id"])
