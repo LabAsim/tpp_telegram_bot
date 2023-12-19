@@ -4,11 +4,15 @@ import inspect
 import os
 import shutil
 import threading
+from datetime import datetime, timezone
 from functools import wraps
 import logging
 from typing import Coroutine, AsyncIterable, Callable, Any
 from aiogram import types, md, Dispatcher, utils
 from itertools import islice
+
+from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 from asyncpg import NotNullViolationError
 
 import config
@@ -18,7 +22,7 @@ from source.bot.apify_actor import (
     synthesize_url,
     convert_category_str_to_url,
 )
-from source.db.funcs import fetch_schedule
+from source.db.funcs import fetch_schedule, delete_target_schedule
 from source.bot.bot_dispatcher import choose_token, botify
 from source.bot.botvalues import BotHelper
 from source.bot.commands_text import Text
@@ -503,14 +507,27 @@ async def send_chunks_rssfeed(
 @dp.message_handler(commands=["schedule", "sch"])
 @update_user
 async def schedule(message: types.Message):
+    """Saves the schedule for the target rss site"""
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     logger.info(f"{message.text=}")
     chat_id = message["from"]["id"]
-    target_rss = message.text.strip("/").replace("schedule", "").replace("sch", "").strip()
+    logger.info(f"{message=}")
+    # target_rss = message.text.strip("/").replace("schedule", "").replace("sch", "").strip()
+    # Example: "/sch ert 1"
+    message_split = message.text.split(" ")
+    target_rss = message_split[1]
     logger.info(f"{target_rss=}")
     target_rss = await parse_commands_for_rssfeed(target_rss)
-
-    await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss)
+    trigger = None
+    try:
+        day = int(message_split[2])
+        trigger = IntervalTrigger(
+            days=day,
+            start_time=datetime.now(timezone.utc),
+        )
+    except ValueError:
+        trigger = CronTrigger(day_of_week=message_split[2])
+    await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss, trigger_target=trigger)
 
 
 @dp.message_handler(commands=["mysch", "myschedule", "μυσψη"])
@@ -518,12 +535,89 @@ async def schedule(message: types.Message):
 async def my_schedule(message: types.Message) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     myschedule_records = await fetch_schedule(message=message)
-    logger.info(f"{myschedule_records=}")
     my_sched = get_my_schedules(myschedule_records)
-    logger.info(f"{my_sched=}")
+    chat_id = message["from"]["id"]
+    lang = await source.db.funcs.fetch_lang(message=message)
+    # No schedules, return to break the flow of the func
+    if len(myschedule_records) == 0:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=md.escape_md(
+                "You have not any saved schedules"
+                if lang == "English"
+                else "Δεν υπάρχουν προγραμματισμένες αποστολές ειδήσεων"
+            ),
+            disable_web_page_preview=True,
+            parse_mode=types.ParseMode.MARKDOWN_V2,
+        )
+        return None
     async for _schedule in my_sched:
         b = await _schedule
         logger.info(f"{b=}")
+        logger.info(f"{b.id=}")
+        if isinstance(b.trigger, CronTrigger):
+            # Example:
+            # CronTrigger(year='*', month='*', day='*', week='*', day_of_week='
+            # mon-fri', hour='0', minute='0', second='0',
+            # start_time='2023-12-19T20:27:28.333450+02:00', timezone='Europe/Bucharest')
+            answer = f"id: {b.id}\n"
+            answer += (
+                f"category: {b.args[1]}\n Schedule news every \n"
+                if lang == "English"
+                else f"Κατηγορία ειδήσεων: {b.args[1]}\n Προγραμματισμένη αποστολή κάθε: \n"
+            )
+            answer += f"{b.trigger._fields[4]}"
+        else:
+            # IntervalTrigger
+            answer = f"id: {b.id}\n"
+            answer += (
+                f"category: {(b.args[1])}\n"
+                f"Schedule news every \n"
+                f"{b.trigger.weeks} weeks | "
+                f"{b.trigger.days} days | "
+                f"{b.trigger.hours} hours"
+                if lang == "English"
+                else f"Κατηγορία ειδήσεων: {b.args[1]}\n"
+                f"Προγραμματισμένη αποστολή κάθε: \n"
+                f"{b.trigger.weeks} εβδομάδες | "
+                f"{b.trigger.days} μέρες | "
+                f"{b.trigger.hours} ώρες"
+            )
+        await bot.send_message(
+            chat_id=chat_id,
+            text=md.escape_md(answer),
+            disable_web_page_preview=True,
+            parse_mode=types.ParseMode.MARKDOWN_V2,
+        )
+
+
+@dp.message_handler(commands=["del", "delete", "δελ", "δελε", "δελετε"])
+@update_user
+async def del_schedule(message: types.Message) -> None:
+    """
+    Deletes the schedule based on the id that exists in the reply message
+    """
+    log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+    if message.__getitem__("reply_to_message"):
+        target_id = message["reply_to_message"]["text"]
+        target_id = target_id.split("\ncategory")
+        target_id = target_id[0].replace("id:", "").strip()
+        await delete_target_schedule(target_id=target_id)
+        logger.debug(f"Schedule was deleted ({target_id=})")
+
+
+@dp.message_handler(commands=["delall", "deleteall", "δελαλλ", "δελεαλλ", "δελετεαλλ"])
+@update_user
+async def del_all_schedules(message: types.Message) -> None:
+    """Deletes every saved schedules of the user"""
+    myschedule_records = await fetch_schedule(message=message)
+    # logger.info(f"{myschedule_records=}")
+    my_sched = get_my_schedules(myschedule_records)
+    async for _schedule in my_sched:
+        b = await _schedule
+        target_id = b.id
+        await delete_target_schedule(target_id=target_id)
+        logger.debug(f"Schedule was deleted ({target_id=})")
 
 
 @dp.message_handler(lambda message: message.text)
