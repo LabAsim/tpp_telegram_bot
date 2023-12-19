@@ -89,7 +89,7 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "reporters_united"
         case "rurepo" | "rur" | "ρθρ" | "ρυρ" | "reporters_united_reportage":
             return "reporters_united"  # reportage is the same rss feed as above
-        case "bbc_world" | "bbcworld" | "bbcw" | "bbcwo" | "ββψ" | "ββσ" | "ββψγ":
+        case "bbc_world" | "bbcworld" | "bbcw" | "bbcwo" | "ββψ" | "ββσ" | "ββψγ" | "bbc":
             return "bbc_world"
         # Use of fmt is crucial here
         # as black unwraps the two lines and ruff points to a too long line
