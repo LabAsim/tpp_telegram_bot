@@ -109,6 +109,7 @@ rss_feed = [
     "bbcworld",
     "bbcw",
     "bbcwo",
+    "bbc",
     "ββψ",
     "ββσ",
     "ββψγ",
