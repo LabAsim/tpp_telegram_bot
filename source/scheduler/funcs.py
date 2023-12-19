@@ -4,9 +4,11 @@ import inspect
 import logging
 import os
 import traceback
-from datetime import datetime, timezone, timedelta
-from typing import Any, AsyncGenerator, Coroutine
+from datetime import timedelta
+from typing import Any, AsyncGenerator
 from uuid import uuid4
+
+from apscheduler.triggers.cron import CronTrigger
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from apscheduler import AsyncScheduler
 from apscheduler.datastores.sqlalchemy import SQLAlchemyDataStore
@@ -75,14 +77,14 @@ async def schedule_target_rss_feed(chat_id: int, target_rss: str) -> None:
     await send_rssfeed(message=None, chat_id=chat_id, target_rss=target_rss)
 
 
-async def schedule_rss_feed(chat_id: str | int, target_rss: str) -> None:
+async def schedule_rss_feed(
+    chat_id: str | int, target_rss: str, trigger_target: CronTrigger | IntervalTrigger
+) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
-    os.environ["database"] = "postgres"
-    os.environ["dbpass"] = "Abcd1234"
     engine = create_async_engine(
         construct_database_url().replace("postgres://", "postgresql+asyncpg://")
     )
-    print(engine.engine)
+    logger.debug(f"postgres engine: {engine.engine}")
     data_store = SQLAlchemyDataStore(engine)
 
     try:
@@ -90,18 +92,14 @@ async def schedule_rss_feed(chat_id: str | int, target_rss: str) -> None:
             await scheduler.add_schedule(
                 func_or_task_id=schedule_target_rss_feed,
                 args=[chat_id, target_rss],
-                trigger=IntervalTrigger(
-                    seconds=20,
-                    start_time=datetime.now(timezone.utc),
-                ),
-                misfire_grace_time=10,
+                trigger=trigger_target,
                 id=f"{chat_id}.{str(uuid4())}",
             )
     except Exception:
         logger.warning(traceback.print_exc())
 
 
-async def get_my_schedules(schedule_ids: list[Any]) -> AsyncGenerator[Coroutine]:
+async def get_my_schedules(schedule_ids: list[Any]) -> AsyncGenerator:
     """Fetches the schedules info from the db"""
     engine = create_async_engine(
         construct_database_url().replace("postgres://", "postgresql+asyncpg://")
