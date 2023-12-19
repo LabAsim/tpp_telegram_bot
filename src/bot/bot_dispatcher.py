@@ -3,7 +3,7 @@ from aiogram import Bot, types
 try:
     import saved_tokens
 except ModuleNotFoundError:
-    from source.helper.helper import EnvVars as saved_tokens
+    from src.helper.helper import EnvVars as saved_tokens
 
 
 def botify(

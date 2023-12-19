@@ -8,8 +8,8 @@ from aiogram.utils import executor
 # from aiogram.enums import ParseMode https://github.com/aiogram/aiogram/blob/v3.0.0/examples/echo_bot.py
 import config
 
-from source.helper.helper import parse_arguments, color_logging
-from source.scheduler.funcs import start_scheduler_as_task
+from src.helper.helper import parse_arguments, color_logging
+from src.scheduler.funcs import start_scheduler_as_task
 
 # This is a hacky way to parse the variables and save the user's preference of DEBUG etc
 if __name__ == "__main__":
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     os.environ["dbpass"] = args.dbpass
 
 # These need to be here, otherwise the imports are messed up!
-from source.bot.bot_functions import dp
+from src.bot.bot_functions import dp
 
 colorama.init(convert=True)
 

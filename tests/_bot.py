@@ -2,9 +2,9 @@
 import unittest
 from apify_actor.main import SearchTerm
 from unittest.mock import AsyncMock, patch
-from source.bot.apify_actor import synthesize_url, convert_category_str_to_url
+from src.bot.apify_actor import synthesize_url, convert_category_str_to_url
 from apify_actor.category_actor import CategoryScraper, _header
-from source.bot.bot_functions import (
+from src.bot.bot_functions import (
     save_language,
     to_search_next_page,
     search_next_page,
@@ -17,7 +17,7 @@ from source.bot.bot_functions import (
     settings_helper,
 )
 from aiogram import md, types
-from source.bot.commands_text import Text
+from src.bot.commands_text import Text
 
 
 class TestBot(unittest.IsolatedAsyncioTestCase):

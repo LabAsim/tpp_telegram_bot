@@ -6,7 +6,7 @@ import time
 import colorama
 import pytube
 from aiogram import types
-from source.helper.helper import wrap_as_async
+from src.helper.helper import wrap_as_async
 
 logger = logging.getLogger(__name__)
 

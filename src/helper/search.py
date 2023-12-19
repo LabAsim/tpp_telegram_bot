@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from typing import Union
-from source.helper.newsdataclass import NewsDataclass
+from src.helper.newsdataclass import NewsDataclass
 
 
 class SearchTerm:

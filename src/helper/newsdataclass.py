@@ -4,7 +4,6 @@ import time
 import unicodedata
 from datetime import datetime, timedelta
 from typing import Any, Union
-from source.helper.helper import trace_error
 
 
 @dataclasses.dataclass
@@ -29,9 +28,7 @@ class NewsDataclass:
         try:
             self.date_unix = NewsDataclass.date_to_unix(self.date)
         except (Exception, ValueError, IndexError):
-            # To avoid tracing errors from search.py. Timestamps are irrelevant for the purpose of SearchTerm class.
-            if self.debug:
-                trace_error()
+            pass
         # Strip unnecessary characters
         try:
             self.main_content = self.strip_ansi_characters(self.main_content)
@@ -39,8 +36,7 @@ class NewsDataclass:
             self.author = self.strip_ansi_characters(self.author)
             self.author_url = self.strip_ansi_characters(self.author_url)
         except Exception:
-            if self.debug:
-                trace_error()
+            raise
         # Lower first letters
         self.category = self.category.lower()
 

@@ -14,8 +14,8 @@ from apscheduler import AsyncScheduler
 from apscheduler.datastores.sqlalchemy import SQLAlchemyDataStore
 from apscheduler.triggers.interval import IntervalTrigger
 
-from source.db.funcs import construct_database_url
-from source.helper.helper import log_func_name, func_name, convert_iterable_to_async_iterator
+from src.db.funcs import construct_database_url
+from src.helper.helper import log_func_name, func_name, convert_iterable_to_async_iterator
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ async def start_scheduler_as_task(aiogram_dispatcher=None) -> None:
 async def schedule_target_rss_feed(chat_id: int, target_rss: str) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     # To avoid circular imports
-    from source.bot.bot_functions import send_rssfeed
+    from src.bot.bot_functions import send_rssfeed
 
     await send_rssfeed(message=None, chat_id=chat_id, target_rss=target_rss)
 

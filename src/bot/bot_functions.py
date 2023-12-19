@@ -16,26 +16,26 @@ from apscheduler.triggers.interval import IntervalTrigger
 from asyncpg import NotNullViolationError
 
 import config
-import source.db.funcs
-from source.bot.apify_actor import (
+import src.db.funcs
+from src.bot.apify_actor import (
     call_apify_actor,
     synthesize_url,
     convert_category_str_to_url,
 )
-from source.db.funcs import fetch_schedule, delete_target_schedule
-from source.bot.bot_dispatcher import choose_token, botify
-from source.bot.botvalues import BotHelper
-from source.bot.commands_text import Text
-from source.helper.constants import rss_feed
-from source.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
-from source.helper.youtube_funcs import download_playlist, download_send
-from source.helper.helper import log_func_name, func_name
-from source.scheduler.funcs import schedule_rss_feed, get_my_schedules
+from src.db.funcs import fetch_schedule, delete_target_schedule
+from src.bot.bot_dispatcher import choose_token, botify
+from src.bot.botvalues import BotHelper
+from src.bot.commands_text import Text
+from src.helper.constants import rss_feed
+from src.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
+from src.helper.youtube_funcs import download_playlist, download_send
+from src.helper.helper import log_func_name, func_name
+from src.scheduler.funcs import schedule_rss_feed, get_my_schedules
 
 try:
     import saved_tokens
 except ModuleNotFoundError:
-    from source.helper.helper import EnvVars as saved_tokens
+    from src.helper.helper import EnvVars as saved_tokens
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +67,13 @@ def update_user(func: Callable) -> Callable[[tuple[Any, ...]], Coroutine[Any, An
                 # logger.debug(f"{args=}")
                 # logger.debug(f'{kwargs.get("message")=}')
                 # logger.info(type(args[0]))
-                await source.db.funcs.update_user_info(message=args[0])
+                await src.db.funcs.update_user_info(message=args[0])
                 return await func(*args)
             else:
                 # Decorator with arguments
                 logger.debug("Decorator called with arguments")
                 # logger.debug(f"{args=}\n{kwargs=}")
-                await source.db.funcs.update_user_info(message=kwargs.get("message"))
+                await src.db.funcs.update_user_info(message=kwargs.get("message"))
                 return await func(*args, **kwargs)
 
         except (Exception, NotNullViolationError, RuntimeWarning, IndexError) as err:
@@ -87,7 +87,7 @@ def update_user(func: Callable) -> Callable[[tuple[Any, ...]], Coroutine[Any, An
 @update_user
 async def show_help(message: types.Message) -> None:
     """Shows the help message"""
-    lang = await source.db.funcs.fetch_lang(message=message)
+    lang = await src.db.funcs.fetch_lang(message=message)
     lang = lang.get("lang")
     if lang == "English":
         answer = Text.help_text_eng
@@ -104,7 +104,7 @@ async def show_help(message: types.Message) -> None:
 async def save_user(message: types.Message) -> None:
     """Saves the user's name and lang preference"""
 
-    await source.db.funcs.connect(message=message)
+    await src.db.funcs.connect(message=message)
     await show_help(message=message)
 
 
@@ -182,7 +182,7 @@ async def to_search_next_page(message: types.Message) -> None:
     # Configure ReplyKeyboardMarkup
     logger.info("to_search_next_page called")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-    lang = await source.db.funcs.fetch_lang(message=message)
+    lang = await src.db.funcs.fetch_lang(message=message)
     logger.info(f"{lang=}")
     if lang == "English":
         markup.add("Yes 🆗", "No 👎")
@@ -198,7 +198,7 @@ async def to_search_next_page(message: types.Message) -> None:
 async def search_next_page(message: types.Message) -> None:
     """Searches the next page"""
 
-    lang = await source.db.funcs.fetch_lang(message=message)
+    lang = await src.db.funcs.fetch_lang(message=message)
     # Check if the keyword is empty and the page number is 1.
     # If True, then prompt to search something first and stop the function.
     if settings_helper.search_keyword == "" and settings_helper.page_number == 1:
@@ -273,7 +273,7 @@ async def end_search(message: types.Message):
     Removes the keyboard and inform the user that the search was ended.
     """
     markup = types.ReplyKeyboardRemove()
-    lang = await source.db.funcs.fetch_lang(message=message)
+    lang = await src.db.funcs.fetch_lang(message=message)
     if settings_helper.search_keyword != "":
         if lang == "English":
             await message.answer(
@@ -537,7 +537,7 @@ async def my_schedule(message: types.Message) -> None:
     myschedule_records = await fetch_schedule(message=message)
     my_sched = get_my_schedules(myschedule_records)
     chat_id = message["from"]["id"]
-    lang = await source.db.funcs.fetch_lang(message=message)
+    lang = await src.db.funcs.fetch_lang(message=message)
     # No schedules, return to break the flow of the func
     if len(myschedule_records) == 0:
         await bot.send_message(

@@ -157,7 +157,7 @@ if __name__ == "__main__":
     try:
         import saved_tokens
     except ModuleNotFoundError:
-        from source.helper.helper import EnvVars as saved_tokens
+        from src.helper.helper import EnvVars as saved_tokens
     url = synthesize_url(keyword="ΒΙΟΜΕ")
     results = call_apify_actor(
         url="https://thepressproject.gr/article_type/radio",

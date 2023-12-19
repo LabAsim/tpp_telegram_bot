@@ -4,8 +4,8 @@ Tests for the apify_actor.py
 import unittest
 import validators
 
-from source.helper.helper import EnvVars
-from source.bot.apify_actor import (
+from src.helper.helper import EnvVars
+from src.bot.apify_actor import (
     convert_category_str_to_url,
     synthesize_url,
     call_apify_actor,
