@@ -449,6 +449,7 @@ async def send_rssfeed(
                 text=answer,
                 disable_web_page_preview=True,
                 parse_mode=types.ParseMode.MARKDOWN_V2,
+                reply_markup=markup,
             )
     except (utils.exceptions.MessageIsTooLong, utils.exceptions.BadRequest, Exception) as err:
         logger.warning(
@@ -501,6 +502,7 @@ async def send_chunks_rssfeed(
                 text=answer,
                 disable_web_page_preview=True,
                 parse_mode=types.ParseMode.MARKDOWN_V2,
+                reply_markup=markup,
             )
 
 
@@ -520,7 +522,8 @@ async def schedule(message: types.Message):
     target_rss = await parse_commands_for_rssfeed(target_rss)
     trigger = None
     try:
-        day = int(message_split[2])
+        # Default 1 day
+        day = int(message_split[2] if len(message_split) > 2 else 1)
         trigger = IntervalTrigger(
             days=day,
             start_time=datetime.now(timezone.utc),
@@ -534,6 +537,7 @@ async def schedule(message: types.Message):
 @update_user
 async def my_schedule(message: types.Message) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+    markup = types.ReplyKeyboardRemove()
     myschedule_records = await fetch_schedule(message=message)
     my_sched = get_my_schedules(myschedule_records)
     chat_id = message["from"]["id"]
@@ -549,6 +553,7 @@ async def my_schedule(message: types.Message) -> None:
             ),
             disable_web_page_preview=True,
             parse_mode=types.ParseMode.MARKDOWN_V2,
+            reply_markup=markup,
         )
         return None
     async for _schedule in my_sched:
@@ -588,6 +593,7 @@ async def my_schedule(message: types.Message) -> None:
             text=md.escape_md(answer),
             disable_web_page_preview=True,
             parse_mode=types.ParseMode.MARKDOWN_V2,
+            reply_markup=markup,
         )
 
 
