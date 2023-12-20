@@ -80,8 +80,10 @@ async def schedule_target_rss_feed(chat_id: int, target_rss: str) -> None:
 async def schedule_rss_feed(
     chat_id: str | int, target_rss: str, trigger_target: CronTrigger | IntervalTrigger
 ) -> None:
-    """Adds the proposed rss schedule to the database. The id of the schedule is composed by a random number and
-    the user's id"""
+    """
+    Adds the proposed rss schedule to the database.
+    The id of the schedule is composed by a random number and the user's id.
+    """
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     engine = create_async_engine(
         construct_database_url().replace("postgres://", "postgresql+asyncpg://")
