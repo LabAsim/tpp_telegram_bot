@@ -92,11 +92,14 @@ async def show_help(message: types.Message) -> None:
     if lang == "English":
         answer = Text.help_text_eng
         answer2 = Text.help_text_eng2
+        answer3 = Text.help_text_eng3
     else:
         answer = Text.help_text_greek
         answer2 = Text.help_text_greek2
+        answer3 = Text.help_text_greek3
     await message.answer(answer)
     await message.answer(answer2)
+    await message.answer(answer3)
 
 
 @dp.message_handler(lambda message: message.text in ("English 👍", "Greek 🤝"))
@@ -108,7 +111,7 @@ async def save_user(message: types.Message) -> None:
     await show_help(message=message)
 
 
-@dp.message_handler(commands=["lang", "language", "start"])
+@dp.message_handler(commands=["lang", "language", "start", "λανγ"])
 @update_user
 async def choose_language(message: types.message) -> None:
     """Choose and saves the language preference of the user"""

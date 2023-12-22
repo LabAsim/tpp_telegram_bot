@@ -21,8 +21,6 @@ if __name__ == "__main__":
 # These need to be here, otherwise the imports are messed up!
 from src.bot.bot_functions import dp
 
-colorama.init(convert=True)
-
 
 def main(debug: bool, dp: Dispatcher) -> None:
     level = logging.DEBUG if debug else logging.INFO
@@ -32,7 +30,7 @@ def main(debug: bool, dp: Dispatcher) -> None:
         force=True,
         handlers=[console],
     )  # Force is needed here to re config logging
-
+    colorama.init(convert=True)
     logging.info(f"DEBUG: {debug}, MODE: {MODE}, TEST: {TEST}")
 
     executor.start_polling(
