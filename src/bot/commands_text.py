@@ -128,6 +128,30 @@ class Text:
         md.escape_md("\nDW Enviroment"),
         "\n",
     )
+    help_text_eng3 = md.text(
+        md.bold("👇 -- Schedule your news -- 👇\n"),
+        md.escape_md("\n• /sch <news command> <interval in days>"),
+        md.escape_md("\nExample: /sch ert 1"),
+        md.escape_md("\n(you will get news every day)"),
+        "\n",
+        md.escape_md("\n• /sch <news command> <days>"),
+        md.escape_md("\nvalid days: mon, tue, wed, thu, fri, sat, sun"),
+        md.escape_md("\nExample: /sch ert mon-fri"),
+        md.escape_md("\n(you will get news from ert from Monday to Friday)"),
+        "\n",
+        md.escape_md("\n• /mysch"),
+        "\n",
+        "Get all your schedules" "\n",
+        md.escape_md("\n• /delall"),
+        "\n",
+        "Deletes ALL your schedules",
+        "\n",
+        md.escape_md("\n• /del"),
+        md.escape_md("\nDeletes a schedule."),
+        md.escape_md(
+            "\n(Works only if you reply at a message containing a particular schedule from /mysch)"
+        ),
+    )
     help_text_greek = md.text(
         md.bold("\n👇 -- Η λίστα με όλες τις εντολές -- 👇\n"),
         "\n• /search ή /s ",
@@ -244,6 +268,30 @@ class Text:
         md.escape_md("\n• /dwenv"),
         md.escape_md("\nDW Enviroment"),
         "\n",
+    )
+    help_text_greek3 = md.text(
+        md.bold("👇 -- Φτιάξε το πρόγραμμά σου -- 👇\n"),
+        md.escape_md("\n• /sch <εντολή είδησης> <διάστημα σε ημέρες>"),
+        md.escape_md("\nΠαράδειγμα: /sch ert 1"),
+        md.escape_md("\n(θα λαμβάνετε ειδήσεις της ερτ κάθε 1 ημέρα)"),
+        "\n",
+        md.escape_md("\n• /sch <εντολή είδησης> <ονόματα ημερών>"),
+        md.escape_md("\nΑποδεκτά ονόματα: mon, tue, wed, thu, fri, sat, sun"),
+        md.escape_md("\nΠαράδειγμα: /sch ert mon-fri"),
+        md.escape_md("\n(Θα λαμβάνετε ειδήσεις της ερτ από Δευτέρα έως Παρασκευή)"),
+        "\n",
+        md.escape_md("\n• /mysch"),
+        "\n",
+        "Δείτε το πρόγραμμά σας" "\n",
+        md.escape_md("\n• /delall"),
+        "\n",
+        "Διαγράψτε ό,τι έχετε προγραμματίσει",
+        "\n",
+        md.escape_md("\n• /del"),
+        md.escape_md("\nΔιαγράψτε μια συγκεκριμένη κατηγορία ειδήσεων"),
+        md.escape_md(
+            "\n(δουλεύει μόνο αν απαντήσετε (reply) σε μήνυμα που περιέχει ένα πρόγραμμα από το /mysch)"
+        ),
     )
     to_search_next_page_eng = "Do you want to search the next page?"
     to_search_next_page_greek = "Θέλετε να συνεχίσετε την αναζήτηση στην επόμενη σελίδα;"
