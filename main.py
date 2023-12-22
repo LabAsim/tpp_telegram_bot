@@ -2,6 +2,13 @@
 import logging
 import os
 import colorama
+
+if __name__ == "__main__":
+    # Set a different level for imported modules
+    # See: https://stackoverflow.com/a/51529172
+    logging.getLogger("aiogram").setLevel(logging.WARNING)
+    logging.getLogger("apscheduler._schedulers.async_").setLevel(logging.WARNING)
+
 from aiogram import Dispatcher
 from aiogram.utils import executor
 
@@ -10,6 +17,7 @@ import config
 
 from src.helper.helper import parse_arguments, color_logging
 from src.scheduler.funcs import start_scheduler_as_task
+
 
 # This is a hacky way to parse the variables and save the user's preference of DEBUG etc
 if __name__ == "__main__":
@@ -30,6 +38,7 @@ def main(debug: bool, dp: Dispatcher) -> None:
         force=True,
         handlers=[console],
     )  # Force is needed here to re config logging
+    # Init should be here so as the colors be rendered properly in fly.io
     colorama.init(convert=True)
     logging.info(f"DEBUG: {debug}, MODE: {MODE}, TEST: {TEST}")
 
