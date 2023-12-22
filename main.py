@@ -8,6 +8,7 @@ if __name__ == "__main__":
     # See: https://stackoverflow.com/a/51529172
     logging.getLogger("aiogram").setLevel(logging.WARNING)
     logging.getLogger("apscheduler._schedulers.async_").setLevel(logging.WARNING)
+    logging.getLogger("pytube").setLevel(logging.WARNING)
 
 from aiogram import Dispatcher
 from aiogram.utils import executor
