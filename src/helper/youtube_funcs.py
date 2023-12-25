@@ -25,9 +25,9 @@ def download_video(video_url: str, target_path=None) -> str | None:
         logger.debug(f"Song [{video.title}] has been successfully downloaded.")
         return file
     except pytube.exceptions.RegexMatchError:
-        logger.warning("Link is not valid")
-    except Exception as err:
-        logger.debug(err)
+        logger.exception("Link is not valid")
+    except Exception:
+        logger.exception("Error in download_video()")
 
 
 def convert_to_mp3(file: str) -> str:
@@ -78,9 +78,11 @@ def download_playlist(url: str) -> str:
                 f"{colorama.Style.RESET_ALL}"
             )
         except pytube.exceptions.RegexMatchError as err:
-            logger.debug(f"{colorama.Fore.RED}Link is not valid \n {err}{colorama.Style.RESET_ALL}")
+            logger.exception(
+                f"{colorama.Fore.RED}Link is not valid \n {err}{colorama.Style.RESET_ALL}"
+            )
         except Exception as err:
-            logger.debug(err)
+            logger.exception(err)
 
     return playlist_folder
 

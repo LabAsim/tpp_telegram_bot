@@ -77,8 +77,7 @@ def update_user(func: Callable) -> Callable[[tuple[Any, ...]], Coroutine[Any, An
                 return await func(*args, **kwargs)
 
         except (Exception, NotNullViolationError, RuntimeWarning, IndexError) as err:
-            logger.warning(f"{err=}")
-            raise err
+            logger.exception(f"{err=}")
 
     return wrapper
 
@@ -609,8 +608,13 @@ async def del_schedule(message: types.Message) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     if message.__getitem__("reply_to_message"):
         target_id = message["reply_to_message"]["text"]
-        target_id = target_id.split("\ncategory")
+        target_id = (
+            target_id.split("\ncategory")
+            if "category " in target_id
+            else target_id.split("\nΚατηγορία")
+        )
         target_id = target_id[0].replace("id:", "").strip()
+        logger.debug(f"{target_id=} to be deleted")
         await delete_target_schedule(target_id=target_id)
         logger.debug(f"Schedule was deleted ({target_id=})")
 

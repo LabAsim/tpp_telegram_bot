@@ -150,7 +150,7 @@ def func_name(frame) -> str:
 
 def log_func_name(thelogger: logging.getLogger, fun_name: str) -> None:
     """Logs the name of the function"""
-    thelogger.info(f"\t{fun_name}() called\n")
+    thelogger.debug(f"\t{fun_name}() called\n")
 
 
 async def convert_iterable_to_async_iterator(iterable: Iterable[Any]) -> AsyncIterator[Any]:
