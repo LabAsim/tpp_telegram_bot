@@ -5,12 +5,13 @@ import argparse
 import asyncio
 import copy
 import dataclasses
+import datetime
 import inspect
 import logging
 import os.path
 import pathlib
 import colorama
-from functools import wraps, partial
+from functools import wraps, partial, lru_cache
 from typing import Union, Callable, Iterable, Any, AsyncIterator
 
 
@@ -157,3 +158,27 @@ async def convert_iterable_to_async_iterator(iterable: Iterable[Any]) -> AsyncIt
     """Converts any iterable to Async iterator"""
     for i in iterable:
         yield i
+
+
+def timed_lru_cache(minutes: int, maxsize: int = 12):
+    """See https://realpython.com/lru-cache-python/"""
+
+    def wrapper_cache(func):
+        func = lru_cache(maxsize=maxsize)(func)
+
+        func.lifetime = datetime.timedelta(minutes=minutes)
+
+        func.expiration = datetime.datetime.utcnow() + func.lifetime
+
+        @wraps(func)
+        def wrapped_func(*args, **kwargs):
+            if datetime.datetime.utcnow() >= func.expiration:
+                func.cache_clear()
+
+                func.expiration = datetime.datetime.utcnow() + func.lifetime
+
+            return func(*args, **kwargs)
+
+        return wrapped_func
+
+    return wrapper_cache

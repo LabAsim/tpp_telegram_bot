@@ -1,8 +1,10 @@
 import json
 import logging
+import time
 
 from apify_client import ApifyClient
 from typing import Union
+from src.helper.helper import timed_lru_cache
 
 
 def convert_category_str_to_url(category_str: str) -> str:
@@ -123,6 +125,7 @@ def synthesize_url(keyword: str, page_number: Union[int, str] = 1, debug: bool =
     return final_url.strip()
 
 
+@timed_lru_cache(minutes=10)
 def call_apify_actor(actor: str, url: str, token: str) -> dict:
     """Calls the apify actor to scrape the target url and
     return a dictionary with the results
@@ -158,10 +161,12 @@ if __name__ == "__main__":
         import saved_tokens
     except ModuleNotFoundError:
         from src.helper.helper import EnvVars as saved_tokens
-    url = synthesize_url(keyword="ΒΙΟΜΕ")
-    results = call_apify_actor(
-        url="https://thepressproject.gr/article_type/radio",
-        token=saved_tokens.TOKEN_APIFY,
-        actor="athletic_scraper/my-actor",
-    )
-    print(results)
+    while True:
+        url = synthesize_url(keyword="ΒΙΟΜΕ")
+        results = call_apify_actor(
+            url="https://thepressproject.gr/article_type/radio",
+            token=saved_tokens.TOKEN_APIFY,
+            actor="athletic_scraper/my-actor",
+        )
+        print(results)
+        time.sleep(1)

@@ -171,9 +171,9 @@ async def search_handler(message: types.Message) -> None:
     Searches based on the user's input,
     replies with the search results and waits the user to interact"""
     await search(message=message)
-    logger.info(f"{message=}")
+    logger.debug(f"{message=}")
     await to_search_next_page(message=message)
-    logger.info("ended..")
+    logger.debug("ended..")
 
 
 @dp.message_handler(lambda message: "arbitrary text, it does not mean anything" == message.text)
@@ -567,20 +567,20 @@ async def my_schedule(message: types.Message) -> None:
             # CronTrigger(year='*', month='*', day='*', week='*', day_of_week='
             # mon-fri', hour='0', minute='0', second='0',
             # start_time='2023-12-19T20:27:28.333450+02:00', timezone='Europe/Bucharest')
-            # sch_time = f"{b.trigger._fields[8]}".split("T")[1].split('.')[0]
             sch_time = f"{b.trigger.start_time.timetz()}".split(".")[0]
             answer = f"id: {b.id}\n"
             answer += (
-                f"category: {b.args[1]}" f"\nSchedule news at {sch_time}\nevery \n"
+                f"category: {b.args[1]}" f"\nSchedule news at {sch_time} (London time)\nevery \n"
                 if lang.get("lang") == "English"
                 else f"Κατηγορία ειδήσεων: {b.args[1]}"
-                f"\nΠρογραμματισμένη αποστολή στις {sch_time}\nκάθε: "
+                f"\nΠρογραμματισμένη αποστολή στις {sch_time} (ώρα Λονδίνου)\nκάθε: "
             )
             answer += f"{b.trigger._fields[4]}"
             logger.debug(f"{(b.trigger.start_time)}")
         else:
             # IntervalTrigger
             sch_time = f"{b.trigger.start_time.time()}".split(".")[0]
+            logger.debug(f"{b.trigger.start_time=}")
             answer = f"id: {b.id}\n"
             logger.debug(f"{lang=}")
             answer += (
@@ -591,12 +591,11 @@ async def my_schedule(message: types.Message) -> None:
                 f"{b.trigger.hours} hours"
                 if lang.get("lang") == "English"
                 else f"Κατηγορία ειδήσεων: {b.args[1]}\n"
-                f"Προγραμματισμένη αποστολή στις {sch_time}\nκάθε "
+                f"Προγραμματισμένη αποστολή στις {sch_time} (ώρα Λονδίνου)\nκάθε "
                 f"{b.trigger.weeks} εβδομάδες | "
                 f"{b.trigger.days} μέρες | "
                 f"{b.trigger.hours} ώρες"
             )
-            logger.debug(f"{answer=}")
 
         await bot.send_message(
             chat_id=chat_id,
