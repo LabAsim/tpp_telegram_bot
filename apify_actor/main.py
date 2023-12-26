@@ -220,9 +220,7 @@ class SearchTerm:
         self.final_url = final_url
         self.debug = debug
         # Call the functions
-        self.connect_to_url()
-        self.soup_the_request()
-        self.scrape_data()
+        self.connect_soup_scrape()
 
     def connect_to_url(self):
         """Connects to the url and gets the response"""
@@ -281,6 +279,11 @@ class SearchTerm:
             self.temporary_list.append(
                 NewsDataclass(url=link, title=title, summary=summary, debug=False)
             )
+
+    def connect_soup_scrape(self):
+        self.connect_to_url()
+        self.soup_the_request()
+        self.scrape_data()
 
     def scrape_next_page(self):
         """Scrapes the next page. If it is the first time to be called, it scrapes the next one"""
