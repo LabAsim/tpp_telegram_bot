@@ -4,7 +4,7 @@ import inspect
 import os
 import shutil
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from functools import wraps
 import logging
 from typing import Coroutine, AsyncIterable, Callable, Any
@@ -182,10 +182,10 @@ async def to_search_next_page(message: types.Message) -> None:
     Asks the user whether to search the next page
     """
     # Configure ReplyKeyboardMarkup
-    logger.info("to_search_next_page called")
+    logger.debug("to_search_next_page called")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
     lang = await src.db.funcs.fetch_lang(message=message)
-    logger.info(f"{lang=}")
+    logger.debug(f"{lang=}")
     if lang == "English":
         markup.add("Yes 🆗", "No 👎")
         await message.reply(Text.to_search_next_page_eng, reply_markup=markup)
@@ -562,36 +562,39 @@ async def my_schedule(message: types.Message) -> None:
         b = await _schedule
         logger.info(f"{b=}")
         logger.info(f"{b.id=}")
+        sch_time = f"{b.trigger.start_time}"
+        sch_time = datetime.fromisoformat(sch_time)
+        sch_time = sch_time.astimezone(timezone(timedelta(hours=2)))
+        sch_time = f"{sch_time.timetz()}".split(".")[0]
         if isinstance(b.trigger, CronTrigger):
             # Example:
             # CronTrigger(year='*', month='*', day='*', week='*', day_of_week='
             # mon-fri', hour='0', minute='0', second='0',
             # start_time='2023-12-19T20:27:28.333450+02:00', timezone='Europe/Bucharest')
-            sch_time = f"{b.trigger.start_time.timetz()}".split(".")[0]
+
             answer = f"id: {b.id}\n"
             answer += (
-                f"category: {b.args[1]}" f"\nSchedule news at {sch_time} (London time)\nevery \n"
+                f"category: {b.args[1]}" f"\nSchedule news at {sch_time} (Athens time)\nevery \n"
                 if lang.get("lang") == "English"
                 else f"Κατηγορία ειδήσεων: {b.args[1]}"
-                f"\nΠρογραμματισμένη αποστολή στις {sch_time} (ώρα Λονδίνου)\nκάθε: "
+                f"\nΠρογραμματισμένη αποστολή στις {sch_time} (ώρα Αθήνας)\nκάθε: "
             )
             answer += f"{b.trigger._fields[4]}"
             logger.debug(f"{(b.trigger.start_time)}")
         else:
             # IntervalTrigger
-            sch_time = f"{b.trigger.start_time.time()}".split(".")[0]
             logger.debug(f"{b.trigger.start_time=}")
             answer = f"id: {b.id}\n"
             logger.debug(f"{lang=}")
             answer += (
                 f"category: {(b.args[1])}\n"
-                f"Schedule news at {sch_time}\nevery "
+                f"Schedule news at {sch_time} (Athens time)\nevery \n"
                 f"{b.trigger.weeks} weeks | "
                 f"{b.trigger.days} days | "
                 f"{b.trigger.hours} hours"
                 if lang.get("lang") == "English"
                 else f"Κατηγορία ειδήσεων: {b.args[1]}\n"
-                f"Προγραμματισμένη αποστολή στις {sch_time} (ώρα Λονδίνου)\nκάθε "
+                f"Προγραμματισμένη αποστολή στις {sch_time} (ώρα Αθήνας)\nκάθε "
                 f"{b.trigger.weeks} εβδομάδες | "
                 f"{b.trigger.days} μέρες | "
                 f"{b.trigger.hours} ώρες"
