@@ -52,7 +52,7 @@ Run the bot locally:
 
 # Roadmap
 
-* [ ]  integrate **APSchedule**
+* [X]  integrate **APSchedule**
 
 * [ ] Migrate to Aiogram 3.X
 

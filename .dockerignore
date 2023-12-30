@@ -1,1 +1,8 @@
 fly.toml
+.space
+.idea
+Spacefile
+example*
+**/__pycache_
+**/.pytest_cache
+__pycache__
