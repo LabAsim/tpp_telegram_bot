@@ -1,5 +1,5 @@
 """
-Tests for the apify_actor.py
+Tests for the rss_funcs.py
 """
 import unittest
 import validators
@@ -119,4 +119,4 @@ class TestRssFuncs(unittest.IsolatedAsyncioTestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=3)

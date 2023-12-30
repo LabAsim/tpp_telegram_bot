@@ -39,7 +39,7 @@ jobs:
         TOKEN_APIFY: ${{ secrets.TOKEN_APIFY }}
     - name: Test with unittest
       run: |
-        python -m unittest discover -s ./tests
+        python -m unittest discover -s ./tests -v
       env:
         TOKEN_TELEGRAM_BOT: ${{ secrets.TOKEN_TELEGRAM_BOT }}
         TOKEN_TELEGRAM_BOT_TEST: ${{ secrets.TOKEN_TELEGRAM_BOT_TEST }}
