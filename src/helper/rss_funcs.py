@@ -67,15 +67,15 @@ async def parse_commands_for_rssfeed(command: str) -> str:
     match command:
         case "efsyn" | "εφσυν":
             return "efsyn"
-        case "kath" | "kat" | "kathimerini" | "καθ" | "κατ" | "καθη" | "καθημερινη":
+        case "kath" | "kat" | "kathimerini" | "καθ" | "κατ" | "καθη" | "καθημερινη" | "καθημερινή" | "kathimerinieng":
             return "kathimerinieng"
-        case "naftemporiki" | "naft" | "naf" | "ναφ" | "ναφτ" | "ναυτ" | "ναυ":
+        case "naftemporiki" | "naft" | "naf" | "ναφ" | "ναφτ" | "ναυτ" | "ναυ" | "nay" | "nayf" | "nayt" | "naut":
             return "naftemporiki"
-        case "tovima" | "tov" | "τοβ" | "τοβημα":
+        case "tovima" | "tov" | "τοβ" | "τοβημα" | "tovi" | "τοβήμα" | "τοβη":
             return "tovima"
         case "ert" | "ερτ":
             return "ert"
-        case "ertnews" | "ερτνεςσ" | "ερτνιουζ" | "ertlatest":
+        case "ertnews" | "ερτνεςσ" | "ερτνιουζ" | "ertlatest" | "ertla" | "ertn":
             return "ert_latest"
         case "documento" | "ντοκουμεντο" | "docu" | "δοκυ" | "doc" | "δοκ" | "ντοκ":
             return "documento"
