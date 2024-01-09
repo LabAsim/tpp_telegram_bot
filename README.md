@@ -3,6 +3,8 @@ A simple Telegram Bot for TPP and other greek news sites.
 
 The bot is hosted in [fly.io](https://fly.io/) or [pythonanywhere](https://www.pythonanywhere.com/) and the scraping script in [Apify](https://apify.com/).
 
+Add it in Telegram! [Click here](https://t.me/TppgrBot)!
+
 ## Table of Contents
 
 *   [Installation](#Installation)
