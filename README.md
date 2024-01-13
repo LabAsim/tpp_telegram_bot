@@ -8,7 +8,7 @@ Add it in Telegram! [Click here](https://t.me/TppgrBot)!
 ## Table of Contents
 
 *   [Installation](#Installation)
-  * [Docker](#Docker)
+*   [Docker](#Docker)
 *   [Donate](#donate)
 *   [License](#license)
 

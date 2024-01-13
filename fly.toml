@@ -20,8 +20,8 @@ primary_region = "ams"
   protocol = ""
   internal_port = 0
   [services.concurrency]
-    hard_limit = 5
-    soft_limit = 3
+    hard_limit = 100
+    soft_limit = 30
 
 [[vm]]
   size = "shared-cpu-1x"
