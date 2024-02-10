@@ -60,7 +60,7 @@ async def connect(message: types.Message) -> None:
     If there is not an environmental var `DATABASE_URL` (for example, if you run the bot locally),
     it will the url from the defaults
     """
-    id = int(message["from"]["id"])
+    id = int(message.from_user.id)
     lang = message.text.strip("👍").strip("🤝").strip()
     name = message["from"]["first_name"]
     last_seen = datetime.datetime.now(datetime.timezone.utc)  # This is UTC+0
@@ -126,9 +126,10 @@ async def update_user_info(message: types.Message) -> None:
     if not message:
         # If there is no messages at all
         return None
-    id = int(message["from"]["id"])
+    print(message.from_user.id)
+    id = int(message.from_user.id)
     lang = "English"
-    name = message["from"]["first_name"]
+    name = message.from_user.first_name
     last_seen = datetime.datetime.now(datetime.timezone.utc)  # This is UTC+0
     # The date in the db will be timezone aware (UTC+2 for Greece)
     pool = await DbPoolSingleton.get_pool()
@@ -171,7 +172,7 @@ async def update_user_info(message: types.Message) -> None:
 
 async def fetch_lang(message: types.Message) -> asyncpg.Record:
     """Returns the language preference of the user"""
-    id = int(message["from"]["id"])
+    id = int(message.from_user.id)
     database_url = construct_database_url()
     conn = await asyncpg.connect(dsn=database_url)
     # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.connection.Connection.fetch
@@ -184,7 +185,7 @@ async def fetch_lang(message: types.Message) -> asyncpg.Record:
 
 async def fetch_schedule(message: types.Message) -> list[asyncpg.Record]:
     """Fetches the schedule of the user (based on `id.`)"""
-    chat_id = str(message["from"]["id"])
+    chat_id = str(message.from_user.id)
     chat_id_with_dot = chat_id + "."  # This distinguishes the user id from schedule id
     database_url = construct_database_url()
     conn = await asyncpg.connect(dsn=database_url)
