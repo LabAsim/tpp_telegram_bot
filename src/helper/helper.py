@@ -14,6 +14,9 @@ import colorama
 from functools import wraps, partial, lru_cache
 from typing import Union, Callable, Iterable, Any, AsyncIterator
 
+from aiogram.utils.markdown import _join
+from aiogram.utils.text_decorations import markdown_decoration
+
 
 def parse_arguments() -> argparse.ArgumentParser.parse_args:
     """
@@ -182,3 +185,10 @@ def timed_lru_cache(minutes: int, maxsize: int = 12):
         return wrapped_func
 
     return wrapper_cache
+
+
+def escape_md(*content, sep=" ") -> str:
+    """
+    Escape markdown text
+    """
+    return markdown_decoration.quote(_join(*content, sep=sep))
