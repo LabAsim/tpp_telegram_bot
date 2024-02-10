@@ -6,10 +6,20 @@ import shutil
 import threading
 from datetime import datetime, timezone, timedelta
 from functools import wraps
+from itertools import islice
 import logging
 from typing import Coroutine, AsyncIterable, Callable, Any
-from aiogram import types, md, Dispatcher, utils
-from itertools import islice
+
+import aiogram
+from aiogram import types, md, Dispatcher
+from aiogram.utils.markdown import text
+from aiogram.enums.parse_mode import ParseMode
+
+
+from src.helper.helper import escape_md
+
+# from aiogram.filters import
+from aiogram.filters.command import Command
 
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
@@ -41,10 +51,9 @@ logger = logging.getLogger(__name__)
 
 token = choose_token(test=config.TEST)
 
-# The dp needs to be instantiated here.
 # Otherwise, the functions are not registered (don't know why though)
-bot = botify(token=token, proxy_url=config.PROXY_URL_PYTHONANYWHERE, mode=config.MODE)
-dp = Dispatcher(bot)  # , run_tasks_by_default=True
+bot = botify(token=token, mode=config.MODE)
+dp = Dispatcher()
 
 settings_helper = BotHelper(
     dispatcher=dp, apify_token=saved_tokens.TOKEN_APIFY, telegram_token=token
@@ -82,7 +91,8 @@ def update_user(func: Callable) -> Callable[[tuple[Any, ...]], Coroutine[Any, An
     return wrapper
 
 
-@dp.message_handler(commands=["help", "χελπ", "ηελπ"])
+@dp.message(Command(*["help", "χελπ", "ηελπ"]))  # commands=["help", "χελπ", "ηελπ"]
+#  F.func(lambda message: message in ["/help", "/χελπ", "/ηελπ"])
 @update_user
 async def show_help(message: types.Message) -> None:
     """Shows the help message"""
@@ -96,12 +106,12 @@ async def show_help(message: types.Message) -> None:
         answer = Text.help_text_greek
         answer2 = Text.help_text_greek2
         answer3 = Text.help_text_greek3
-    await message.answer(answer)
+    await message.answer(str(answer))
     await message.answer(answer2)
     await message.answer(answer3)
 
 
-@dp.message_handler(lambda message: message.text in ("English 👍", "Greek 🤝"))
+@dp.message(lambda message: message.text in ("English 👍", "Greek 🤝"))
 @update_user
 async def save_user(message: types.Message) -> None:
     """Saves the user's name and lang preference"""
@@ -110,7 +120,7 @@ async def save_user(message: types.Message) -> None:
     await show_help(message=message)
 
 
-@dp.message_handler(commands=["lang", "language", "start", "λανγ"])
+@dp.message(Command(*["lang", "language", "start", "λανγ"]))
 @update_user
 async def choose_language(message: types.message) -> None:
     """Choose and saves the language preference of the user"""
@@ -141,16 +151,16 @@ async def search(message: types.Message) -> None:
         None, call_apify_actor, "athletic_scraper/my-actor", url, settings_helper.apify_token
     )
     settings_helper.search_results = results["results_total"]
-    answer = md.text()
+    answer = text()
     for result_dict_key in list(settings_helper.search_results.keys()):
         title = result_dict_key
         url = settings_helper.search_results[result_dict_key]
         last_line = "-" * 50
-        answer += md.text(
-            md.text(""),
-            md.bold((md.text(title))),
-            md.text(md.escape_md(url)),
-            md.text(md.escape_md(last_line)),
+        answer += text(
+            text(""),
+            md.bold((text(title))),
+            text(escape_md(url)),
+            text(escape_md(last_line)),
             sep="\n",
         )
 
@@ -160,11 +170,12 @@ async def search(message: types.Message) -> None:
         answer,
         reply_markup=markup,
         disable_web_page_preview=True,
-        parse_mode=types.ParseMode.MARKDOWN_V2,
+        parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
-@dp.message_handler(commands=["search", "s", "σ"])
+# commands=["search", "s", "σ"]
+@dp.message(Command(*["search", "s", "σ"]))
 @update_user
 async def search_handler(message: types.Message) -> None:
     """
@@ -176,7 +187,7 @@ async def search_handler(message: types.Message) -> None:
     logger.debug("ended..")
 
 
-@dp.message_handler(lambda message: "arbitrary text, it does not mean anything" == message.text)
+@dp.message(lambda message: "arbitrary text, it does not mean anything" == message.text)
 async def to_search_next_page(message: types.Message) -> None:
     """
     Asks the user whether to search the next page
@@ -194,8 +205,8 @@ async def to_search_next_page(message: types.Message) -> None:
         await message.reply(Text.to_search_next_page_greek, reply_markup=markup)
 
 
-@dp.message_handler(lambda message: "Yes 🆗" == message.text)
-@dp.message_handler(lambda message: "Ναι 🆗" == message.text)
+@dp.message(lambda message: "Yes 🆗" == message.text)
+@dp.message(lambda message: "Ναι 🆗" == message.text)
 @update_user
 async def search_next_page(message: types.Message) -> None:
     """Searches the next page"""
@@ -239,11 +250,11 @@ async def search_next_page(message: types.Message) -> None:
         title = result_dict_key
         url = settings_helper.search_results[result_dict_key]
         last_line = "-" * 50
-        answer += md.text(
-            md.text(""),
-            md.bold(md.text(title)),
-            md.text(md.escape_md(url)),
-            md.text(md.escape_md(last_line)),
+        answer += text(
+            text(""),
+            md.bold(text(title)),
+            text(escape_md(url)),
+            text(escape_md(last_line)),
             sep="\n",
         )
 
@@ -260,15 +271,15 @@ async def search_next_page(message: types.Message) -> None:
         answer = reply_to_empty_results
 
     # Reply to the user
-    await message.answer(f"{md.text(answer)}", reply_markup=markup)
+    await message.answer(f"{text(answer)}", reply_markup=markup)
 
     # Prompt to search the next page only if the current search was successful.
     if answer != reply_to_empty_results:
         await to_search_next_page(message=message)
 
 
-@dp.message_handler(lambda message: "No 👎" == message.text)
-@dp.message_handler(lambda message: "Όχι 👎" == message.text)
+@dp.message(lambda message: "No 👎" == message.text)
+@dp.message(lambda message: "Όχι 👎" == message.text)
 @update_user
 async def end_search(message: types.Message):
     """
@@ -298,15 +309,17 @@ async def end_search(message: types.Message):
     settings_helper.page_number = 1
 
 
-@dp.message_handler(
-    commands=[
-        "category",
-        "Category",
-        "c",
-        "κατηγορία",
-        "κατηγορια",
-        "κ",
-    ]
+@dp.message(
+    Command(
+        *[
+            "category",
+            "Category",
+            "c",
+            "κατηγορία",
+            "κατηγορια",
+            "κ",
+        ]
+    )
 )
 @update_user
 async def search_category(message: types.Message) -> None:
@@ -352,16 +365,16 @@ async def search_category(message: types.Message) -> None:
     #     token=settings_helper.apify_token,
     # )["results_total"]
 
-    answer = md.text()
+    answer = text()
     for result_dict_key in list(settings_helper.search_results.keys()):
         title = result_dict_key
         url = settings_helper.search_results[result_dict_key]
         last_line = "-" * 50
-        answer += md.text(
-            md.text(""),
-            md.bold((md.text(title))),
-            md.text(md.escape_md(url)),
-            md.text(md.escape_md(last_line)),
+        answer += text(
+            text(""),
+            md.bold((text(title))),
+            text(escape_md(url)),
+            text(escape_md(last_line)),
             sep="\n",
         )
     # logging.debug(f"Answer forwarded to user:{answer}")
@@ -371,11 +384,11 @@ async def search_category(message: types.Message) -> None:
         answer,
         reply_markup=markup,
         disable_web_page_preview=True,
-        parse_mode=types.ParseMode.MARKDOWN_V2,
+        parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
-@dp.message_handler(commands=["youtube", "video", "yt"])
+@dp.message(Command(*["youtube", "video", "yt"]))  # commands=["youtube", "video", "yt"]
 @update_user
 async def send_video(message: types.Message) -> None:
     """Downloads and sends the video(s) from the url provided by the user"""
@@ -407,7 +420,7 @@ async def send_video(message: types.Message) -> None:
         logger.debug(f"{downloaded_file.file.name} deleted")
 
 
-@dp.message_handler(commands=rss_feed)
+@dp.message(Command(*rss_feed))
 @update_user
 async def send_rssfeed(
     message: types.Message = None, target_rss: str = None, chat_id: int = None
@@ -422,16 +435,16 @@ async def send_rssfeed(
     target = await parse_commands_for_rssfeed(target)
     results = await fetch_news(target=target)
     # logger.debug(f"{results=}")
-    answer = md.text()
+    answer = text()
     for entry in results:
         title = entry.title
         url = entry.link
         last_line = "-" * 50
-        answer += md.text(
-            md.text(""),
-            md.bold((md.text(title))),
-            md.text(md.escape_md(url)),
-            md.text(md.escape_md(last_line)),
+        answer += text(
+            text(""),
+            md.bold((text(title))),
+            text(escape_md(url)),
+            text(escape_md(last_line)),
             sep="\n",
         )
 
@@ -440,20 +453,24 @@ async def send_rssfeed(
     try:
         if message:
             await message.reply(
-                answer,
+                escape_md(answer),
                 reply_markup=markup,
                 disable_web_page_preview=True,
-                parse_mode=types.ParseMode.MARKDOWN_V2,
+                parse_mode=ParseMode.MARKDOWN_V2,
             )
         else:
             await bot.send_message(
                 chat_id=chat_id,
                 text=answer,
                 disable_web_page_preview=True,
-                parse_mode=types.ParseMode.MARKDOWN_V2,
+                parse_mode=ParseMode.MARKDOWN_V2,
                 reply_markup=markup,
             )
-    except (utils.exceptions.MessageIsTooLong, utils.exceptions.BadRequest, Exception) as err:
+    except (
+        aiogram.exceptions.DetailedAiogramError,
+        aiogram.exceptions.TelegramBadRequest,
+        Exception,
+    ) as err:
         logger.warning(
             f"{len(results)=} {len(answer)=}"
             f"\n{err=}"
@@ -478,16 +495,16 @@ async def send_chunks_rssfeed(
             yield [k for k in islice(it, size)]
 
     async for item in chunks(data=results, size=size):
-        answer = md.text()
+        answer = text()
         for entry in item:
             title = entry.title
             url = entry.link
             last_line = "-" * 50
-            answer += md.text(
-                md.text(""),
-                md.bold((md.text(title))),
-                md.text(md.escape_md(url)),
-                md.text(md.escape_md(last_line)),
+            answer += text(
+                text(""),
+                md.bold((text(escape_md(title)))),
+                text(escape_md(url)),
+                text(escape_md(last_line)),
                 sep="\n",
             )
         markup = types.ReplyKeyboardRemove()
@@ -496,19 +513,19 @@ async def send_chunks_rssfeed(
                 answer,
                 reply_markup=markup,
                 disable_web_page_preview=True,
-                parse_mode=types.ParseMode.MARKDOWN_V2,
+                parse_mode=ParseMode.MARKDOWN_V2,
             )
         else:
             await bot.send_message(
                 chat_id=chat_id,
                 text=answer,
                 disable_web_page_preview=True,
-                parse_mode=types.ParseMode.MARKDOWN_V2,
+                parse_mode=ParseMode.MARKDOWN_V2,
                 reply_markup=markup,
             )
 
 
-@dp.message_handler(commands=["schedule", "sch"])
+@dp.message(Command(*["schedule", "sch"]))
 @update_user
 async def schedule(message: types.Message):
     """Saves the schedule for the target rss site"""
@@ -535,7 +552,7 @@ async def schedule(message: types.Message):
     await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss, trigger_target=trigger)
 
 
-@dp.message_handler(commands=["mysch", "myschedule", "μυσψη"])
+@dp.message(Command(*["mysch", "myschedule", "μυσψη"]))
 @update_user
 async def my_schedule(message: types.Message) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
@@ -548,13 +565,13 @@ async def my_schedule(message: types.Message) -> None:
     if len(myschedule_records) == 0:
         await bot.send_message(
             chat_id=chat_id,
-            text=md.escape_md(
+            text=escape_md(
                 "You have not any saved schedules"
                 if lang == "English"
                 else "Δεν υπάρχουν προγραμματισμένες αποστολές ειδήσεων"
             ),
             disable_web_page_preview=True,
-            parse_mode=types.ParseMode.MARKDOWN_V2,
+            parse_mode=ParseMode.MARKDOWN_V2,
             reply_markup=markup,
         )
         return None
@@ -602,14 +619,14 @@ async def my_schedule(message: types.Message) -> None:
 
         await bot.send_message(
             chat_id=chat_id,
-            text=md.escape_md(answer),
+            text=escape_md(answer),
             disable_web_page_preview=True,
-            parse_mode=types.ParseMode.MARKDOWN_V2,
+            parse_mode=ParseMode.MARKDOWN_V2,
             reply_markup=markup,
         )
 
 
-@dp.message_handler(commands=["del", "delete", "δελ", "δελε", "δελετε"])
+@dp.message(Command(*["del", "delete", "δελ", "δελε", "δελετε"]))
 @update_user
 async def del_schedule(message: types.Message) -> None:
     """
@@ -629,7 +646,7 @@ async def del_schedule(message: types.Message) -> None:
         logger.debug(f"Schedule was deleted ({target_id=})")
 
 
-@dp.message_handler(commands=["delall", "deleteall", "δελαλλ", "δελεαλλ", "δελετεαλλ"])
+@dp.message(Command(*["delall", "deleteall", "δελαλλ", "δελεαλλ", "δελετεαλλ"]))
 @update_user
 async def del_all_schedules(message: types.Message) -> None:
     """Deletes every saved schedules of the user"""
@@ -643,7 +660,7 @@ async def del_all_schedules(message: types.Message) -> None:
         logger.debug(f"Schedule was deleted ({target_id=})")
 
 
-@dp.message_handler(lambda message: message.text)
+@dp.message(lambda message: message.text)
 @update_user
 async def random_text(message: types.Message) -> None:
     """Just to update the user's info, if anything is sent to the bot"""
