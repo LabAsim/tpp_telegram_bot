@@ -4,7 +4,11 @@ Tests for the apify_actor.py
 import unittest
 import validators
 
-from src.helper.helper import EnvVars
+try:
+    import saved_tokens
+except ModuleNotFoundError:
+    from src.helper.helper import EnvVars as saved_tokens
+
 from src.bot.apify_actor import (
     convert_category_str_to_url,
     synthesize_url,
@@ -229,7 +233,7 @@ class TestApifyActor(unittest.TestCase):
         # Search ==> athletic_scraper/my-actor
         url = synthesize_url(keyword="Τσίπρας")
         results = call_apify_actor(
-            token=EnvVars.TOKEN_APIFY, actor="athletic_scraper/my-actor", url=url
+            token=saved_tokens.TOKEN_APIFY, actor="athletic_scraper/my-actor", url=url
         )["results_total"]
         self.assertIsInstance(results, dict)
         self.assertIs(len(results), 10)
@@ -242,7 +246,7 @@ class TestApifyActor(unittest.TestCase):
         # Test the Culture category
         url = convert_category_str_to_url(category_str="cul")
         results = call_apify_actor(
-            actor="athletic_scraper/category-actor", url=url, token=EnvVars.TOKEN_APIFY
+            actor="athletic_scraper/category-actor", url=url, token=saved_tokens.TOKEN_APIFY
         )["results_total"]
         self.assertIsInstance(results, dict)
         self.assertIs(len(results), 10)
