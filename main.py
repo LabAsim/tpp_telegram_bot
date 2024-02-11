@@ -22,8 +22,8 @@ from src.scheduler.funcs import start_scheduler_as_task
 # This is a hacky way to parse the variables and save the user's preference of DEBUG etc
 if __name__ == "__main__":
     args = parse_arguments()
-    DEBUG, MODE, TEST = args.debug, args.mode, args.test
-    config.DEBUG, config.MODE, config.TEST = DEBUG, MODE, TEST
+    DEBUG, TEST = args.debug, args.test
+    config.DEBUG, config.TEST = DEBUG, TEST
     os.environ["dbpass"] = args.dbpass
 
 # These need to be here, otherwise the imports are messed up!
@@ -40,8 +40,7 @@ async def main(debug: bool, dp: Dispatcher) -> None:
     )  # Force is needed here to re config logging
     # Init should be here so as the colors be rendered properly in fly.io
     colorama.init(convert=True)
-    logging.info(f"DEBUG: {debug}, MODE: {MODE}, TEST: {TEST}")
-    print(bot)
+    logging.info(f"DEBUG: {debug}, TEST: {TEST}")
     await start_scheduler_as_task()
     await dp.start_polling(
         bot,

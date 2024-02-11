@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 token = choose_token(test=config.TEST)
 
 # Otherwise, the functions are not registered (don't know why though)
-bot = botify(token=token, mode=config.MODE)
+bot = botify(token=token)
 dp = Dispatcher()
 
 settings_helper = BotHelper(

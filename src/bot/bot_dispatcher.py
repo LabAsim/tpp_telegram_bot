@@ -1,4 +1,5 @@
-from aiogram import Bot, types
+from aiogram import Bot
+from aiogram.enums.parse_mode import ParseMode
 
 try:
     import saved_tokens
@@ -8,18 +9,12 @@ except ModuleNotFoundError:
 
 def botify(
     token: str,
-    mode: str,
-    parse_mode=types.ParseMode.MARKDOWN_V2,
-    timeout: int = 180,
-    proxy_url: str = "http://proxy.server:3128",
+    parse_mode=ParseMode.MARKDOWN_V2,
 ) -> Bot:
     """Creates and returns the Bot object"""
-    # Create the bot
-    if mode == "pythonanywhere":
-        # The proxy is needed only if the Bot is used on pythonanywhere.com
-        bot_to_return = Bot(token=token, parse_mode=parse_mode, timeout=timeout, proxy=proxy_url)
-    else:
-        bot_to_return = Bot(token=token, parse_mode=parse_mode, timeout=timeout)
+
+    bot_to_return = Bot(token=token, parse_mode=parse_mode)
+
     return bot_to_return
 
 

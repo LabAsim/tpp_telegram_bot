@@ -35,15 +35,6 @@ def parse_arguments() -> argparse.ArgumentParser.parse_args:
         help="If True, it prints everything set to DEBUG and above.",
     )
     my_parser.add_argument(
-        "--mode",
-        type=str,
-        action="store",
-        const=True,
-        nargs="?",
-        required=False,
-        default="self",
-    )
-    my_parser.add_argument(
         "--test",
         type=str2bool,
         action="store",
