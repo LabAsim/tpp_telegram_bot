@@ -388,7 +388,7 @@ async def search_category(message: types.Message) -> None:
     )
 
 
-@dp.message(Command(*["youtube", "video", "yt"]))  # commands=["youtube", "video", "yt"]
+@dp.message(Command(*["youtube", "video", "yt"]))
 @update_user
 async def send_video(message: types.Message) -> None:
     """Downloads and sends the video(s) from the url provided by the user"""
@@ -411,13 +411,14 @@ async def send_video(message: types.Message) -> None:
 
     try:
         downloaded_file = await download_send(message=message)
-        await message.answer_document(document=downloaded_file)
+        await message.reply_document(document=downloaded_file)
     except Exception as err:
-        logger.warning(err)
+        logger.exception(err)
     finally:
-        thr = threading.Thread(target=lambda: os.remove(downloaded_file.file.name))
+        thr = threading.Thread(target=lambda: os.remove(downloaded_file.path))
         thr.start()
-        logger.debug(f"{downloaded_file.file.name} deleted")
+        if downloaded_file is not None:
+            logger.debug(f"{downloaded_file.path} deleted")
 
 
 @dp.message(Command(*rss_feed))
@@ -442,7 +443,7 @@ async def send_rssfeed(
         last_line = "-" * 50
         answer += text(
             text(""),
-            md.bold((text(title))),
+            md.bold((text(escape_md(title)))),
             text(escape_md(url)),
             text(escape_md(last_line)),
             sep="\n",
@@ -453,7 +454,7 @@ async def send_rssfeed(
     try:
         if message:
             await message.reply(
-                escape_md(answer),
+                answer,
                 reply_markup=markup,
                 disable_web_page_preview=True,
                 parse_mode=ParseMode.MARKDOWN_V2,
@@ -531,7 +532,7 @@ async def schedule(message: types.Message):
     """Saves the schedule for the target rss site"""
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     logger.info(f"{message.text=}")
-    chat_id = message["from"]["id"]
+    chat_id = message.from_user.id
     logger.info(f"{message=}")
     # target_rss = message.text.strip("/").replace("schedule", "").replace("sch", "").strip()
     # Example: "/sch ert 1"
@@ -559,7 +560,7 @@ async def my_schedule(message: types.Message) -> None:
     markup = types.ReplyKeyboardRemove()
     myschedule_records = await fetch_schedule(message=message)
     my_sched = get_my_schedules(myschedule_records)
-    chat_id = message["from"]["id"]
+    chat_id = message.from_user.id
     lang = await src.db.funcs.fetch_lang(message=message)
     # No schedules, return to break the flow of the func
     if len(myschedule_records) == 0:
