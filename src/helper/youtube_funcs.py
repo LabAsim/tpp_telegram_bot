@@ -88,11 +88,11 @@ def download_playlist(url: str) -> str:
 
 
 @wrap_as_async
-def download_send(message: types.Message) -> types.InputFile:
+def download_send(message: types.Message) -> types.FSInputFile:
     """Downloads the video from the url in the message and return the uploaded file"""
     current_dir = os.path.dirname(__file__)
     logger.debug(f"message text: {message.text}")
     file = download_video(video_url=message.text, target_path=current_dir)
     file = convert_to_mp3(file)
-    file = types.InputFile(file)
+    file = types.FSInputFile(file)
     return file
