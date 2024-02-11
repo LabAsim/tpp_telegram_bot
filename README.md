@@ -1,7 +1,7 @@
 # tpp_telegram_bot
 A simple Telegram Bot for TPP and other greek news sites.
 
-The bot is hosted in [fly.io](https://fly.io/) or [pythonanywhere](https://www.pythonanywhere.com/) and the scraping script in [Apify](https://apify.com/).
+The bot is hosted in [fly.io](https://fly.io/) and the scraping script in [Apify](https://apify.com/).
 
 Add it in Telegram! [Click here](https://t.me/TppgrBot)!
 
@@ -23,13 +23,7 @@ Run `pip install -r requirements.txt` to install the dependencies.
 you can set the tokens to environmental variables named as the constants above.
 In this case, do not create the `saved_tokens.py` at all.
 
-*   If you want to run the test bot, run `python main.py --test True` (default is `False`).
-
-### Pythonanywhere
-Upload the files in pythonanywhere, open a console and run sequently
-* `cd telegram_bot`
-* `source venv/bin/activate` (activate the virtual environment)
-* `python -m main`
+*   If you want to run the test bot, run `python main.py --test True --dbpass yourpass` (default is `False`).
 
 
 ### Fly.io
@@ -56,7 +50,7 @@ Run the bot locally:
 
 * [X]  integrate **APSchedule**
 
-* [ ] Migrate to Aiogram 3.X
+* [ _**ongoing**_ ] Migrate to Aiogram 3.X
 
 
 
