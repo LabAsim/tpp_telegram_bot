@@ -1,4 +1,5 @@
 """Main module"""
+import asyncio
 import logging
 import os
 import colorama
@@ -11,14 +12,12 @@ if __name__ == "__main__":
     logging.getLogger("pytube").setLevel(logging.WARNING)
 
 from aiogram import Dispatcher
-from aiogram.utils import executor
 
 # from aiogram.enums import ParseMode https://github.com/aiogram/aiogram/blob/v3.0.0/examples/echo_bot.py
 import config
 
 from src.helper.helper import parse_arguments, color_logging
 from src.scheduler.funcs import start_scheduler_as_task
-
 
 # This is a hacky way to parse the variables and save the user's preference of DEBUG etc
 if __name__ == "__main__":
@@ -28,10 +27,10 @@ if __name__ == "__main__":
     os.environ["dbpass"] = args.dbpass
 
 # These need to be here, otherwise the imports are messed up!
-from src.bot.bot_functions import dp
+from src.bot.bot_functions import dp, bot
 
 
-def main(debug: bool, dp: Dispatcher) -> None:
+async def main(debug: bool, dp: Dispatcher) -> None:
     level = logging.DEBUG if debug else logging.INFO
     console = color_logging(level=level)
     logging.basicConfig(
@@ -42,14 +41,14 @@ def main(debug: bool, dp: Dispatcher) -> None:
     # Init should be here so as the colors be rendered properly in fly.io
     colorama.init(convert=True)
     logging.info(f"DEBUG: {debug}, MODE: {MODE}, TEST: {TEST}")
-
-    executor.start_polling(
-        dispatcher=dp,
+    print(bot)
+    await start_scheduler_as_task()
+    await dp.start_polling(
+        bot,
         timeout=60,
-        on_startup=start_scheduler_as_task,
-        skip_updates=True,
+        skip_updates=False,
     )
 
 
 if __name__ == "__main__":
-    main(debug=config.DEBUG, dp=dp)
+    asyncio.run(main(debug=config.DEBUG, dp=dp))
