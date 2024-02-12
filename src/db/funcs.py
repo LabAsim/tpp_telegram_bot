@@ -41,7 +41,7 @@ class DbPoolSingleton:
 
 
 def construct_database_url() -> str:
-    """If there is not a environmental variable, it creates a new one based on defaults"""
+    """If there is not an environmental variable, it creates a new one based on defaults"""
     if not os.environ.get("DATABASE_URL"):
         # ``postgres://user:pass@host:port/database?option=value``
         host = "127.0.0.1"
@@ -58,11 +58,11 @@ async def connect(message: types.Message) -> None:
     """
     It connects to the Postgresql db and saves the user's id, name, lang.
     If there is not an environmental var `DATABASE_URL` (for example, if you run the bot locally),
-    it will the url from the defaults
+    it will use the url from the defaults
     """
     id = int(message.from_user.id)
     lang = message.text.strip("👍").strip("🤝").strip()
-    name = message["from"]["first_name"]
+    name = message.from_user.first_name
     last_seen = datetime.datetime.now(datetime.timezone.utc)  # This is UTC+0
     # The date in the db will be timezone aware (UTC+2 for Greece)
     date_added = last_seen
