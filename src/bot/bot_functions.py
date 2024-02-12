@@ -15,7 +15,6 @@ from aiogram import types, md, Dispatcher
 from aiogram.utils.markdown import text
 from aiogram.enums.parse_mode import ParseMode
 
-
 from src.helper.helper import escape_md
 
 # from aiogram.filters import
@@ -91,9 +90,7 @@ def update_user(func: Callable) -> Callable[[tuple[Any, ...]], Coroutine[Any, An
     return wrapper
 
 
-@dp.message(Command(*["help", "χελπ", "ηελπ"]))  # commands=["help", "χελπ", "ηελπ"]
-#  F.func(lambda message: message in ["/help", "/χελπ", "/ηελπ"])
-@update_user
+@dp.message(Command(*["help", "χελπ", "ηελπ"]))
 async def show_help(message: types.Message) -> None:
     """Shows the help message"""
     lang = await src.db.funcs.fetch_lang(message=message)
@@ -112,7 +109,6 @@ async def show_help(message: types.Message) -> None:
 
 
 @dp.message(lambda message: message.text in ("English 👍", "Greek 🤝"))
-@update_user
 async def save_user(message: types.Message) -> None:
     """Saves the user's name and lang preference"""
 
@@ -121,7 +117,6 @@ async def save_user(message: types.Message) -> None:
 
 
 @dp.message(Command(*["lang", "language", "start", "λανγ"]))
-@update_user
 async def choose_language(message: types.message) -> None:
     """Choose and saves the language preference of the user"""
 
@@ -174,9 +169,7 @@ async def search(message: types.Message) -> None:
     )
 
 
-# commands=["search", "s", "σ"]
 @dp.message(Command(*["search", "s", "σ"]))
-@update_user
 async def search_handler(message: types.Message) -> None:
     """
     Searches based on the user's input,
@@ -207,7 +200,6 @@ async def to_search_next_page(message: types.Message) -> None:
 
 @dp.message(lambda message: "Yes 🆗" == message.text)
 @dp.message(lambda message: "Ναι 🆗" == message.text)
-@update_user
 async def search_next_page(message: types.Message) -> None:
     """Searches the next page"""
 
@@ -280,7 +272,6 @@ async def search_next_page(message: types.Message) -> None:
 
 @dp.message(lambda message: "No 👎" == message.text)
 @dp.message(lambda message: "Όχι 👎" == message.text)
-@update_user
 async def end_search(message: types.Message):
     """
     Removes the keyboard and inform the user that the search was ended.
@@ -321,7 +312,6 @@ async def end_search(message: types.Message):
         ]
     )
 )
-@update_user
 async def search_category(message: types.Message) -> None:
     """
     Scrapes the provided news category athletic_scraper/category-actor
@@ -389,7 +379,6 @@ async def search_category(message: types.Message) -> None:
 
 
 @dp.message(Command(*["youtube", "video", "yt"]))
-@update_user
 async def send_video(message: types.Message) -> None:
     """Downloads and sends the video(s) from the url provided by the user"""
 
@@ -422,7 +411,6 @@ async def send_video(message: types.Message) -> None:
 
 
 @dp.message(Command(*rss_feed))
-@update_user
 async def send_rssfeed(
     message: types.Message = None, target_rss: str = None, chat_id: int = None
 ) -> None:
@@ -527,7 +515,6 @@ async def send_chunks_rssfeed(
 
 
 @dp.message(Command(*["schedule", "sch"]))
-@update_user
 async def schedule(message: types.Message):
     """Saves the schedule for the target rss site"""
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
@@ -554,7 +541,6 @@ async def schedule(message: types.Message):
 
 
 @dp.message(Command(*["mysch", "myschedule", "μυσψη"]))
-@update_user
 async def my_schedule(message: types.Message) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     markup = types.ReplyKeyboardRemove()
@@ -628,14 +614,13 @@ async def my_schedule(message: types.Message) -> None:
 
 
 @dp.message(Command(*["del", "delete", "δελ", "δελε", "δελετε"]))
-@update_user
 async def del_schedule(message: types.Message) -> None:
     """
     Deletes the schedule based on the id that exists in the reply message
     """
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
-    if message.__getitem__("reply_to_message"):
-        target_id = message["reply_to_message"]["text"]
+    if message.reply_to_message:
+        target_id = message.reply_to_message.text
         target_id = (
             target_id.split("\ncategory")
             if "category " in target_id
@@ -648,7 +633,6 @@ async def del_schedule(message: types.Message) -> None:
 
 
 @dp.message(Command(*["delall", "deleteall", "δελαλλ", "δελεαλλ", "δελετεαλλ"]))
-@update_user
 async def del_all_schedules(message: types.Message) -> None:
     """Deletes every saved schedules of the user"""
     myschedule_records = await fetch_schedule(message=message)
@@ -662,8 +646,12 @@ async def del_all_schedules(message: types.Message) -> None:
 
 
 @dp.message(lambda message: message.text)
-@update_user
 async def random_text(message: types.Message) -> None:
     """Just to update the user's info, if anything is sent to the bot"""
+
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+    # logger.debug(f"\n{message=}")
+    # logger.debug(f"\n{message.model_dump_json(indent=4)}")
+    if message.reply_to_message:
+        logger.info(f"{message.reply_to_message.text=}")
     pass
