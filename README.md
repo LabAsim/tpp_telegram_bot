@@ -48,9 +48,9 @@ Run the bot locally:
 
 # Roadmap
 
-* [X]  integrate **APSchedule**
+* [X]  integrate [**APSchedule**](https://github.com/agronholm/apscheduler)
 
-* [ _**ongoing**_ ] Migrate to Aiogram 3.X
+* [ _**ongoing**_ ] Migrate to [Aiogram 3.X](https://github.com/aiogram/aiogram)
 
 
 
