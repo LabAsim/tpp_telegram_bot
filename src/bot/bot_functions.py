@@ -15,8 +15,6 @@ from aiogram import types, md, Dispatcher
 from aiogram.utils.markdown import text
 from aiogram.enums.parse_mode import ParseMode
 
-from src.helper.helper import escape_md
-
 # from aiogram.filters import
 from aiogram.filters.command import Command
 
@@ -38,7 +36,7 @@ from src.bot.commands_text import Text
 from src.helper.constants import rss_feed
 from src.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
 from src.helper.youtube_funcs import download_playlist, download_send
-from src.helper.helper import log_func_name, func_name
+from src.helper.helper import log_func_name, func_name, escape_md, extract_schedule_id
 from src.scheduler.funcs import schedule_rss_feed, get_my_schedules
 
 try:
@@ -609,7 +607,6 @@ async def my_schedule(message: types.Message) -> None:
             text=escape_md(answer),
             disable_web_page_preview=True,
             parse_mode=ParseMode.MARKDOWN_V2,
-            reply_markup=markup,
         )
 
 
@@ -620,13 +617,8 @@ async def del_schedule(message: types.Message) -> None:
     """
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     if message.reply_to_message:
-        target_id = message.reply_to_message.text
-        target_id = (
-            target_id.split("\ncategory")
-            if "category " in target_id
-            else target_id.split("\nΚατηγορία")
-        )
-        target_id = target_id[0].replace("id:", "").strip()
+        message_text = message.reply_to_message.text
+        target_id = extract_schedule_id(message_text=message_text)
         logger.debug(f"{target_id=} to be deleted")
         await delete_target_schedule(target_id=target_id)
         logger.debug(f"Schedule was deleted ({target_id=})")

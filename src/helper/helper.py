@@ -183,3 +183,22 @@ def escape_md(*content, sep=" ") -> str:
     Escape markdown text
     """
     return markdown_decoration.quote(_join(*content, sep=sep))
+
+
+def extract_schedule_id(message_text: str) -> str:
+    """
+    Extracts the schedule id from the text.
+
+    For example:
+        target_id='123456789.2a83b81d-0c5c-46a4-8607-ac1326ac61b2\ncategory: tpp\nSchedule news at 12:11:09 (Athens
+            time)\nevery \n0 weeks | 1 days | 0 hours' becomes
+        target_id='123456789.2a83b81d-0c5c-46a4-8607-ac1326ac61b2'
+    """
+    message_text = (
+        message_text.split("\ncategory")
+        if "category" in message_text
+        else message_text.split("\nΚατηγορία")
+    )
+    target_id = message_text[0].replace("id:", "").strip()
+
+    return target_id
