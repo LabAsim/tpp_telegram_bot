@@ -24,10 +24,20 @@ class BotHelper:
         self.proxies = {"http": self.proxy_url}
         self.dp = dispatcher
         # language selection
-        lang1 = KeyboardButton("English 👍")
-        lang2 = KeyboardButton("Greek 🤝")
-        self.lang_kb = (
-            ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(lang1).add(lang2)
+        lang1 = KeyboardButton(text="English 👍")
+        lang2 = KeyboardButton(text="Greek 🤝")
+        self.lang_kb = ReplyKeyboardMarkup(
+            resize_keyboard=True, one_time_keyboard=True, keyboard=[[lang1, lang2]]
+        )
+        yes_button_eng = KeyboardButton(text="Yes 🆗")
+        no_button_eng = KeyboardButton(text="No 👎")
+        self.lang_yes_no_kb_eng = ReplyKeyboardMarkup(
+            resize_keyboard=True, one_time_keyboard=True, keyboard=[[yes_button_eng, no_button_eng]]
+        )
+        yes_button_gr = KeyboardButton(text="Ναι 🆗")
+        no_button_gr = KeyboardButton(text="Όχι 👎")
+        self.lang_yes_no_kb_gr = ReplyKeyboardMarkup(
+            resize_keyboard=True, one_time_keyboard=True, keyboard=[[yes_button_gr, no_button_gr]]
         )
         self.dir_path_exe = self.find_the_path_of_main_exe()
         self.dir_path = self.find_the_path_of_main()
