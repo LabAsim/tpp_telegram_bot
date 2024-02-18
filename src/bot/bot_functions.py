@@ -146,7 +146,7 @@ async def search(message: types.Message) -> None:
     settings_helper.search_results = results["results_total"]
     answer = text()
     for result_dict_key in list(settings_helper.search_results.keys()):
-        title = result_dict_key
+        title = escape_md(result_dict_key)
         url = settings_helper.search_results[result_dict_key]
         last_line = "-" * 50
         answer += text(
@@ -158,7 +158,7 @@ async def search(message: types.Message) -> None:
         )
 
     markup = types.ReplyKeyboardRemove()
-
+    logger.debug(f"{answer=}")
     await message.reply(
         answer,
         reply_markup=markup,
@@ -185,14 +185,14 @@ async def to_search_next_page(message: types.Message) -> None:
     """
     # Configure ReplyKeyboardMarkup
     logger.debug("to_search_next_page called")
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-    lang = await src.db.funcs.fetch_lang(message=message)
-    logger.debug(f"{lang=}")
+    lang = await src.db.funcs.fetch_lang(message=message)  # It returns <Record lang='English'>]
+    logger.debug(f"{lang.get('lang')=}")
+    lang = lang.get("lang")
     if lang == "English":
-        markup.add("Yes 🆗", "No 👎")
+        markup = settings_helper.lang_yes_no_kb_eng
         await message.reply(Text.to_search_next_page_eng, reply_markup=markup)
     else:
-        markup.add("Ναι 🆗", "Όχι 👎")
+        markup = settings_helper.lang_yes_no_kb_gr
         await message.reply(Text.to_search_next_page_greek, reply_markup=markup)
 
 
@@ -237,7 +237,7 @@ async def search_next_page(message: types.Message) -> None:
     settings_helper.search_results = results["results_total"]
     answer = ""
     for result_dict_key in list(settings_helper.search_results.keys()):
-        title = result_dict_key
+        title = escape_md(result_dict_key)
         url = settings_helper.search_results[result_dict_key]
         last_line = "-" * 50
         answer += text(
