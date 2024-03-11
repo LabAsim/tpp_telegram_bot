@@ -11,6 +11,8 @@ if __name__ == "__main__":
     logging.getLogger("apscheduler._schedulers.async_").setLevel(logging.WARNING)
     logging.getLogger("pytube").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("apify_client").setLevel(logging.WARNING)
 
 from aiogram import Dispatcher
 
