@@ -1,9 +1,9 @@
-# tpp_telegram_bot
+# A Telegram bot for TPP and other news sites
 A simple Telegram Bot for TPP and other greek news sites.
 
 The bot is hosted in [fly.io](https://fly.io/) and the scraping script in [Apify](https://apify.com/).
 
-Add it on Telegram! [Click here](https://t.me/TppgrBot)!
+### Add it on Telegram! [Click here](https://t.me/TppgrBot)!
 
 ## Table of Contents
 
