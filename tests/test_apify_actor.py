@@ -243,17 +243,32 @@ class TestApifyActor(unittest.TestCase):
 
     def test_call_apify_actor_category_search(self):
         # Category ==> athletic_scraper/category-actor
-        # Test the Culture category
-        url = convert_category_str_to_url(category_str="cul")
-        results = call_apify_actor(
-            actor="athletic_scraper/category-actor", url=url, token=saved_tokens.TOKEN_APIFY
-        )["results_total"]
-        self.assertIsInstance(results, dict)
-        self.assertIs(len(results), 10)
-        for key, value in results.items():
-            self.assertIsInstance(key, str)
-            self.assertTrue(validators.url(value))
+        categories = [
+            "cul",
+            "tv",
+            "radio",
+            "anaskopisi",
+            "analysis",
+            "greece",
+            "international",
+            "economy",
+            "politics",
+            "news",
+        ]
+        for category in categories:
+            url = convert_category_str_to_url(category_str=category)
+            results = call_apify_actor(
+                actor="athletic_scraper/category-actor", url=url, token=saved_tokens.TOKEN_APIFY
+            )["results_total"]
+            self.assertIsInstance(results, dict)
+
+            self.assertIs(len(results), 10) if not category == "anaskopisi" else self.assertIs(
+                len(results), 20
+            )
+            for key, value in results.items():
+                self.assertIsInstance(key, str)
+                self.assertTrue(validators.url(value))
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=0, buffer=True)
+    unittest.main(verbosity=2, buffer=True)
