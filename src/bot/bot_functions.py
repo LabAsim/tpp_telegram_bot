@@ -345,6 +345,16 @@ async def search_category(message: types.Message) -> None:
     )
     settings_helper.search_results = results["results_total"]
 
+    markup = types.ReplyKeyboardRemove()
+    # If results are an empty dict, stop.
+    if len(settings_helper.search_results) == 0:
+        await message.reply(
+            text=text("No data at the moment\nΔεν υπάρχει αποτέλεσμα προς το παρόν"),
+            reply_markup=markup,
+            disable_web_page_preview=True,
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
+        return None
     # That is a sync way, which blocks main loop
 
     # settings_helper.search_results = call_apify_actor(
@@ -360,13 +370,11 @@ async def search_category(message: types.Message) -> None:
         last_line = "-" * 50
         answer += text(
             text(""),
-            md.bold((text(title))),
+            md.bold(escape_md((text(title)))),
             text(escape_md(url)),
             text(escape_md(last_line)),
             sep="\n",
         )
-    # logging.debug(f"Answer forwarded to user:{answer}")
-    markup = types.ReplyKeyboardRemove()
     # Reply to user
     await message.reply(
         answer,
