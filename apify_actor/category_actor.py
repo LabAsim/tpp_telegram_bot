@@ -91,7 +91,8 @@ class CategoryScraper:
         self.soup = None
         self.headers = header
         self.url = url
-        self.category = category
+        # Parse category from the url if it's not specified
+        self.category = category or self.url.rstrip("/").split("/")[-1]
         self.debug = debug
         self.check_url_and_iterate(self.url, self.headers)
 

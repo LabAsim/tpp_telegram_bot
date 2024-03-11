@@ -134,7 +134,7 @@ def call_apify_actor(actor: str, url: str, token: str) -> dict:
     :param token: `str` : The token of the Apify platform.
     :return: A `dict` holding the scraped data as {title: url}
     """
-    apify_client = ApifyClient(token=token, max_retries=2)
+    apify_client = ApifyClient(token=token, max_retries=3)
     actor_client = apify_client.actor(f"{actor}")  # .call()
 
     dic = {"start_urls": [{"url": f"{url}"}]}
