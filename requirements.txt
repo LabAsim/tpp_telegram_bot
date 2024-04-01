@@ -1,4 +1,4 @@
-aiogram==2.25.1
+aiogram>=3.3.0
 apify==1.1.5
 beautifulsoup4==4.11.2
 colorama==0.4.6
