@@ -128,6 +128,19 @@ class TestApifyActor(unittest.TestCase):
         ):
             target_url = "https://thepressproject.gr/article_type/report/"
             self.assertEqual(convert_category_str_to_url(a), target_url)
+
+        # Reportage
+        for a in (
+            "english",
+            "English",
+            "eng",
+            "english",
+            "αγγλικα",
+            "αγγ",
+        ):
+            target_url = "https://thepressproject.gr/category/english/"
+            self.assertEqual(convert_category_str_to_url(a), target_url)
+
         # Anything else
         arb_text = "arbitrary category"
         if arb_text not in (
@@ -254,6 +267,7 @@ class TestApifyActor(unittest.TestCase):
             "economy",
             "politics",
             "news",
+            "english",
         ]
         for category in categories:
             url = convert_category_str_to_url(category_str=category)
