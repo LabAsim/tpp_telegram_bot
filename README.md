@@ -8,6 +8,7 @@ The bot is hosted in [fly.io](https://fly.io/) and the scraping script in [Apify
 ## Table of Contents
 
 *   [Installation](#Installation)
+*   [fly.io](#Fly.io)
 *   [Docker](#Docker)
 *   [Donate](#donate)
 *   [License](#license)
@@ -26,7 +27,7 @@ In this case, do not create the `saved_tokens.py` at all.
 *   If you want to run the test bot, run `python main.py --test True --dbpass yourpass` (default is `False`).
 
 
-### Fly.io
+## Fly.io
 Install [flyctl](https://fly.io/docs/hands-on/install-flyctl/)
 
 Open a powershell and type:
@@ -36,7 +37,7 @@ Open a powershell and type:
 *   `fly launch`
 *   `fly deploy` (use deploy to update the app if you have already launched it once)
 
-# Docker
+## Docker
 
 Build the image
 
@@ -46,7 +47,7 @@ Run the bot locally:
 
 ``docker run -d tppbotapp``
 
-# Roadmap
+## Roadmap
 
 * [X]  Integrate [**APSchedule**](https://github.com/agronholm/apscheduler)
 
