@@ -33,11 +33,11 @@ from src.db.funcs import fetch_schedule, delete_target_schedule
 from src.bot.bot_dispatcher import choose_token, botify
 from src.bot.botvalues import BotHelper
 from src.bot.commands_text import Text
-from src.helper.constants import rss_feed
+from src.helper.constants import rss_feed, SEARCH_CATEGORY_COMMANDS
 from src.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
 from src.helper.youtube_funcs import download_playlist, download_send
 from src.helper.helper import log_func_name, func_name, escape_md, extract_schedule_id
-from src.scheduler.funcs import schedule_rss_feed, get_my_schedules
+from src.scheduler.funcs import schedule_rss_feed, get_my_schedules, schedule_category
 
 try:
     import saved_tokens
@@ -298,27 +298,24 @@ async def end_search(message: types.Message):
     settings_helper.page_number = 1
 
 
-@dp.message(
-    Command(
-        *[
-            "category",
-            "Category",
-            "c",
-            "κατηγορία",
-            "κατηγορια",
-            "κ",
-        ]
-    )
-)
-async def search_category(message: types.Message) -> None:
+@dp.message(Command(*SEARCH_CATEGORY_COMMANDS))
+async def search_category(
+    message: types.Message | None, target: str = None, chat_id: int = None
+) -> None:
     """
     Scrapes the provided news category athletic_scraper/category-actor
     """
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
-    logger.info(f"{message.from_user.first_name}: {message.text}")
+
+    assert (message and target) is None
+    if not message:
+        assert (target and chat_id) is not None
+
     # Reset the counter
     settings_helper.page_number = 1
-    settings_helper.search_keyword = message.text.strip().replace("/category", "").strip()
+    settings_helper.search_keyword = (
+        target if not message else message.text.strip().replace("/category", "").strip()
+    )
     settings_helper.search_keyword = (
         settings_helper.search_keyword.strip().replace("/c", "").strip()
     )
@@ -376,12 +373,22 @@ async def search_category(message: types.Message) -> None:
             sep="\n",
         )
     # Reply to user
-    await message.reply(
-        answer,
-        reply_markup=markup,
-        disable_web_page_preview=True,
-        parse_mode=ParseMode.MARKDOWN_V2,
-    )
+    if message:
+        logger.info(f"{message.from_user.first_name}: {message.text}")
+        await message.reply(
+            answer,
+            reply_markup=markup,
+            disable_web_page_preview=True,
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=answer,
+            disable_web_page_preview=True,
+            parse_mode=ParseMode.MARKDOWN_V2,
+            reply_markup=markup,
+        )
 
 
 @dp.message(Command(*["youtube", "video", "yt"]))
@@ -524,26 +531,50 @@ async def send_chunks_rssfeed(
 async def schedule(message: types.Message):
     """Saves the schedule for the target rss site"""
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
-    logger.info(f"{message.text=}")
+    logger.debug(f"{message.text=}")
     chat_id = message.from_user.id
-    logger.info(f"{message=}")
+    logger.debug(f"{message=}")
     # target_rss = message.text.strip("/").replace("schedule", "").replace("sch", "").strip()
-    # Example: "/sch ert 1"
+
     message_split = message.text.split(" ")
-    target_rss = message_split[1]
-    logger.info(f"{target_rss=}")
-    target_rss = await parse_commands_for_rssfeed(target_rss)
+    logger.debug(f"{len(message_split)=}")
+
     trigger = None
-    try:
-        # Default 1 day
-        day = int(message_split[2] if len(message_split) > 2 else 1)
-        trigger = IntervalTrigger(
-            days=day,
-            start_time=datetime.now(timezone.utc),
-        )
-    except ValueError:
-        trigger = CronTrigger(day_of_week=message_split[2])
-    await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss, trigger_target=trigger)
+    # If the format of the command is for rss feed
+    if 2 <= len(message_split) <= 3:
+        # Example: "/sch ert 1"
+        # Example: "/sch ert mon-fri"
+        target_rss = message_split[1]
+        logger.info(f"{target_rss=}")
+        target_rss = await parse_commands_for_rssfeed(target_rss)
+        try:
+            # Default 1 day
+            day = int(message_split[2] if len(message_split) > 2 else 1)
+            trigger = IntervalTrigger(
+                days=day,
+                start_time=datetime.now(timezone.utc),
+            )
+        except ValueError:
+            trigger = CronTrigger(day_of_week=message_split[2])
+        await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss, trigger_target=trigger)
+    elif len(message_split) == 4:
+        # Example: "/sch search BIOME 1"
+        # Example: "/sch search BIOME mon-fri"
+        # Example: "/sch category news 1"
+        # Example: "/sch category news mon-fri"
+        command = message_split[1]
+        target = message_split[2]
+        try:
+            # Default 1 day
+            day = int(message_split[3] if len(message_split) > 3 else 1)
+            trigger = IntervalTrigger(
+                days=day,
+                start_time=datetime.now(timezone.utc),
+            )
+        except ValueError:
+            trigger = CronTrigger(day_of_week=message_split[-1])
+        if command in SEARCH_CATEGORY_COMMANDS:
+            await schedule_category(chat_id=chat_id, target=target, trigger_target=trigger)
 
 
 @dp.message(Command(*["mysch", "myschedule", "μυσψη"]))

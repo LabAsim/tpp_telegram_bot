@@ -1,3 +1,13 @@
+SEARCH_CATEGORY_COMMANDS = [
+    "category",
+    "Category",
+    "c",
+    "κατηγορία",
+    "κατηγορια",
+    "κ",
+]
+
+
 # Keywords for commands to fetch rss feed
 rss_feed = [
     "efsyn",
