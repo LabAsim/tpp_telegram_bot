@@ -8,7 +8,7 @@ The bot is hosted in [fly.io](https://fly.io/) and the scraping script in [Apify
 ## Table of Contents
 
 *   [Installation](#Installation)
-*   [fly.io](#Fly.io)
+*   [fly.io](#Flyio)
 *   [Docker](#Docker)
 *   [Donate](#donate)
 *   [License](#license)
