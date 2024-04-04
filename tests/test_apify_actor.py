@@ -129,7 +129,7 @@ class TestApifyActor(unittest.TestCase):
             target_url = "https://thepressproject.gr/article_type/report/"
             self.assertEqual(convert_category_str_to_url(a), target_url)
 
-        # Reportage
+        # English
         for a in (
             "english",
             "English",
