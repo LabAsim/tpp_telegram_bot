@@ -103,6 +103,42 @@ async def schedule_rss_feed(
         logger.warning(traceback.print_exc())
 
 
+async def schedule_target_search(chat_id: int, target: str) -> None:
+    log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+    # To avoid circular imports
+    from src.bot.bot_functions import search
+
+    # There is no user message, just a scheduled search scraping
+    await search(message=None, chat_id=chat_id, target=target)
+
+
+async def schedule_search(
+    chat_id: str | int, target: str, trigger_target: CronTrigger | IntervalTrigger
+) -> None:
+    """
+    Adds the proposed category to the database.
+    The id of the schedule is composed by a random number and the user's id.
+    """
+    log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+    engine = create_async_engine(
+        construct_database_url().replace("postgres://", "postgresql+asyncpg://")
+    )
+    logger.debug(f"postgres engine: {engine.engine}")
+    data_store = SQLAlchemyDataStore(engine)
+
+    try:
+        async with AsyncScheduler(data_store) as scheduler:
+            await scheduler.add_schedule(
+                func_or_task_id=schedule_target_search,
+                args=[chat_id, target],
+                trigger=trigger_target,
+                id=f"{chat_id}.{str(uuid4())}",
+            )
+            logger.debug("Schedule added")
+    except Exception:
+        logger.warning(traceback.print_exc())
+
+
 async def schedule_target_category(chat_id: int, target: str) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     # To avoid circular imports
@@ -134,6 +170,7 @@ async def schedule_category(
                 trigger=trigger_target,
                 id=f"{chat_id}.{str(uuid4())}",
             )
+            logger.debug("Schedule added")
     except Exception:
         logger.warning(traceback.print_exc())
 
