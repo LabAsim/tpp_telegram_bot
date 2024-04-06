@@ -6,6 +6,8 @@ from apify_client import ApifyClient
 from typing import Union
 from src.helper.helper import timed_lru_cache
 
+logger = logging.getLogger(__name__)
+
 
 def convert_category_str_to_url(category_str: str) -> str:
     """Converts the string category to a valid url"""
@@ -109,7 +111,7 @@ def convert_category_str_to_url(category_str: str) -> str:
     elif category_str in ("english", "English", "eng", "english", "αγγλικα", "αγγ"):
         return "https://thepressproject.gr/category/english/"
     else:
-        logging.debug(f"'{category_str}' does not respond to any know category")
+        logger.debug(f"'{category_str}' does not respond to any know category")
         return ""
 
 
@@ -123,38 +125,65 @@ def synthesize_url(keyword: str, page_number: Union[int, str] = 1, debug: bool =
     keyword = str(keyword)
     final_url = base_url + page_number + base_url_preterm + keyword + suffix_url
     if debug:
-        print(f"Recreated url: {final_url}")
+        logger.debug(f"Recreated url: {final_url}")
     return final_url.strip()
 
 
 @timed_lru_cache(minutes=10)
-def call_apify_actor(actor: str, url: str, token: str) -> dict:
+def call_apify_actor(actor: str, _url: str, token: str) -> dict:
     """Calls the apify actor to scrape the target url and
     return a dictionary with the results
     :param actor: `str` : The actor name to be called.
-    :param url: `str` : The url to be scraped.
+    :param _url: `str` : The url to be scraped.
     :param token: `str` : The token of the Apify platform.
     :return: A `dict` holding the scraped data as {title: url}
     """
-    apify_client = ApifyClient(token=token, max_retries=3)
+    apify_client = ApifyClient(token=token, max_retries=2)
     actor_client = apify_client.actor(f"{actor}")  # .call()
 
-    dic = {"start_urls": [{"url": f"{url}"}]}
+    dic = {"start_urls": [{"url": f"{_url}"}]}
     dic = json.dumps(dic)
 
-    actor_client.get()
+    # actor_client.get()
     act = actor_client.call(run_input=dic, content_type="application/json", timeout_secs=120)
-    # print("act")
-    # for key in act.keys():
-    #    print(key)
-    # print(act)
+
     dataset_items = apify_client.dataset(act["defaultDatasetId"]).list_items().items
 
-    # print("dataset")
+    logger.debug(f"\n{dataset_items=}")
     for item in dataset_items:
-        print(item)
-    # print(dataset_items)
+        logger.debug(f"\n{item=}")
+
     if isinstance(dataset_items, list):
+        logger.debug("returning")
+        return dataset_items[0]  # Currently it contains only one item
+
+
+# @timed_lru_cache(minutes=10)
+async def async_call_apify_actor(actor: str, _url: str, token: str) -> dict:
+    """Calls the apify actor to scrape the target url and
+    return a dictionary with the results
+    :param actor: `str` : The actor name to be called.
+    :param _url: `str` : The url to be scraped.
+    :param token: `str` : The token of the Apify platform.
+    :return: A `dict` holding the scraped data as {title: url}
+    """
+    apify_client = ApifyClient(token=token, max_retries=2)
+    actor_client = apify_client.actor(f"{actor}")  # .call()
+
+    dic = {"start_urls": [{"url": f"{_url}"}]}
+    dic = json.dumps(dic)
+
+    # actor_client.get()
+    act = actor_client.call(run_input=dic, content_type="application/json", timeout_secs=120)
+
+    dataset_items = apify_client.dataset(act["defaultDatasetId"]).list_items().items
+
+    logger.debug(f"\n{dataset_items=}")
+    for item in dataset_items:
+        logger.debug(f"\n{item=}")
+
+    if isinstance(dataset_items, list):
+        logger.debug("returning")
         return dataset_items[0]  # Currently it contains only one item
 
 
@@ -166,9 +195,9 @@ if __name__ == "__main__":
     while True:
         url = synthesize_url(keyword="ΒΙΟΜΕ")
         results = call_apify_actor(
-            url="https://thepressproject.gr/article_type/radio",
+            _url="https://thepressproject.gr/?s=geia&submit=Αναζήτηση",
             token=saved_tokens.TOKEN_APIFY,
-            actor="athletic_scraper/my-actor",
+            actor="athletic_scraper/search-actor",
         )
         print(results)
-        time.sleep(1)
+        time.sleep(10)
