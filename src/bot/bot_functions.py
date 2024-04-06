@@ -28,16 +28,22 @@ from src.bot.apify_actor import (
     call_apify_actor,
     synthesize_url,
     convert_category_str_to_url,
+    async_call_apify_actor,
 )
 from src.db.funcs import fetch_schedule, delete_target_schedule
 from src.bot.bot_dispatcher import choose_token, botify
 from src.bot.botvalues import BotHelper
 from src.bot.commands_text import Text
-from src.helper.constants import rss_feed, SEARCH_CATEGORY_COMMANDS
+from src.helper.constants import rss_feed, SEARCH_CATEGORY_COMMANDS, SEARCH_COMMANDS
 from src.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
 from src.helper.youtube_funcs import download_playlist, download_send
 from src.helper.helper import log_func_name, func_name, escape_md, extract_schedule_id
-from src.scheduler.funcs import schedule_rss_feed, get_my_schedules, schedule_category
+from src.scheduler.funcs import (
+    schedule_rss_feed,
+    get_my_schedules,
+    schedule_category,
+    schedule_search,
+)
 
 try:
     import saved_tokens
@@ -121,29 +127,72 @@ async def choose_language(message: types.message) -> None:
     await message.answer(Text.choose_lang_text, reply_markup=settings_helper.lang_kb)
 
 
-async def search(message: types.Message) -> None:
+async def search(message: types.Message | None, target: str = None, chat_id: int = None) -> None:
     """Searches based on the user's input and replies with the search results"""
-    logger.info(f"{message.from_user.first_name}: {message.text}\n\n\n\n")
+
+    log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
+
+    assert (message and target) is None
+    if not message:
+        assert (target and chat_id) is not None
+    logger.debug(f"{message=}\n{target=}\n{chat_id=}")
     # Reset the counter
     settings_helper.page_number = 1
-    settings_helper.search_keyword = message.text.strip().replace("/search", "").strip()
+    settings_helper.search_keyword = (
+        target if not message else message.text.strip().replace("/search", "").strip()
+    )
     settings_helper.search_keyword = (
         settings_helper.search_keyword.strip().replace("/s", "").strip()
     )
     settings_helper.search_keyword = (
         settings_helper.search_keyword.strip().replace("/σ", "").strip()
     )
+    logger.debug(f"{settings_helper.search_keyword=}")
     url = synthesize_url(keyword=settings_helper.search_keyword, page_number=1)
+    # If the _url does not exist (it's empty string), stop the method
+    if url == "":
+        return None
+    logger.debug(f"{url=}")
     # Add 1 one to the counter
     settings_helper.page_number += 1
-    # settings_helper.search_results = call_apify_actor(
-    #     actor="athletic_scraper/my-actor", url=url, token=settings_helper.apify_token
-    # )["results_total"]
-    loop = asyncio.get_event_loop()
-    results = await loop.run_in_executor(
-        None, call_apify_actor, "athletic_scraper/my-actor", url, settings_helper.apify_token
+
+    # loop = asyncio.get_event_loop()
+    # results = None
+    # try:
+    #     results = await loop.run_in_executor(
+    #         None, call_apify_actor, "athletic_scraper/search-actor", url, settings_helper.apify_token
+    #     )
+    #     # raise ValueError
+    # except Exception as err:
+    #     logger.exception(err)
+    results = await async_call_apify_actor(
+        _url=url, actor="athletic_scraper/search-actor", token=settings_helper.apify_token
     )
+    logger.debug(f"{results=}")
     settings_helper.search_results = results["results_total"]
+    logger.debug(f"{settings_helper.search_results=}")
+
+    markup = types.ReplyKeyboardRemove()
+
+    # If results are an empty dict, stop.
+    if len(settings_helper.search_results) == 0:
+        if message:
+            await message.reply(
+                text=text("No data at the moment\nΔεν υπάρχει αποτέλεσμα προς το παρόν"),
+                reply_markup=markup,
+                disable_web_page_preview=True,
+                parse_mode=ParseMode.MARKDOWN_V2,
+            )
+        else:
+            await bot.send_message(
+                chat_id=chat_id,
+                text=text(
+                    f"No data at the moment for keyword {settings_helper.search_keyword}"
+                    f"\nΔεν υπάρχει αποτέλεσμα προς το παρόν για την αναζήτηση {settings_helper.search_keyword}"
+                ),
+            )
+        return None
+
     answer = text()
     for result_dict_key in list(settings_helper.search_results.keys()):
         title = escape_md(result_dict_key)
@@ -157,17 +206,31 @@ async def search(message: types.Message) -> None:
             sep="\n",
         )
 
-    markup = types.ReplyKeyboardRemove()
     logger.debug(f"{answer=}")
-    await message.reply(
-        answer,
-        reply_markup=markup,
-        disable_web_page_preview=True,
-        parse_mode=ParseMode.MARKDOWN_V2,
-    )
+    # Reply to user
+    if message:
+        logger.info(f"{message.from_user.first_name}: {message.text}")
+        await message.reply(
+            answer,
+            reply_markup=markup,
+            disable_web_page_preview=True,
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
+    else:
+        try:
+            logger.info("Sending...")
+            msg = await bot.send_message(
+                chat_id=chat_id,
+                text=answer,
+                disable_web_page_preview=True,
+            )
+            logger.info("Sent")
+            logger.debug(f"{msg=}")
+        except Exception as err:
+            logger.exception(err)
 
 
-@dp.message(Command(*["search", "s", "σ"]))
+@dp.message(Command(*SEARCH_COMMANDS))
 async def search_handler(message: types.Message) -> None:
     """
     Searches based on the user's input,
@@ -226,7 +289,7 @@ async def search_next_page(message: types.Message) -> None:
     # This is a non-async way, which blocks main loop.
 
     # settings_helper.search_results = call_apify_actor(
-    #     url=url, token=settings_helper.apify_token, actor="athletic_scraper/my-actor"
+    #     _url=_url, token=settings_helper.apify_token, actor="athletic_scraper/my-actor"
     # )["results_total"]
 
     # Fetch the results
@@ -332,6 +395,7 @@ async def search_category(
     url = convert_category_str_to_url(category_str=settings_helper.search_keyword)
     # If the url does not exist (it's empty string), stop the method
     if url == "":
+        logger.debug("No url, returning None")
         return None
 
     # Update the counter
@@ -356,7 +420,7 @@ async def search_category(
 
     # settings_helper.search_results = call_apify_actor(
     #     actor="athletic_scraper/category-actor",
-    #     url=url,
+    #     _url=_url,
     #     token=settings_helper.apify_token,
     # )["results_total"]
 
@@ -382,13 +446,15 @@ async def search_category(
             parse_mode=ParseMode.MARKDOWN_V2,
         )
     else:
-        await bot.send_message(
+        msg = await bot.send_message(
             chat_id=chat_id,
             text=answer,
             disable_web_page_preview=True,
             parse_mode=ParseMode.MARKDOWN_V2,
             reply_markup=markup,
         )
+        logger.debug("Sent")
+        logger.debug(f"{msg=}")
 
 
 @dp.message(Command(*["youtube", "video", "yt"]))
@@ -568,6 +634,7 @@ async def schedule(message: types.Message):
             # Default 1 day
             day = int(message_split[3] if len(message_split) > 3 else 1)
             trigger = IntervalTrigger(
+                # minutes=1,
                 days=day,
                 start_time=datetime.now(timezone.utc),
             )
@@ -575,6 +642,8 @@ async def schedule(message: types.Message):
             trigger = CronTrigger(day_of_week=message_split[-1])
         if command in SEARCH_CATEGORY_COMMANDS:
             await schedule_category(chat_id=chat_id, target=target, trigger_target=trigger)
+        elif command in SEARCH_COMMANDS:
+            await schedule_search(chat_id=chat_id, target=target, trigger_target=trigger)
 
 
 @dp.message(Command(*["mysch", "myschedule", "μυσψη"]))
