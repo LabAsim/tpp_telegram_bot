@@ -4,7 +4,7 @@ Spacefile
 saved_tokens.py
 example*
 settings.json
-venv
+venv*
 **/__pycache_
 **/.pytest_cache
 __pycache__
