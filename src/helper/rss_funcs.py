@@ -141,5 +141,5 @@ async def parse_commands_for_rssfeed(command: str) -> str:
         case "dwenv" | "δςενω" | "δςενβ":
             return "dwenv"
         case _:
-            raise ValueError(f"Unknown command passed {command=}")
+            logger.debug(ValueError(f"Unknown command passed {command=}"))
         # fmt: on
