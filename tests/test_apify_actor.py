@@ -246,7 +246,7 @@ class TestApifyActor(unittest.TestCase):
         # Search ==> athletic_scraper/my-actor
         url = synthesize_url(keyword="Τσίπρας")
         results = call_apify_actor(
-            token=saved_tokens.TOKEN_APIFY, actor="athletic_scraper/my-actor", url=url
+            token=saved_tokens.TOKEN_APIFY, actor="athletic_scraper/search-actor", _url=url
         )["results_total"]
         self.assertIsInstance(results, dict)
         self.assertIs(len(results), 10)
@@ -272,7 +272,7 @@ class TestApifyActor(unittest.TestCase):
         for category in categories:
             url = convert_category_str_to_url(category_str=category)
             results = call_apify_actor(
-                actor="athletic_scraper/category-actor", url=url, token=saved_tokens.TOKEN_APIFY
+                actor="athletic_scraper/category-actor", _url=url, token=saved_tokens.TOKEN_APIFY
             )["results_total"]
             self.assertIsInstance(results, dict)
             if len(results) % 10 == 0:  # If len is multiple of 10
