@@ -7,6 +7,7 @@ SEARCH_CATEGORY_COMMANDS = [
     "κ",
 ]
 
+SEARCH_COMMANDS = ["search", "s", "σ"]
 
 # Keywords for commands to fetch rss feed
 rss_feed = [
