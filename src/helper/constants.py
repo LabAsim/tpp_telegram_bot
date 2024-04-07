@@ -1,3 +1,9 @@
+HELP_COMMANDS = ["help", "χελπ", "ηελπ"]
+
+LANGUAGE_COMMANDS = ["lang", "language", "start", "λανγ"]
+
+YOUTUBE_COMMANDS = ["youtube", "video", "yt"]
+
 SEARCH_CATEGORY_COMMANDS = [
     "category",
     "Category",
@@ -8,6 +14,11 @@ SEARCH_CATEGORY_COMMANDS = [
 ]
 
 SEARCH_COMMANDS = ["search", "s", "σ"]
+SCHEDULE_COMMANDS = ["schedule", "sch"]
+MYSCHEDULE_COMMANDS = ["mysch", "myschedule", "μυσψη"]
+DELETE_SCHEDULE = ["del", "delete", "δελ", "δελε", "δελετε"]
+DELETE_ALL_SCHEDULES_COMMANDS = ["delall", "deleteall", "δελαλλ", "δελεαλλ", "δελετεαλλ"]
+
 
 # Keywords for commands to fetch rss feed
 rss_feed = [

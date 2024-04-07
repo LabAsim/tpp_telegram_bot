@@ -34,7 +34,18 @@ from src.db.funcs import fetch_schedule, delete_target_schedule
 from src.bot.bot_dispatcher import choose_token, botify
 from src.bot.botvalues import BotHelper
 from src.bot.commands_text import Text
-from src.helper.constants import rss_feed, SEARCH_CATEGORY_COMMANDS, SEARCH_COMMANDS
+from src.helper.constants import (
+    rss_feed,
+    SEARCH_CATEGORY_COMMANDS,
+    SEARCH_COMMANDS,
+    DELETE_ALL_SCHEDULES_COMMANDS,
+    HELP_COMMANDS,
+    LANGUAGE_COMMANDS,
+    YOUTUBE_COMMANDS,
+    SCHEDULE_COMMANDS,
+    MYSCHEDULE_COMMANDS,
+    DELETE_SCHEDULE,
+)
 from src.helper.rss_funcs import fetch_news, parse_commands_for_rssfeed
 from src.helper.youtube_funcs import download_playlist, download_send
 from src.helper.helper import log_func_name, func_name, escape_md, extract_schedule_id
@@ -94,7 +105,7 @@ def update_user(func: Callable) -> Callable[[tuple[Any, ...]], Coroutine[Any, An
     return wrapper
 
 
-@dp.message(Command(*["help", "χελπ", "ηελπ"]))
+@dp.message(Command(*HELP_COMMANDS))
 async def show_help(message: types.Message) -> None:
     """Shows the help message"""
     lang = await src.db.funcs.fetch_lang(message=message)
@@ -120,7 +131,7 @@ async def save_user(message: types.Message) -> None:
     await show_help(message=message)
 
 
-@dp.message(Command(*["lang", "language", "start", "λανγ"]))
+@dp.message(Command(*LANGUAGE_COMMANDS))
 async def choose_language(message: types.message) -> None:
     """Choose and saves the language preference of the user"""
 
@@ -218,15 +229,25 @@ async def search(message: types.Message | None, target: str = None, chat_id: int
         )
     else:
         try:
-            logger.info("Sending...")
-            msg = await bot.send_message(
+            logger.info("Sending.....")
+            # There is a bug in async scheduler and the scheduled job is cancelled
+            # https://github.com/agronholm/apscheduler/issues/833
+
+            await bot.send_message(
+                allow_sending_without_reply=True,
                 chat_id=chat_id,
                 text=answer,
                 disable_web_page_preview=True,
+                parse_mode=ParseMode.MARKDOWN_V2,
+                reply_markup=markup,
             )
-            logger.info("Sent")
-            logger.debug(f"{msg=}")
-        except Exception as err:
+            logger.info("Search sent")
+            # logger.debug(f"{msg=}")
+        except (
+            aiogram.exceptions.DetailedAiogramError,
+            aiogram.exceptions.TelegramBadRequest,
+            Exception,
+        ) as err:
             logger.exception(err)
 
 
@@ -457,7 +478,7 @@ async def search_category(
         logger.debug(f"{msg=}")
 
 
-@dp.message(Command(*["youtube", "video", "yt"]))
+@dp.message(Command(*YOUTUBE_COMMANDS))
 async def send_video(message: types.Message) -> None:
     """Downloads and sends the video(s) from the url provided by the user"""
 
@@ -593,7 +614,7 @@ async def send_chunks_rssfeed(
             )
 
 
-@dp.message(Command(*["schedule", "sch"]))
+@dp.message(Command(*SCHEDULE_COMMANDS))
 async def schedule(message: types.Message):
     """Saves the schedule for the target rss site"""
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
@@ -634,7 +655,8 @@ async def schedule(message: types.Message):
             # Default 1 day
             day = int(message_split[3] if len(message_split) > 3 else 1)
             trigger = IntervalTrigger(
-                # minutes=1,
+                # seconds=30,
+                # minutes=3,
                 days=day,
                 start_time=datetime.now(timezone.utc),
             )
@@ -646,7 +668,7 @@ async def schedule(message: types.Message):
             await schedule_search(chat_id=chat_id, target=target, trigger_target=trigger)
 
 
-@dp.message(Command(*["mysch", "myschedule", "μυσψη"]))
+@dp.message(Command(*MYSCHEDULE_COMMANDS))
 async def my_schedule(message: types.Message) -> None:
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
     markup = types.ReplyKeyboardRemove()
@@ -718,7 +740,7 @@ async def my_schedule(message: types.Message) -> None:
         )
 
 
-@dp.message(Command(*["del", "delete", "δελ", "δελε", "δελετε"]))
+@dp.message(Command(*DELETE_SCHEDULE))
 async def del_schedule(message: types.Message) -> None:
     """
     Deletes the schedule based on the id that exists in the reply message
@@ -732,7 +754,7 @@ async def del_schedule(message: types.Message) -> None:
         logger.debug(f"Schedule was deleted ({target_id=})")
 
 
-@dp.message(Command(*["delall", "deleteall", "δελαλλ", "δελεαλλ", "δελετεαλλ"]))
+@dp.message(Command(*DELETE_ALL_SCHEDULES_COMMANDS))
 async def del_all_schedules(message: types.Message) -> None:
     """Deletes every saved schedules of the user"""
     myschedule_records = await fetch_schedule(message=message)
