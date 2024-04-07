@@ -656,8 +656,8 @@ async def schedule(message: types.Message):
             day = int(message_split[3] if len(message_split) > 3 else 1)
             trigger = IntervalTrigger(
                 # seconds=30,
-                # minutes=3,
-                days=day,
+                minutes=30,
+                # days=day,
                 start_time=datetime.now(timezone.utc),
             )
         except ValueError:
