@@ -190,7 +190,8 @@ async def fetch_schedule(message: types.Message) -> list[asyncpg.Record]:
     database_url = construct_database_url()
     conn = await asyncpg.connect(dsn=database_url)
     rows = await conn.fetch(
-        """SELECT * FROM schedules WHERE schedules.id LIKE  $1 || '%' ;""", chat_id_with_dot
+        """SELECT * FROM apscheduler_jobs WHERE apscheduler_jobs.id LIKE  $1 || '%' ;""",
+        chat_id_with_dot,
     )
     logger.debug(rows)
     return rows
@@ -200,4 +201,4 @@ async def delete_target_schedule(target_id: str) -> None:
     """Deletes the target schedule"""
     database_url = construct_database_url()
     conn = await asyncpg.connect(dsn=database_url)
-    await conn.execute("""delete from schedules where id = $1""", target_id)
+    await conn.execute("""delete from apscheduler_jobs where id = $1""", target_id)
