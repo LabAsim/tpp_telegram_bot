@@ -632,18 +632,27 @@ async def schedule(message: types.Message):
         # Example: "/sch ert 1"
         # Example: "/sch ert mon-fri"
         target_rss = message_split[1]
+        scheduled_type = "rss"
         logger.info(f"{target_rss=}")
         target_rss = await parse_commands_for_rssfeed(target_rss)
         try:
             # Default 1 day
             day = int(message_split[2] if len(message_split) > 2 else 1)
             trigger = IntervalTrigger(
-                days=day,
-                start_time=datetime.now(timezone.utc),
+                days=day, start_date=datetime.now(timezone.utc), timezone=timezone.utc
             )
         except ValueError:
-            trigger = CronTrigger(day_of_week=message_split[2])
-        await schedule_rss_feed(chat_id=chat_id, target_rss=target_rss, trigger_target=trigger)
+            trigger = CronTrigger(
+                day_of_week=message_split[2],
+                start_date=datetime.now(timezone.utc),
+                timezone=timezone.utc,
+            )
+        await schedule_rss_feed(
+            chat_id=chat_id,
+            target_rss=target_rss,
+            trigger_target=trigger,
+            scheduled_type=scheduled_type,
+        )
     elif len(message_split) == 4:
         # Example: "/sch search BIOME 1"
         # Example: "/sch search BIOME mon-fri"
@@ -651,21 +660,46 @@ async def schedule(message: types.Message):
         # Example: "/sch category news mon-fri"
         command = message_split[1]
         target = message_split[2]
+        scheduled_type = command
         try:
             # Default 1 day
             day = int(message_split[3] if len(message_split) > 3 else 1)
             trigger = IntervalTrigger(
-                # seconds=30,
-                minutes=30,
-                # days=day,
-                start_time=datetime.now(timezone.utc),
+                days=day, start_date=datetime.now(timezone.utc), timezone=timezone.utc
             )
         except ValueError:
-            trigger = CronTrigger(day_of_week=message_split[-1])
+            trigger = CronTrigger(
+                day_of_week=message_split[-1],
+                start_date=datetime.now(timezone.utc),
+                timezone=timezone.utc,
+            )
         if command in SEARCH_CATEGORY_COMMANDS:
-            await schedule_category(chat_id=chat_id, target=target, trigger_target=trigger)
+            await schedule_category(
+                chat_id=chat_id,
+                target=target,
+                trigger_target=trigger,
+                scheduled_type=scheduled_type,
+            )
         elif command in SEARCH_COMMANDS:
-            await schedule_search(chat_id=chat_id, target=target, trigger_target=trigger)
+            await schedule_search(
+                chat_id=chat_id,
+                target=target,
+                trigger_target=trigger,
+                scheduled_type=scheduled_type,
+            )
+        else:
+            lang = await src.db.funcs.fetch_lang(message=message)
+            answer = (
+                f"Command '{command}' is not recognized"
+                if lang.get("lang").lower() == "english"
+                else f"H εντολή '{command}' δεν βρέθηκε"
+            )
+            await bot.send_message(
+                chat_id=chat_id,
+                text=escape_md(answer),
+                disable_web_page_preview=True,
+                parse_mode=ParseMode.MARKDOWN_V2,
+            )
 
 
 @dp.message(Command(*MYSCHEDULE_COMMANDS))
@@ -691,45 +725,48 @@ async def my_schedule(message: types.Message) -> None:
         )
         return None
     async for _schedule in my_sched:
-        b = await _schedule
+        b = _schedule
         logger.info(f"{b=}")
         logger.info(f"{b.id=}")
-        sch_time = f"{b.trigger.start_time}"
-        sch_time = datetime.fromisoformat(sch_time)
-        sch_time = sch_time.astimezone(timezone(timedelta(hours=2)))
-        sch_time = f"{sch_time.timetz()}".split(".")[0]
+        logger.debug(f"{b.trigger.start_date=}")
+        sch_time = f"{b.trigger.start_date}"
+        if b.trigger.start_date is not None:
+            sch_time = datetime.fromisoformat(sch_time)
+            sch_time = sch_time.astimezone(timezone(timedelta(hours=2)))
+            sch_time = f"{sch_time.timetz()}".split(".")[0]
+
         if isinstance(b.trigger, CronTrigger):
             # Example:
             # CronTrigger(year='*', month='*', day='*', week='*', day_of_week='
             # mon-fri', hour='0', minute='0', second='0',
             # start_time='2023-12-19T20:27:28.333450+02:00', timezone='Europe/Bucharest')
 
+            logger.info(f"{b.trigger.fields=}")
             answer = f"id: {b.id}\n"
             answer += (
-                f"category: {b.args[1]}" f"\nSchedule news at {sch_time} (Athens time)\nevery \n"
+                f"category: {b.args[1]}" f"\nSchedule news at {sch_time} (Athens time)\nevery "
                 if lang.get("lang") == "English"
                 else f"Κατηγορία ειδήσεων: {b.args[1]}"
                 f"\nΠρογραμματισμένη αποστολή στις {sch_time} (ώρα Αθήνας)\nκάθε: "
             )
-            answer += f"{b.trigger._fields[4]}"
-            logger.debug(f"{(b.trigger.start_time)}")
+            answer += f"{b.trigger.fields[4]}"
+            logger.debug(f"{b.trigger.start_date=}")
         else:
             # IntervalTrigger
-            logger.debug(f"{b.trigger.start_time=}")
+            logger.debug(f"{b.trigger.interval=}")
+            logger.debug(f"{b.trigger.start_date=}")
             answer = f"id: {b.id}\n"
             logger.debug(f"{lang=}")
             answer += (
-                f"category: {(b.args[1])}\n"
-                f"Schedule news at {sch_time} (Athens time)\nevery \n"
-                f"{b.trigger.weeks} weeks | "
-                f"{b.trigger.days} days | "
-                f"{b.trigger.hours} hours"
+                f"category: {(b.args[1])}\n" f"Schedule news at {sch_time} (Athens time)\nevery \n"
+                # f"{b.trigger.weeks} weeks | "
+                f"{b.trigger.interval.days} days | "
+                f"{int(b.trigger.interval.seconds)/(60*60)} hours"
                 if lang.get("lang") == "English"
                 else f"Κατηγορία ειδήσεων: {b.args[1]}\n"
                 f"Προγραμματισμένη αποστολή στις {sch_time} (ώρα Αθήνας)\nκάθε "
-                f"{b.trigger.weeks} εβδομάδες | "
-                f"{b.trigger.days} μέρες | "
-                f"{b.trigger.hours} ώρες"
+                f"{b.trigger.interval.days} μέρες | "
+                f"{int(b.trigger.interval.seconds)/(60*60)} ώρες"
             )
 
         await bot.send_message(
@@ -761,7 +798,7 @@ async def del_all_schedules(message: types.Message) -> None:
     # logger.info(f"{myschedule_records=}")
     my_sched = get_my_schedules(myschedule_records)
     async for _schedule in my_sched:
-        b = await _schedule
+        b = _schedule
         target_id = b.id
         await delete_target_schedule(target_id=target_id)
         logger.debug(f"Schedule was deleted ({target_id=})")
