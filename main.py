@@ -8,11 +8,11 @@ if __name__ == "__main__":
     # Set a different level for imported modules
     # See: https://stackoverflow.com/a/51529172
     logging.getLogger("aiogram").setLevel(logging.WARNING)
-    logging.getLogger("apscheduler._schedulers.async_").setLevel(logging.WARNING)
     logging.getLogger("pytube").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("apify_client").setLevel(logging.WARNING)
+    logging.getLogger("apscheduler").setLevel(logging.INFO)
 
 from aiogram import Dispatcher
 
