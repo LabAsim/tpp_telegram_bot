@@ -6,9 +6,9 @@ from aiogram import BaseMiddleware
 from aiogram.types import Message
 
 import src.db.funcs
-from src.bot.bot_functions import dp
 
 logger = logging.getLogger(__name__)
+logger.info(f"{__name__} imported")
 
 
 class CounterMiddleware(BaseMiddleware):
@@ -48,11 +48,11 @@ class UserUpdateMiddleware(BaseMiddleware):
         data: Dict[str, Any],
     ) -> Any:
         await src.db.funcs.update_user_info(message=event)
-
+        logger.debug("User info updated in db")
         return await handler(event, data)
 
 
-@dp.message.outer_middleware()
+# @dp.message.outer_middleware()
 async def update_user_middleware(
     handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
     message: Message,
@@ -64,8 +64,9 @@ async def update_user_middleware(
     it updates the user data in the db.
     See: https://docs.aiogram.dev/en/latest/dispatcher/middlewares.html
     """
-    # logger.info(f"{message=}")
+    # logger.info(f"{message=}")=
     # logger.info(f"{handler=}")
     # logger.info(f"{data=}")
     await src.db.funcs.update_user_info(message=message)
+    logger.debug(f"{message.from_user} info updated")
     return await handler(message, data)

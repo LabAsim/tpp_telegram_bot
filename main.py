@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
 # These need to be here, otherwise the imports are messed up!
 from src.bot.bot_functions import dp, bot
+from src.bot.middleware import UserUpdateMiddleware
 
 
 async def main(debug: bool, dp: Dispatcher) -> None:
@@ -44,10 +45,12 @@ async def main(debug: bool, dp: Dispatcher) -> None:
     # Init should be here so as the colors be rendered properly in fly.io
     colorama.init(convert=True)
     logging.info(f"DEBUG: {debug}, TEST: {TEST}")
+    # Middleware needs to be registered here, otherwise it won't work!
+    dp.message.outer_middleware(UserUpdateMiddleware())
     await start_scheduler_as_task()
     await dp.start_polling(
         bot,
-        timeout=60,
+        timeout=20,
         skip_updates=False,
     )
 

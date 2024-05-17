@@ -15,7 +15,6 @@ from aiogram import types, md, Dispatcher
 from aiogram.utils.markdown import text
 from aiogram.enums.parse_mode import ParseMode
 
-# from aiogram.filters import
 from aiogram.filters.command import Command
 
 from apscheduler.triggers.cron import CronTrigger
@@ -761,12 +760,12 @@ async def my_schedule(message: types.Message) -> None:
                 f"category: {(b.args[1])}\n" f"Schedule news at {sch_time} (Athens time)\nevery \n"
                 # f"{b.trigger.weeks} weeks | "
                 f"{b.trigger.interval.days} days | "
-                f"{int(b.trigger.interval.seconds)/(60*60)} hours"
+                f"{int(b.trigger.interval.seconds) / (60 * 60)} hours"
                 if lang.get("lang") == "English"
                 else f"Κατηγορία ειδήσεων: {b.args[1]}\n"
                 f"Προγραμματισμένη αποστολή στις {sch_time} (ώρα Αθήνας)\nκάθε "
                 f"{b.trigger.interval.days} μέρες | "
-                f"{int(b.trigger.interval.seconds)/(60*60)} ώρες"
+                f"{int(b.trigger.interval.seconds) / (60 * 60)} ώρες"
             )
 
         await bot.send_message(

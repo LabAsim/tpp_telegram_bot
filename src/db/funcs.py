@@ -126,7 +126,7 @@ async def update_user_info(message: types.Message) -> None:
     if not message:
         # If there is no messages at all
         return None
-    print(message.from_user.id)
+    # print(message.from_user.id)
     id = int(message.from_user.id)
     lang = "English"
     name = message.from_user.first_name
