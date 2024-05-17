@@ -634,6 +634,22 @@ async def schedule(message: types.Message):
         scheduled_type = "rss"
         logger.info(f"{target_rss=}")
         target_rss = await parse_commands_for_rssfeed(target_rss)
+        if target_rss is None:
+            lang = await src.db.funcs.fetch_lang(message=message)
+            answer = (
+                "Command is not recognized. \nSome proper examples:"
+                if lang.get("lang").lower() == "english"
+                else "H εντολή δεν βρέθηκε. \nΚάποια παραδείγματα είναι:"
+            )
+            answer += '\nExample: "/sch ert 1"' '\nExample: "/sch ert mon-fri'
+            await bot.send_message(
+                chat_id=chat_id,
+                text=escape_md(answer),
+                disable_web_page_preview=True,
+                parse_mode=ParseMode.MARKDOWN_V2,
+            )
+            # Stop
+            return
         try:
             # Default 1 day
             day = int(message_split[2] if len(message_split) > 2 else 1)
