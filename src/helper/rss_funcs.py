@@ -62,7 +62,7 @@ async def fetch_news(target: str) -> list:
     return results
 
 
-async def parse_commands_for_rssfeed(command: str) -> str:
+async def parse_commands_for_rssfeed(command: str) -> None | str:
     """Matches the command to the proper newspaper"""
     match command:
         case "efsyn" | "εφσυν":
@@ -142,4 +142,5 @@ async def parse_commands_for_rssfeed(command: str) -> str:
             return "dwenv"
         case _:
             logger.debug(ValueError(f"Unknown command passed {command=}"))
+            return None
         # fmt: on
