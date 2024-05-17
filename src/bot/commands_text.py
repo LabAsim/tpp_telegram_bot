@@ -142,6 +142,22 @@ class Text:
         escape_md("\nExample: /sch ert mon-fri"),
         escape_md("\n(you will get news from ert from Monday to Friday)"),
         "\n",
+        escape_md("\n• /sch search <search term> <days or interval>"),
+        escape_md("\nvalid days: mon, tue, wed, thu, fri, sat, sun"),
+        escape_md("\nExample: /sch search ΒΙΟΜΕ ert mon-fri"),
+        escape_md("\nExample: /sch search ΒΙΟΜΕ ert 1"),
+        escape_md(
+            "\n(you will get results from the search for BIOME from Monday to Friday or every day, respectively)"
+        ),
+        "\n",
+        escape_md("\n• /sch category <category> <days or interval>"),
+        escape_md("\nvalid days: mon, tue, wed, thu, fri, sat, sun"),
+        escape_md("\nExample: /sch category news ert mon-fri"),
+        escape_md("\nExample: /sch category news ert 1"),
+        escape_md(
+            "\n(you will get the category news from Monday to Friday or every day, respectively)"
+        ),
+        "\n",
         escape_md("\n• /mysch"),
         "\n",
         "Get all your schedules" "\n",
@@ -283,6 +299,22 @@ class Text:
         escape_md("\nΑποδεκτά ονόματα: mon, tue, wed, thu, fri, sat, sun"),
         escape_md("\nΠαράδειγμα: /sch ert mon-fri"),
         escape_md("\n(Θα λαμβάνετε ειδήσεις της ερτ από Δευτέρα έως Παρασκευή)"),
+        "\n",
+        escape_md("\n• /sch search <λέξη κλειδί> <ονόματα ημερών ή διάστημα σε ημέρες>"),
+        escape_md("\nΑποδεκτά ονόματα: mon, tue, wed, thu, fri, sat, sun"),
+        escape_md("\nΠαράδειγμα: /sch search ΒΙΟΜΕ ert mon-fri"),
+        escape_md("\nΠαράδειγμα: /sch search ΒΙΟΜΕ ert 1"),
+        escape_md(
+            "\n(Θα λαμβάνετε ειδήσεις της ερτ από Δευτέρα έως Παρασκευή ή καθημερινά, αντίστοιχα)"
+        ),
+        "\n",
+        escape_md("\n• /sch category <κατηγορία> <ονόματα ημερών ή διάστημα σε ημέρες>"),
+        escape_md("\nΑποδεκτά ονόματα: mon, tue, wed, thu, fri, sat, sun"),
+        escape_md("\nΠαράδειγμα: /sch category news ert mon-fri"),
+        escape_md("\nΠαράδειγμα: /sch category news ert 1"),
+        escape_md(
+            "\n(Θα λαμβάνετε ειδήσεις της ερτ από Δευτέρα έως Παρασκευή ή καθημερινά, αντίστοιχα)"
+        ),
         "\n",
         escape_md("\n• /mysch"),
         "\n",
