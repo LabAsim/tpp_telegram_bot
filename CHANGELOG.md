@@ -8,3 +8,9 @@
 * Aiogram 2 -> 3
 * Drop MODE
 * Remove pythonanywhere
+
+
+**v0.1.0** (25/5/2024)
+
+* Rollback Apscheduler to 3.10
+* Schedule scraping news (either by `/sch search` or `/sch category`)
