@@ -80,7 +80,7 @@ async def start_scheduler_background(aiogram_dispatcher=None) -> None:
     Starts the scheduler in the background.
     """
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
-    SchedulerSingleton().get_scheduler()
+    SchedulerSingleton().get_scheduler().start()
 
 
 async def start_scheduler_as_task(aiogram_dispatcher=None) -> None:
@@ -210,5 +210,8 @@ async def get_my_schedules(schedule_ids: list[Any]) -> AsyncGenerator:
     # )
     # data_store = SQLAlchemyJobStore(engine=engine)
     scheduler = SchedulerSingleton.get_scheduler()
+    for sc in schedule_ids:
+        s = scheduler.get_job(job_id=sc["id"], jobstore="postgresql")
+        logger.info(f"{s=}")
     async for schedule_id in convert_iterable_to_async_iterator(schedule_ids):
         yield scheduler.get_job(job_id=schedule_id["id"], jobstore="postgresql")
