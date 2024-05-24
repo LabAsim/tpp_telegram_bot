@@ -119,7 +119,7 @@ async def show_help(message: types.Message) -> None:
         answer3 = Text.help_text_greek3
     await message.answer(str(answer))
     await message.answer(answer2)
-    await message.answer(answer3)
+    await message.answer(answer3, reply_markup=types.ReplyKeyboardRemove())
 
 
 @dp.message(lambda message: message.text in ("English 👍", "Greek 🤝"))
