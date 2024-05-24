@@ -49,11 +49,6 @@ class SchedulerSingleton:
         return scheduler
 
     @staticmethod
-    def start():
-        """Starts the scheduler"""
-        SchedulerSingleton.instance.start()
-
-    @staticmethod
     def get_scheduler():
         """
         Initializes a scheduler if it does not exist and returns it.
@@ -83,12 +78,9 @@ def get_postgres_engine() -> Engine:
 async def start_scheduler_background(aiogram_dispatcher=None) -> None:
     """
     Starts the scheduler in the background.
-    The while loop needs to exist to make sure the scheduler will never stop
-    (if the func ends, the scheduler ends, too).
     """
     log_func_name(thelogger=logger, fun_name=func_name(inspect.currentframe()))
-    scheduler = SchedulerSingleton().get_scheduler()
-    scheduler.start()
+    SchedulerSingleton().get_scheduler()
 
 
 async def start_scheduler_as_task(aiogram_dispatcher=None) -> None:
@@ -204,7 +196,7 @@ async def schedule_category(
             #     start_date=datetime.datetime.now(datetime.timezone.utc),
             # ),
             id=f"{chat_id}.{scheduled_type}.{target}.{str(uuid4())}",
-            # id=f"{chat_id}.{str(uuid4())}",
+            replace_existing=True,
         )
         logger.debug("Schedule added")
     except Exception:
