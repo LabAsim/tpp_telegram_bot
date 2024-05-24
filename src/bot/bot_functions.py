@@ -731,7 +731,7 @@ async def my_schedule(message: types.Message) -> None:
             chat_id=chat_id,
             text=escape_md(
                 "You have not any saved schedules"
-                if lang == "English"
+                if lang.get("lang") == "English"
                 else "Δεν υπάρχουν προγραμματισμένες αποστολές ειδήσεων"
             ),
             disable_web_page_preview=True,
