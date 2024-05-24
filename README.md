@@ -49,13 +49,14 @@ Run the bot locally:
 
 ## Roadmap
 
-* [X]  Integrate [**APSchedule**](https://github.com/agronholm/apscheduler)
+* [X]  Integrate [**APSchedule 3.10.4**](https://github.com/agronholm/apscheduler)
 
 * [X]  Migrate to [Aiogram 3.X](https://github.com/aiogram/aiogram)
 
+* [X] Allow scheduled news scraping
 
-* [ _**ongoing**_ ] Allow scheduled news scraping
 
+* [ _**Ongoing**_ ] User Guide
 
 ## Donate
 
