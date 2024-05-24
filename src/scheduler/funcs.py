@@ -210,8 +210,5 @@ async def get_my_schedules(schedule_ids: list[Any]) -> AsyncGenerator:
     # )
     # data_store = SQLAlchemyJobStore(engine=engine)
     scheduler = SchedulerSingleton.get_scheduler()
-    for sc in schedule_ids:
-        s = scheduler.get_job(job_id=sc["id"], jobstore="postgresql")
-        logger.info(f"{s=}")
     async for schedule_id in convert_iterable_to_async_iterator(schedule_ids):
         yield scheduler.get_job(job_id=schedule_id["id"], jobstore="postgresql")
