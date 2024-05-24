@@ -741,8 +741,8 @@ async def my_schedule(message: types.Message) -> None:
         return None
     async for _schedule in my_sched:
         b = _schedule
-        logger.info(f"{b=}")
-        logger.info(f"{b.id=}")
+        logger.debug(f"{b=}")
+        logger.debug(f"{b.id=}")
         logger.debug(f"{b.trigger.start_date=}")
         sch_time = f"{b.trigger.start_date}"
         if b.trigger.start_date is not None:
@@ -756,7 +756,7 @@ async def my_schedule(message: types.Message) -> None:
             # mon-fri', hour='0', minute='0', second='0',
             # start_time='2023-12-19T20:27:28.333450+02:00', timezone='Europe/Bucharest')
 
-            logger.info(f"{b.trigger.fields=}")
+            logger.debug(f"{b.trigger.fields=}")
             answer = f"id: {b.id}\n"
             answer += (
                 f"category: {b.args[1]}" f"\nSchedule news at {sch_time} (Athens time)\nevery "
