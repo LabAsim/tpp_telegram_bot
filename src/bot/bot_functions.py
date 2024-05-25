@@ -747,7 +747,8 @@ async def my_schedule(message: types.Message) -> None:
         sch_time = f"{b.trigger.start_date}"
         if b.trigger.start_date is not None:
             sch_time = datetime.fromisoformat(sch_time)
-            sch_time = sch_time.astimezone(timezone(timedelta(hours=2)))
+            # Athens time is UTC+3
+            sch_time = sch_time.astimezone(timezone(timedelta(hours=3)))
             sch_time = f"{sch_time.timetz()}".split(".")[0]
 
         if isinstance(b.trigger, CronTrigger):
