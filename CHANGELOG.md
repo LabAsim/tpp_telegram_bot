@@ -14,3 +14,7 @@
 
 * Rollback Apscheduler to 3.10
 * Schedule scraping news (either by `/sch search` or `/sch category`)
+
+**v0.1.1** (26/5/2024)
+
+* Fix `OperationalError: (psycopg2.OperationalError) server closed the connection unexpectedly`
