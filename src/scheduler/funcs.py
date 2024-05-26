@@ -70,7 +70,17 @@ def get_postgres_engine() -> Engine:
     #     # https://stackoverflow.com/a/64698899
     #     construct_database_url().replace("postgres://", "postgresql+asyncpg://")
     # )
-    engine = create_engine(construct_database_url().replace("postgres://", "postgresql://"))
+    engine = create_engine(
+        url=construct_database_url().replace("postgres://", "postgresql://"),
+        # To combat the error
+        # OperationalError: (psycopg2.OperationalError) server closed the connection unexpectedly
+        # See this for the args https://stackoverflow.com/a/60614871
+        pool_size=2,
+        max_overflow=2,
+        pool_recycle=120,
+        pool_pre_ping=True,
+        pool_use_lifo=True,
+    )
 
     return engine
 
