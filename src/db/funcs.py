@@ -202,3 +202,16 @@ async def delete_target_schedule(target_id: str) -> None:
     database_url = construct_database_url()
     conn = await asyncpg.connect(dsn=database_url)
     await conn.execute("""delete from apscheduler_jobs where id = $1""", target_id)
+
+
+async def delete_user_info(message: types.Message) -> bool | None:
+    """Deletes the user's info from the db"""
+    user_id = int(message.from_user.id)
+    database_url = construct_database_url()
+    conn = await asyncpg.connect(dsn=database_url)
+    result = await conn.execute("""DELETE FROM users WHERE users.id = $1;""", user_id)
+    if "1" in result:
+        logger.debug(f"User (id: {user_id}) deleted successfully!")
+
+    # If the single row is deleted, it returns "DELETE 1", else "DELETE 0"
+    return True if "1" in result else False if "0" in result else None
