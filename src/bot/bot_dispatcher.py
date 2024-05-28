@@ -1,4 +1,5 @@
 from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
 from aiogram.enums.parse_mode import ParseMode
 
 try:
@@ -12,8 +13,8 @@ def botify(
     parse_mode=ParseMode.MARKDOWN_V2,
 ) -> Bot:
     """Creates and returns the Bot object"""
-
-    bot_to_return = Bot(token=token, parse_mode=parse_mode)
+    default_props = DefaultBotProperties(parse_mode=parse_mode)
+    bot_to_return = Bot(token=token, default=default_props)
 
     return bot_to_return
 
