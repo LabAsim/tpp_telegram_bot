@@ -7,7 +7,6 @@ import datetime
 
 from aiogram import types
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -233,12 +232,19 @@ async def delete_all_user_schedules(message: types.Message) -> bool:
     from src.scheduler.funcs import get_my_schedules
 
     my_sched = get_my_schedules(myschedule_records)
-    logger.info(f"{my_sched=}")
 
     async for _schedule in my_sched:
-        logger.info(f"{_schedule=}")
         b = _schedule
         target_id = b.id
         await delete_target_schedule(target_id=target_id)
 
     return True
+
+
+async def delete_all_user_schedules_and_info(message: types.Message) -> bool:
+    """Deletes all user's schedules and stored info"""
+    result = await delete_user_info(message=message)
+    result2 = await delete_all_user_schedules(message=message)
+    if (result is True) & (result2 is True):
+        return True
+    return False
