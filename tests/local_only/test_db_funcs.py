@@ -4,6 +4,7 @@ import asyncpg
 import colorama
 import pytest
 from aiogram import types
+from apscheduler.schedulers.base import STATE_STOPPED
 from apscheduler.triggers.interval import IntervalTrigger
 from pydantic import BaseModel
 
@@ -108,7 +109,8 @@ async def test_delete_all_user_schedules():
 
     # The scheduler needs to be initiated in order the test to work properly
     scheduler = SchedulerSingleton.get_scheduler()
-    scheduler.start(paused=True)
+    if scheduler.state == STATE_STOPPED:
+        scheduler.start(paused=True)
 
     results = await delete_all_user_schedules(message=mock)
     assert results is True
@@ -174,7 +176,8 @@ async def test_delete_all_user_schedules_and_info():
 
     # The scheduler needs to be initiated in order the test to work properly
     scheduler = SchedulerSingleton.get_scheduler()
-    scheduler.start(paused=True)
+    if scheduler.state == STATE_STOPPED:
+        scheduler.start(paused=True)
 
     results = await delete_all_user_schedules_and_info(message=mock)
     assert results is True
