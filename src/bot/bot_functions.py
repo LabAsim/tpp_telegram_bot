@@ -32,8 +32,8 @@ from src.bot.apify_actor import (
 from src.db.funcs import (
     fetch_schedule,
     delete_target_schedule,
-    delete_user_info,
     delete_all_user_schedules,
+    delete_all_user_schedules_and_info,
 )
 from src.bot.bot_dispatcher import choose_token, botify
 from src.bot.botvalues import BotHelper
@@ -821,9 +821,8 @@ async def del_all_schedules(message: types.Message) -> None:
 @dp.message(Command(*["deleteme"]))
 async def del_my_info(message: types.Message) -> None:
     """Deletes the user info & schedules"""
-    result = await delete_user_info(message=message)
-    result2 = await delete_all_user_schedules(message=message)
-    if (result is True) & (result2 is True):
+    result = await delete_all_user_schedules_and_info(message=message)
+    if result is True:
         chat_id = message.from_user.id
         answer = "Your info was successfully deleted!"
         await bot.send_message(
