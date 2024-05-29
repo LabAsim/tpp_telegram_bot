@@ -64,7 +64,7 @@ async def test_delete_all_user_schedules():
 
     # A fake schedule
     await schedule_category(
-        chat_id=12345678,
+        chat_id=MockedUserId.id,
         target="tpp",
         scheduled_type="rss",
         trigger_target=IntervalTrigger(
@@ -74,7 +74,7 @@ async def test_delete_all_user_schedules():
     )
 
     await schedule_category(
-        chat_id=12345678,
+        chat_id=MockedUserId.id,
         target="ert",
         scheduled_type="rss",
         trigger_target=IntervalTrigger(
