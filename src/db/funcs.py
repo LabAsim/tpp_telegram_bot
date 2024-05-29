@@ -7,6 +7,7 @@ import datetime
 
 from aiogram import types
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -193,15 +194,20 @@ async def fetch_schedule(message: types.Message) -> list[asyncpg.Record]:
         """SELECT * FROM apscheduler_jobs WHERE apscheduler_jobs.id LIKE  $1 || '%' ;""",
         chat_id_with_dot,
     )
-    logger.debug(rows)
+    logger.debug(f"{rows=}")
     return rows
 
 
-async def delete_target_schedule(target_id: str) -> None:
+async def delete_target_schedule(target_id: str) -> bool | None:
     """Deletes the target schedule"""
     database_url = construct_database_url()
     conn = await asyncpg.connect(dsn=database_url)
-    await conn.execute("""delete from apscheduler_jobs where id = $1""", target_id)
+    result = await conn.execute("""DELETE FROM apscheduler_jobs WHERE id = $1""", target_id)
+    if "1" in result:
+        logger.debug(f"Schedule was deleted ({target_id=})")
+
+    # If the single row is deleted, it returns "DELETE 1", else "DELETE 0"
+    return True if "1" in result else False if "0" in result else None
 
 
 async def delete_user_info(message: types.Message) -> bool | None:
@@ -215,3 +221,24 @@ async def delete_user_info(message: types.Message) -> bool | None:
 
     # If the single row is deleted, it returns "DELETE 1", else "DELETE 0"
     return True if "1" in result else False if "0" in result else None
+
+
+async def delete_all_user_schedules(message: types.Message) -> bool:
+    """Iterates and deletes the user's schedules"""
+    myschedule_records = await fetch_schedule(message=message)
+    # In case there are no schedules
+    if len(myschedule_records) == 0:
+        return False
+
+    from src.scheduler.funcs import get_my_schedules
+
+    my_sched = get_my_schedules(myschedule_records)
+    logger.info(f"{my_sched=}")
+
+    async for _schedule in my_sched:
+        logger.info(f"{_schedule=}")
+        b = _schedule
+        target_id = b.id
+        await delete_target_schedule(target_id=target_id)
+
+    return True
