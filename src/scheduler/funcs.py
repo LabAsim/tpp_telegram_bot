@@ -39,13 +39,13 @@ class SchedulerSingleton:
         executors = {
             # See here https://stackoverflow.com/q/77930656
             "default": AsyncIOExecutor(),
-            "processpool": ProcessPoolExecutor(5),
+            "processpool": ProcessPoolExecutor(2),
         }
-        job_defaults = {"coalesce": False, "max_instances": 3}
+        job_defaults = {"coalesce": True, "max_instances": 1, "misfire_grace_time": 1000}
         scheduler = AsyncIOScheduler(
             jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=pytz.utc
         )
-        logger.debug("created")
+        logger.debug("Scheduler created")
         return scheduler
 
     @staticmethod
