@@ -29,7 +29,12 @@ from src.bot.apify_actor import (
     convert_category_str_to_url,
     async_call_apify_actor,
 )
-from src.db.funcs import fetch_schedule, delete_target_schedule, delete_user_info
+from src.db.funcs import (
+    fetch_schedule,
+    delete_target_schedule,
+    delete_user_info,
+    delete_all_user_schedules,
+)
 from src.bot.bot_dispatcher import choose_token, botify
 from src.bot.botvalues import BotHelper
 from src.bot.commands_text import Text
@@ -810,21 +815,15 @@ async def del_schedule(message: types.Message) -> None:
 @dp.message(Command(*DELETE_ALL_SCHEDULES_COMMANDS))
 async def del_all_schedules(message: types.Message) -> None:
     """Deletes every saved schedules of the user"""
-    myschedule_records = await fetch_schedule(message=message)
-    # logger.info(f"{myschedule_records=}")
-    my_sched = get_my_schedules(myschedule_records)
-    async for _schedule in my_sched:
-        b = _schedule
-        target_id = b.id
-        await delete_target_schedule(target_id=target_id)
-        logger.debug(f"Schedule was deleted ({target_id=})")
+    await delete_all_user_schedules(message=message)
 
 
 @dp.message(Command(*["deleteme"]))
 async def del_my_info(message: types.Message) -> None:
-    """Deletes the user info"""
+    """Deletes the user info & schedules"""
     result = await delete_user_info(message=message)
-    if result is True:
+    result2 = await delete_all_user_schedules(message=message)
+    if (result is True) & (result2 is True):
         chat_id = message.from_user.id
         answer = "Your info was successfully deleted!"
         await bot.send_message(
