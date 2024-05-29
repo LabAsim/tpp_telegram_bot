@@ -34,7 +34,12 @@ async def test_delete_user_info():
     database_url = construct_database_url()
     conn = await asyncpg.connect(dsn=database_url)
     try:
-        await conn.execute("""INSERT INTO users(id,name,lang) VALUES(12345678,'geia','English');""")
+        await conn.execute(
+            """INSERT INTO users(id,name,lang) VALUES($1,$2,$3);""",
+            int(MockedUserId().id),
+            "geia",
+            "English",
+        )
     except asyncpg.exceptions.UniqueViolationError:
         pass
 
