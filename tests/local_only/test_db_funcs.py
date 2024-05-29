@@ -113,7 +113,7 @@ async def test_delete_all_user_schedules():
     results = await delete_all_user_schedules(message=mock)
     assert results is True
 
-    # The schedules is already deleted
+    # The schedules are already deleted
     results = await delete_all_user_schedules(message=mock)
     logging.info(f"{results=}")
     assert results is False
@@ -179,7 +179,7 @@ async def test_delete_all_user_schedules_and_info():
     results = await delete_all_user_schedules_and_info(message=mock)
     assert results is True
 
-    # The schedules is already deleted
+    # The schedules are already deleted
     results = await delete_all_user_schedules_and_info(message=mock)
     logging.info(f"{results=}")
     assert results is False
