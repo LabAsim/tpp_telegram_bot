@@ -564,6 +564,10 @@ async def send_rssfeed(
         aiogram.exceptions.TelegramBadRequest,
         Exception,
     ) as err:
+        if len(results) == 0:
+            logger.warning(f"No results from `{target_rss=}`" f"\n{err=}")
+            return
+
         logger.warning(
             f"{len(results)=} {len(answer)=}"
             f"\n{err=}"
