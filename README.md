@@ -10,6 +10,8 @@ The bot is hosted on [fly.io](https://fly.io/) and the scraping script on [Apify
 *   [Installation](#Installation)
 *   [fly.io](#Flyio)
 *   [Docker](#Docker)
+*   [Roadmap](#Roadmap)
+*   [Documentation](#Documentation)
 *   [Donate](#donate)
 *   [License](#license)
 
@@ -57,6 +59,13 @@ Run the bot locally:
 
 
 * [ _**Ongoing**_ ] User Guide
+
+## Documentation
+
+You can see the documentation [here](https://labasim.github.io/tpp_telegram_bot/).
+
+The documentation is also available from within the application, just send `/help` to
+the bot.
 
 ## Donate
 
