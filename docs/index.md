@@ -77,6 +77,7 @@ The primary motivation for creating it was to have news served at scheduled time
 
 Just add a slash `/` in front of the supported news sites to get the latest news.
 Of course, there are short versions, there is no need to type the full name.
+Only lowercase names are allowed.
 
 The functions are ***case-sensitive***.
 
@@ -118,3 +119,68 @@ Supported sites
 
 
 ### Scheduling
+
+You can schedule your news delivery.
+
+
+```title="Schedule RSS based functions"
+/sch[edule] <news command> <interval>
+```
+
+* `Interval` should be either an **integer** representing days *or* a **string** indicating the names of the days
+  * Valid **integer** days: `1 to infinity`
+  * Valid **string** days: `mon, tue, wed, thu, fri, sat, sun`
+  * Examples:
+    * `/sch ert 1`
+    * `/sch ert mon-fri`
+
+
+```title="Schedule search"
+/sch[edule] search <search term> <interval>
+```
+
+* `search term` is any term that you want to get news for
+* `Interval` should be either an **integer** representing days *or* a **string** indicating the names of the days
+  * Valid **integer** days: `1 to infinity`
+  * Valid **string** days: `mon, tue, wed, thu, fri, sat, sun`
+  * Examples:
+    * `/sch search ΒΙΟΜΕ ert mon-fri`
+    * `/sch search ΒΙΟΜΕ ert 1`
+
+```title="Schedule category news"
+/sch[edule] category <category> <interval>
+```
+
+* `category` is a valid category of `/category`.
+* `Interval` should be either an **integer** representing days *or* a **string** indicating the names of the days
+  * Valid **integer** days: `1 to infinity`
+  * Valid **string** days: `mon, tue, wed, thu, fri, sat, sun`
+  * Examples:
+    * `/sch category news ert 1`
+    * `/sch category news ert mon-fri`
+
+```title="Fetch all your active schedules"
+/mysch[edule]
+```
+
+The bot sends you back your schedules
+
+```title="Deletes a particular schedule"
+/del[ete]
+```
+
+This function works **only** *if you reply at a message which contains a particular schedule from `/mysch`*.
+
+```title="Deletes all your schedules"
+/del[ete]all
+```
+
+Erases every saved schedule that you had.
+
+```title="Deletes all your saved info including your schedules"
+/deleteme
+```
+
+This functions deletes all your saved info including your schedules.
+If you reply to the bot anytime after invoking `/deleteme`,
+it will save again your telegram name and user id.
