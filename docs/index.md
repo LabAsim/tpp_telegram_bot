@@ -78,36 +78,36 @@ The primary motivation for creating it was to have news served at scheduled time
 Just add a slash `/` in front of the supported news sites to get the latest news.
 Of course, there are short versions, there is no need to type the full name.
 
-The functions are ***not*** case-sensitive.
+The functions are ***case-sensitive***.
 
 Supported sites
 
-* Efsyn - `/efsyn`
-* Kathimerini english version - `/kat`
-* To Vima - `/tov`
-* Ert - `/ert`
-* Naftemporiki - `/naf`
-* Documento - `/doc`
-* Prin - `/prin`
-* Reporters United - `/ru`
-* Kontra - eksegersi.gr - `/kontra`
-* Guardian
+* [Efsyn](https://www.efsyn.gr/) - `/efsyn`
+* [Kathimerini english version](https://www.ekathimerini.com/) - `/kat`
+* [To Vima](https://www.tovima.gr/) - `/tov`
+* [Ert](https://www.ert.gr/) - `/ert`
+* [Naftemporiki](https://www.naftemporiki.gr/) - `/naf`
+* [Documento](https://www.documentonews.gr/) - `/doc`
+* [Prin](https://prin.gr/) - `/prin`
+* [Reporters United](https://www.reportersunited.gr/) - `/ru`
+* [Kontra - eksegersi.gr](https://eksegersi.gr/) - `/kontra`
+* [Guardian](https://www.theguardian.com/)
     * Guardian Europe - `/geu`
     * Guardian Middle East - `gme`
     * Guardian World - `/gw`
-* Reuters - `/reu`
+* [Reuters](https://www.reuters.com/) - `/reu`
     * Reuters International - `/rint`
     * Reuters Politics - `/rpol`
     * Reuters News - `/rnews`
-* BBC
+* [BBC](https://www.bbc.com/)
     * BBC World - `/bbcw`
     * BBC Top stories International - `/bbctpint`
     * BBC Europe - `/bbceu`
     * BBC Science - `/bbcsc`
-* CNN - `/cnn`
+* [CNN](https://edition.cnn.com/) - `/cnn`
     * CNN world - `/cnnw`
     * CNN Europe - `/cnneu`
-* DW - `/dw`
+* [DW](https://www.dw.com/en) - `/dw`
     * DW World - `/dweu`
     * DW Science - `/dwsc`
     * DW Asia - `/dwasia`
