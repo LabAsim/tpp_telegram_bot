@@ -54,19 +54,10 @@ def construct_database_url() -> str:
     return os.environ["DATABASE_URL"]
 
 
-async def connect(message: types.Message) -> None:
-    """
-    It connects to the Postgresql db and saves the user's id, name, lang.
-    If there is not an environmental var `DATABASE_URL` (for example, if you run the bot locally),
-    it will use the url from the defaults
-    """
-    id = int(message.from_user.id)
-    lang = message.text.strip("👍").strip("🤝").strip()
-    name = message.from_user.first_name
-    last_seen = datetime.datetime.now(datetime.timezone.utc)  # This is UTC+0
-    # The date in the db will be timezone aware (UTC+2 for Greece)
-    date_added = last_seen
-    pool = await DbPoolSingleton.get_pool()
+async def create_db_tables_startup(pool: asyncpg.pool.Pool | None) -> None:
+    """Creates the tables on startup"""
+    if not pool:
+        pool = await DbPoolSingleton.get_pool()
     async with pool.acquire() as conn:
         await conn.execute(
             """
@@ -91,6 +82,22 @@ async def connect(message: types.Message) -> None:
             """
         )
 
+
+async def connect(message: types.Message) -> None:
+    """
+    It connects to the Postgresql db and saves the user's id, name, lang.
+    If there is not an environmental var `DATABASE_URL` (for example, if you run the bot locally),
+    it will use the url from the defaults
+    """
+    id = int(message.from_user.id)
+    lang = message.text.strip("👍").strip("🤝").strip()
+    name = message.from_user.first_name
+    last_seen = datetime.datetime.now(datetime.timezone.utc)  # This is UTC+0
+    # The date in the db will be timezone aware (UTC+2 for Greece)
+    date_added = last_seen
+    pool = await DbPoolSingleton.get_pool()
+    # await create_db_tables_startup(pool=pool)
+    async with pool.acquire() as conn:
         await conn.execute(
             """
            INSERT INTO users(id,name,lang,date_added,last_seen) VALUES($1,$2,$3,$4,$5)

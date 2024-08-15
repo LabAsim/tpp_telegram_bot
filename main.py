@@ -4,6 +4,8 @@ import logging
 import os
 import colorama
 
+from src.db.funcs import create_db_tables_startup
+
 if __name__ == "__main__":
     # Set a different level for imported modules
     # See: https://stackoverflow.com/a/51529172
@@ -48,6 +50,7 @@ async def main(debug: bool, dp: Dispatcher) -> None:
     # Middleware needs to be registered here, otherwise it won't work!
     dp.message.outer_middleware(UserUpdateMiddleware())
     await start_scheduler_as_task()
+    await create_db_tables_startup(pool=None)
     await dp.start_polling(
         bot,
         timeout=20,
