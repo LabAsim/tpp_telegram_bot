@@ -1,3 +1,9 @@
+**v0.2.0**
+
+* Functions added `/deleteme` & `/del[ete]all`
+* User guide (see [here](https://labasim.github.io/tpp_telegram_bot/))
+
+
 **v0.1.2** (29/5/2024)
 
 * Lower max instances for jobs
