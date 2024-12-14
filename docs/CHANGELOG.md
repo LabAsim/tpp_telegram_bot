@@ -1,3 +1,7 @@
+**v0.2.1**
+
+* Sleep for 1 sec to avoid Telegram's flood control
+
 **v0.2.0**
 
 * Functions added `/deleteme` & `/del[ete]all`
