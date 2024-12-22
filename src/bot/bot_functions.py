@@ -4,7 +4,6 @@ import inspect
 import os
 import shutil
 import threading
-import time
 from datetime import datetime, timezone, timedelta
 from functools import wraps
 from itertools import islice
@@ -574,7 +573,7 @@ async def send_rssfeed(
             f"\n{err=}"
             f"\nAttempting to send chunks of the rss feed"
         )
-        time.sleep(1)
+        await asyncio.sleep(1)
         await send_chunks_rssfeed(
             results=results,
             message=message,
@@ -622,7 +621,7 @@ async def send_chunks_rssfeed(
                 parse_mode=ParseMode.MARKDOWN_V2,
                 reply_markup=markup,
             )
-        time.sleep(1)
+        await asyncio.sleep(1)
 
 
 @dp.message(Command(*SCHEDULE_COMMANDS))
@@ -803,7 +802,7 @@ async def my_schedule(message: types.Message) -> None:
             disable_web_page_preview=True,
             parse_mode=ParseMode.MARKDOWN_V2,
         )
-        time.sleep(1)
+        await asyncio.sleep(1)
 
 
 @dp.message(Command(*DELETE_SCHEDULE))
